@@ -1,0 +1,96 @@
+import React, { memo, useRef, useState } from 'react';
+import { Table } from 'antd';
+import LazyLoad from 'react-lazyload';
+import styles from './customTable.less';
+import cloneDeep from 'lodash/cloneDeep';
+import CustomTr from './CustomTr';
+
+const getComponent = (lazyload, rowHeight) => {
+  return {
+    table: props => <table {...props} />,
+    header: {
+      wrapper: props => <thead {...props} />,
+      row: props => <tr {...props} /> ,
+      cell: props => <th style={{ padding: 0, height: rowHeight }} {...props} />,
+    },
+    body: {
+      wrapper: props => <tbody {...props} />,
+      row: props => !lazyload ? <CustomTr height={rowHeight} {...props} />                                                           
+        : <LazyLoad overflow once height={rowHeight} offset={rowHeight * 1} placeholder={<tr><td><div></div></td></tr>}><CustomTr height={rowHeight} {...props} /></LazyLoad>,
+      cell: props => <td style={{ height: rowHeight, padding: 0 }}  {...props} />,
+    }
+  }
+}
+
+const getWidth = (prop, widthMap, calcPlaceholder) => {
+  let maxLength = 0, propLength = 0;
+  if (widthMap[prop]) {
+    calcPlaceholder.innerHTML = widthMap[prop];
+    propLength = calcPlaceholder.offsetWidth;
+    if (maxLength < propLength) maxLength = propLength;
+  }
+  calcPlaceholder.innerHTML = prop;
+  propLength = calcPlaceholder.offsetWidth;
+  if (maxLength < propLength) maxLength = propLength;
+  return maxLength + 24;
+}
+
+const calcWidth = (props, tableInfo, pageInfo) => {
+  console.time('CalcWidth:')
+  const { dataSource, columns, pagination, leftFixItem, rightFixItem, colWidth, rowSelection } = props;
+  const usedColumns = columns;
+  const usedDataSource = dataSource;
+  for (let i = 0; i < leftFixItem; i += 1) usedColumns[i].fixed = 'left';
+  for (let i = usedColumns.length - 1, length = usedColumns.length - 1 - rightFixItem; i > length; i -= 1) usedColumns[i].fixed = 'right';
+  if (colWidth.type === 'allPage' || (colWidth.type === 'curPage' && pageInfo.total !== 0)) {
+    const widthMap = {};
+    const startRow = colWidth.type === 'curPage' ? pageInfo.range[0] - 1 : 0;
+    const endRow = colWidth.type === 'curPage'? pageInfo.range[1]: usedDataSource.length;
+    for (let i = startRow, length = endRow; i < length; i += 1) {
+      for (let prop in usedDataSource[i]) {
+        if (usedDataSource[i][prop] !== null) {
+          if (!widthMap[prop] || (typeof usedDataSource[i][prop] === 'number' && usedDataSource[i][prop] > widthMap[prop])
+              || (typeof usedDataSource[i][prop] === 'string' && usedDataSource[i][prop].replace(/ /g,'').length > widthMap[prop].replace(/ /g,'').length))
+            widthMap[prop] = usedDataSource[i][prop];
+        }
+      }
+    }
+    for (let i = 0, length = usedColumns.length; i < usedColumns.length; i += 1) {
+      usedColumns[i].width = getWidth(usedColumns[i].title, widthMap, tableInfo.calcPlaceholder.current);
+      tableInfo.scroll.x += usedColumns[i].width;
+    }
+  } else if (colWidth.type === 'numbers') {
+      for (let i = 0, length = usedColumns.length; i < usedColumns.length; i += 1) {
+      usedColumns[i].width = colWidth.widths[usedColumns[i].title] || colWidth.default;
+      tableInfo.scroll.x += usedColumns[i].width;
+    }
+  }
+  console.timeEnd('CalcWidth:')
+  return [usedDataSource, usedColumns, tableInfo.scroll];
+}
+
+const handlePageChange = (total, range, pageInfo, setPageInfo) =>  {
+  if (!pageInfo.update && pageInfo.range[0] === range[0] && pageInfo.range[1] === range[1] && pageInfo.total === total) return;
+  if (!pageInfo.update) setPageInfo({ update: true, total, range });
+  else pageInfo.update = false;
+};
+
+const DrTable = memo(({ className, lazyload, rowHeight, tableHeight, pagination, ...props }) => {
+  const { dataSource, columns } = props;
+  const [pageInfo, setPageInfo] = useState({ update: false, total: 0, range: 0 });
+  const tableInfo = { calcPlaceholder: useRef(null), scroll: { x: 0, y: tableHeight }};
+  let usedDataSource = null, usedColumns = null, components = null;
+  if (dataSource && columns) {
+    [usedDataSource, usedColumns, scroll] = calcWidth(props, tableInfo, pageInfo);
+    components = getComponent(lazyload, rowHeight);
+  }
+  return [<div key="calcPlaceholder" className={styles.calcPlaceholder} ref={tableInfo.calcPlaceholder}/>, usedDataSource && usedColumns && <Table key="table" className={`${className} ${styles.drTable}`} dataSource={usedDataSource} columns={usedColumns} components={components} pagination={{ ...pagination, showTotal: props.colWidth.type === 'curPage' ? (total, range) => handlePageChange(total, range, pageInfo, setPageInfo) : null }} scroll={scroll} {...props} />];
+});
+
+DrTable.defaultProps = {
+  leftFixItem: 0,
+  rightFixItem: 0,
+  lazyload: true,
+}
+
+export default DrTable;

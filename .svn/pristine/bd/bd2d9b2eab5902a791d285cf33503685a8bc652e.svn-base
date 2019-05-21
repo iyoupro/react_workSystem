@@ -1,0 +1,12 @@
+import React, { memo } from 'react';
+import { Input } from 'antd';
+import styles from './Input.less';
+
+
+const BeautifulInput = memo(({ className, ...props}) => {
+  return (
+    <Input className={`${className} ${styles.input}`} {...props} />
+  );
+});
+
+export default BeautifulInput;

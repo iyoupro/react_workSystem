@@ -1,0 +1,56 @@
+import React, { Component } from 'react';
+import { DragLayer } from 'react-dnd';
+import PropTypes from 'prop-types';
+
+class DragPreview extends Component {
+  static propTypes = {
+    currentOffset: PropTypes.shape({
+      x: PropTypes.number.isRequired,
+      y: PropTypes.number.isRequired,
+    }),
+    initialPos: PropTypes.shape({
+      x: PropTypes.number.isRequired,
+      y: PropTypes.number.isRequired,
+    }),
+    isDragging: PropTypes.bool.isRequired,
+  };
+
+  getStyle = () => {
+    const { isDragging, currentOffset, initialPos } = this.props;
+    if (!isDragging) {
+      return { display: 'none' };
+    }
+    let left, top, transform;
+    if (currentOffset && initialPos) {
+      left = initialPos.x;
+      top = initialPos.y;
+      transform = `translate(calc(${currentOffset.x}px - 50%), calc(${currentOffset.y}px - 50%)`;
+    }
+    return {
+      pointerEvents: 'none',
+      position: 'fixed',
+      zIndex: 100,
+      background: 'transparent',
+      left,
+      top,
+      transform,
+      WebkitTransform: transform,
+    }
+  }
+
+  render() {
+    const { dragPreview, onMobile } = this.props;
+    return (
+      <div style={this.getStyle()}>
+        {dragPreview && typeof(dragPreview) !== 'boolean' && <dragPreViewElement />}
+        {(onMobile || typeof(dragPreview) === 'boolean') && <div style={{ height: '24px', width: '24px', background: 'transparent', borderRadius: '50%', border: '2px solid #000' }} />}
+      </div>
+    );
+  }
+}
+
+export default DragLayer(monitor => ({
+  initialPos: monitor.getInitialClientOffset(),
+  currentOffset: monitor.getDifferenceFromInitialOffset(),
+  isDragging: monitor.isDragging(),
+}))(DragPreview);

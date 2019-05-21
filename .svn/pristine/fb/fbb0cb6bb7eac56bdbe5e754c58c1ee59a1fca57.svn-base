@@ -1,0 +1,48 @@
+/** @format */
+
+import React, { useState } from 'react';
+import { Affix } from 'antd';
+import Section from './Section';
+import Input from './components/Input';
+import uniqueId from 'lodash/uniqueId';
+import styles from './index.less';
+
+import { pipe } from '../../rehook/';
+import { initPage, withSetData } from './handler';
+
+const FormsPage = ({ data, setData, mode, setMode, selectedItem, setSelectedItem, ...props }) => {
+  const { title, sections } = data;
+  return (
+    <div className={styles.wrapper} >
+      <div className={styles.header} >
+        <Input
+          inputWrapperClassName={styles.title}
+          inputClassName={styles.titleInput} 
+          focusUnderlineClassName={styles.titleFocusUnderline} 
+          placeholder="请输入表单标题"
+          value={title}
+          autoSize
+          showUnderline={false}
+          onChange={event => setData('title', event.target.value)} 
+        />
+      </div>
+      {sections && sections.map(section => (
+        <Section
+          key={section.id}
+          data={section}
+          mode={mode}
+          selectedItem={selectedItem}
+          setSelectedItem={setSelectedItem}
+          {...props}
+        />
+      ))}
+    </div>
+  );
+};
+
+// FormsPage.defaultProps = {
+//   mode: 'edit',
+//   data: initialData,
+// };
+
+export default pipe(initPage, withSetData, FormsPage);

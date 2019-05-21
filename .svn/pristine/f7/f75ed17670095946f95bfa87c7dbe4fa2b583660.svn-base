@@ -1,0 +1,21 @@
+import React, { memo } from 'react';
+import { Select } from 'antd';
+import styles from './Radio.less';
+
+const Option = Select.Option;
+
+const Radio = memo(props => {
+  const { options } = props;
+  return (
+    <div>
+      {/* <Select className={styles.type} defaultValue={type} style={{ width: 120 }}>
+        <Option value="选择题">选择题</Option>
+        <Option value="多选题">多选题</Option>
+        <Option value="下拉列表" >下拉列表</Option>
+        <Option value="段落">段落</Option>
+      </Select>     */}
+    </div>
+  );
+});
+
+export default Radio;

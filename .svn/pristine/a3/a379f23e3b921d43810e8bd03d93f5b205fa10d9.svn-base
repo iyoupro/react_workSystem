@@ -1,0 +1,31 @@
+import React, { useState } from 'react';
+import IM from '../components/IM';
+import styles from './IMPage.less';
+
+import initChatUserData from '../components/IM/chatUserData';
+import initChatData from '../components/IM/chatData';
+import initLoginUserData from '../components/IM/loginUserData';
+
+const IMPage = props => {
+  const [loginUserData, setLoginUserData] = useState(initLoginUserData);
+  const [chatData, setChatData] = useState(initChatData);
+  const [chatUserData, setChatUserData] = useState(initChatUserData);
+
+  const onChange = (type, info) => {
+    console.log(type, info);
+  };
+
+  return (
+    <div className={styles.iMpageWrapper} >
+      <IM
+        className={styles.imWrapper}
+        loginUserData={loginUserData}
+        chatData={chatData}
+        chatUserData={chatUserData}
+        onChange={onChange}
+      />
+    </div>
+  );
+}
+
+export default IMPage;

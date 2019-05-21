@@ -1,0 +1,173 @@
+/** @format */
+
+import React, { memo, useRef, useState } from 'react';
+import { Table, Button, Icon } from 'antd';
+import PropTypes from 'prop-types';
+import LazyLoad from 'react-lazyload';
+import cloneDeep from 'lodash/cloneDeep';
+import styles from './index.less';
+
+const getComponent = (lazyload, cellHeight) => {
+  return {
+    table: props => <table {...props} />,
+    header: {
+      wrapper: props => <thead {...props} />,
+      row: props => <tr {...props} />,
+      cell: props => (
+        <th style={{ height: cellHeight, padding: 0, textAlign: 'center' }} {...props} />
+      ),
+    },
+    body: {
+      wrapper: props => <tbody {...props} />,
+      row: props =>
+        !lazyload ? (
+          <tr style={{ height: cellHeight }} {...props} />
+        ) : (
+          <LazyLoad
+            overflow
+            once
+            height={cellHeight}
+            // throttle={250}
+            placeholder={
+              <tr>
+                <td>
+                  <div />
+                </td>
+              </tr>
+            }
+          >
+            <tr style={{ height: cellHeight }} {...props} />
+          </LazyLoad>
+        ),
+      cell: props => (
+        <td style={{ height: cellHeight, padding: 0, textAlign: 'center' }} {...props} />
+      ),
+    },
+  };
+};
+
+const getWidth = (prop, widthMap, calcPlaceholder) => {
+  let maxLength = 0,
+    propLength = 0;
+  if (widthMap[prop]) {
+    calcPlaceholder.innerHTML = widthMap[prop];
+    propLength = calcPlaceholder.offsetWidth;
+    if (maxLength < propLength) maxLength = propLength;
+  }
+  calcPlaceholder.innerHTML = prop;
+  propLength = calcPlaceholder.offsetWidth;
+  if (maxLength < propLength) maxLength = propLength;
+  return maxLength + 24;
+};
+
+const calcWidth = (dataSource, columns, pagination, extraOptions, tableInfo, pageInfo) => {
+  const { cellWidth, showDeleteButton, onHandleDelete } = extraOptions;
+  const usedColumns = columns;
+  const usedDataSource = dataSource;
+  let fixItem = extraOptions.fixItem || [0, 0]
+  for (let i = 0; i < fixItem[0]; i += 1) usedColumns[i].fixed = 'left';
+  for (let i = usedColumns.length - 1, length = usedColumns.length - 1 - fixItem[1]; i > length; i -= 1)
+    usedColumns[i].fixed = 'right';
+  if (showDeleteButton && usedColumns[usedColumns.length - 1].key !== 'delete') {
+    columns.push({
+      title: 'delete',
+      key: 'delete',
+      fixed: 'right',
+      width: 100,
+      render: (text, record) => <Icon className={styles.delete} type="delete" onClick={() => onHandleDelete(record.key)} />,
+    });
+  }
+
+  if (cellWidth.type === 'allPage' || (cellWidth.type === 'curPage' && pageInfo.total !== 0)) {
+    const widthMap = {};
+    const startRow = cellWidth.type === 'curPage' ? pageInfo.range[0] - 1 : 0;
+    const endRow = cellWidth.type === 'curPage' ? pageInfo.range[1] : usedDataSource.length;
+    for (let i = startRow, length = endRow; i < length; i += 1) {
+      for (let prop in usedDataSource[i]) {
+        if (usedDataSource[i][prop] !== null) {
+          if (
+            !widthMap[prop] ||
+            (typeof usedDataSource[i][prop] === 'number' &&
+              usedDataSource[i][prop] > widthMap[prop]) ||
+            (typeof usedDataSource[i][prop] === 'string' &&
+              usedDataSource[i][prop].replace(/ /g, '').length >
+                widthMap[prop].replace(/ /g, '').length)
+          )
+            widthMap[prop] = usedDataSource[i][prop];
+        }
+      }
+    }
+    for (let i = 0, length = usedColumns.length; i < usedColumns.length; i += 1) {
+      usedColumns[i].width = getWidth(
+        usedColumns[i].title,
+        widthMap,
+        tableInfo.calcPlaceholder.current,
+      );
+      tableInfo.scroll.x += usedColumns[i].width;
+    }
+  } else if (cellWidth.type === 'numbers') {
+    for (let i = 0, length = usedColumns.length; i < usedColumns.length; i += 1) {
+      usedColumns[i].width = cellWidth.widths[usedColumns[i].title] || cellWidth.default;
+      tableInfo.scroll.x += usedColumns[i].width;
+    }
+  }
+  return [usedDataSource, usedColumns, tableInfo.scroll];
+};
+
+const handlePageChange = (total, range, pageInfo, setPageInfo) => {
+  if (
+    !pageInfo.update &&
+    pageInfo.range[0] === range[0] &&
+    pageInfo.range[1] === range[1] &&
+    pageInfo.total === total
+  )
+    return;
+  if (!pageInfo.update) setPageInfo({ update: true, total, range });
+  else pageInfo.update = false;
+};
+
+const DrTable = ({ className, extraOptions, dataSource, columns, pagination, ...props }) => {
+  const { lazyload, cellWidth, cellHeight, tableHeight } = extraOptions;
+  const [pageInfo, setPageInfo] = useState({ update: false, total: 0, range: 0 });
+  const tableInfo = { calcPlaceholder: useRef(null), scroll: { x: 0, y: tableHeight } };
+  let usedDataSource = null;
+  let usedColumns = null;
+  let components = null;
+  if (dataSource && columns) {
+    [usedDataSource, usedColumns, scroll] = calcWidth(dataSource, columns, pagination, extraOptions, tableInfo, pageInfo);
+    components = getComponent(lazyload, cellHeight);
+  }
+
+  return [
+    <div
+      key="calcPlaceholder"
+      className={styles.calcPlaceholder}
+      ref={tableInfo.calcPlaceholder}
+    />,
+    usedDataSource &&
+      usedColumns && (
+        <Table
+          key="table"
+          className={`${className} ${styles.drTable}`}
+          dataSource={usedDataSource}
+          columns={usedColumns}
+          components={components}
+          pagination={{
+            ...pagination,
+            showTotal:
+              cellWidth.type === 'curPage'
+                ? (total, range) => handlePageChange(total, range, pageInfo, setPageInfo)
+                : null,
+          }}
+          scroll={scroll}
+          {...props}
+        />
+      ),
+  ];
+};
+
+DrTable.PropTypes = {
+  extraOptions: PropTypes.object.isRequired,
+}
+
+export default memo(DrTable);

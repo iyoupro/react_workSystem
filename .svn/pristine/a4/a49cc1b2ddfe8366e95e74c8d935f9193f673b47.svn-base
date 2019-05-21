@@ -1,0 +1,52 @@
+/** @format */
+
+import React, { useRef, useEffect } from 'react';
+import { findDOMNode } from 'react-dom';
+import { Affix, Button, Icon } from 'antd';
+import Section from './Section';
+import Input from './components/Input';
+import styles from './index.less';
+
+import { pipe } from '../../rehook/';
+import { initPage, withSetData } from './handler';
+
+const FormsPage = ({ data, setData, mode, setMode, addItem, ...props }) => {
+  const { title, sections } = data;
+  return (
+    <div className={styles.wrapper}>
+      <div className={styles.header} >
+        <Input
+          inputWrapperClassName={styles.title}
+          inputClassName={styles.titleInput} 
+          focusUnderlineClassName={styles.titleFocusUnderline} 
+          placeholder="请输入表单标题"
+          value={title}
+          autoSize
+          showUnderline={false}
+          onChange={event => setData('title', event.target.value)} 
+        />
+      </div>
+      <div className={styles.content}>
+        {sections && sections.map(section => (
+          <Section
+            key={section.id}
+            data={section}
+            mode={mode}
+            {...props}
+          />
+        ))}
+      </div>
+      <div className={styles.affix}>
+        <Button shape="circle" icon="plus" onClick={addItem}/>
+        <Button shape="circle" icon="block" />
+      </div>        
+    </div>
+  );
+};
+
+// FormsPage.defaultProps = {
+//   mode: 'edit',
+//   data: initialData,
+// };
+
+export default pipe(initPage, withSetData, FormsPage);

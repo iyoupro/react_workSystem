@@ -1,0 +1,86 @@
+import React, { useRef } from 'react';
+import { Select, Icon, Switch, Collapse, Button } from 'antd';
+import Checkbox from './itemContent/Checkbox';
+import MyRadio from './itemContent/Radio';
+import Time from './itemContent/Time';
+import Input from './components/Input';
+import styles from './Item.less';
+import { pipe } from '../../rehook/';
+import { withSetData } from './handler';
+
+const Option = Select.Option;
+
+const types = {
+  Paragraph: { name: '段落', extraContent: null },
+  MyRadio: { name: '单选', extraContent: MyRadio },
+  Checkbox: { name: '多选', extraContent: Checkbox },
+  Time: { name: '日期', extraContent: Time }
+};
+
+const Item = ({ data, mode, setData, isSelected, setSelectedItem, copyItem, deleteItem, ...props }) => {
+  const { title, declaraction, type, inputValue } = data;
+  const thisItem = useRef(null);
+  const ExtraContent = types[type] && types[type].extraContent;
+  const onClickItem = event => {
+    if (thisItem.current && event.nativeEvent.target.className.indexOf('deleteIcon') !== -1) {
+      thisItem.current.style['max-height'] = `${thisItem.current.clientHeight}px`;
+      thisItem.current.classList.add(styles.delete);
+      const timer = setInterval(() => {
+        if (thisItem.current.clientHeight <= 0) {
+          deleteItem();
+          clearInterval(timer)              
+        }
+      }, 1);
+    }
+    else setSelectedItem(data);
+  }
+  return (
+    <li ref={thisItem} className={`${styles.wrapper} ${isSelected ? styles.isSelected : ''}`} onClick={onClickItem}>
+      <Input 
+        inputWrapperClassName={styles.title} 
+        inputClassName={styles.titleInput} 
+        underlineClassName={styles.underLine}
+        underlineClassName={styles.focusUnderLine}
+        autoSize={false}
+        showUnderline={isSelected}
+        value={title}
+        onChange={event => setData('title', event.target.value)} />
+      {type !== 'SectionTitle' &&
+        <Select className={styles.typeSelect} value={type} onSelect={value => setData('type', value)}>
+          {Object.keys(types) && Object.keys(types).map(itemType => <Option key={itemType} value={itemType}>{types[itemType].name}</Option>)}
+        </Select>  
+      }
+      {declaraction &&   
+        <Input 
+          inputWrapperClassName={styles.declaraction} 
+          inputClassName={styles.declaractionInput} 
+          underlineClassName={styles.underLine}
+          underlineClassName={styles.focusUnderLine}
+          autoSize={false}
+          showUnderline={isSelected}
+          value={declaraction}
+          onChange={event => setData('declaraction', event.target.value)} />      
+      }
+      {ExtraContent && <ExtraContent data={data} mode={mode} setData={setData} isSelected={isSelected} {...props} />}
+      {isSelected ? <hr className={styles.horizontalLine} /> : ''}
+      {type !== 'SectionTitle' && 
+        <div className={styles.footer}>
+          { type === 'MyRadio' || type === 'Checkbox' ?
+            <Radio.Group size='small' className={styles.footerItem} defaultValue='one' onChange={e => setData('layout', e.target.value)}>
+              <Radio.Button value="one">一列</Radio.Button>
+              <Radio.Button value="two">两列</Radio.Button>
+              <Radio.Button value="three">三列</Radio.Button>
+              <Radio.Button value="four">四列</Radio.Button>
+            </Radio.Group> : ''
+          }
+          <Button className={`${styles.footerItem} copyIcon`} shape="circle" icon="copy" />
+          <Button className={`${styles.footerItem} deleteIcon`} shape="circle" icon="delete" />
+          必填：<Switch className={styles.footerItem} checkedChildren="是" unCheckedChildren="否" defaultChecked />
+          显示说明：<Switch className={styles.footerItem} checkedChildren="是" unCheckedChildren="否" defaultChecked />
+        </div>
+      }
+    </li>
+  );
+};
+
+export default pipe(withSetData, Item);

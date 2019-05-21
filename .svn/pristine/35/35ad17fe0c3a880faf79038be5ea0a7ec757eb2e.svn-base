@@ -1,0 +1,109 @@
+/** @format */
+import React, { Component } from 'react';
+import styles from './StepChartPage.css';
+import FlowChart from '../components/FlowChart/';
+
+class StepChartPage extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      chartData: [
+        {
+          no: '0',
+          name: '开始',
+          previous: [],
+          next: ['1'],
+        },
+        {
+          no: '1',
+          name: '结束',
+          previous: ['2', '3', '4'],
+          next: [],
+        },
+        {
+          no: '2',
+          name: 'b1',
+          previous: ['0'],
+          next: ['1'],
+        },
+        {
+          no: '3',
+          name: 'b2',
+          previous: ['0'],
+          next: ['1'],
+        },
+        {
+          no: '4',
+          name: 'b3',
+          previous: ['0'],
+          next: ['1'],
+        },
+      ]
+    }
+
+  render() {
+    return (
+      <FlowChart
+        className={styles.chart}
+        chartData={this.state.chartData}
+        showShadow
+        nodeSize={50}
+        uniderection
+        colDistance={1}
+        rowDistance={1}
+        shapeInfo={{
+          line: {
+            width: 1,
+            color: 'black',
+          },
+          headNode: {
+            nodeShape: 'ellipse',
+            fillColor: '#fcffe6',
+            textColor: 'black',
+            strokeColor: 'gray',
+            popupFillColor: 'white',
+            popupTextColor: 'black',
+            selectedFillColor: '#1890ff',
+            selectedTextColor: 'white',
+            selectedStrokeColor: 'gray',
+          },
+          tailNode: {
+            nodeShape: 'ellipse',
+            fillColor: '#fcffe6',
+            textColor: 'black',
+            strokeColor: 'gray',
+            popupFillColor: 'white',
+            popupTextColor: 'black',
+            selectedFillColor: '#1890ff',
+            selectedTextColor: 'white',
+            selectedStrokeColor: 'gray',
+          },
+          normalNode: {
+            nodeShape: 'rectangle',
+            fillColor: 'white',
+            textColor: 'black',
+            strokeColor: 'gray',
+            popupFillColor: 'white',
+            popupTextColor: 'black',
+            selectedFillColor: '#1890ff',
+            selectedTextColor: 'white',
+            selectedStrokeColor: 'gray',
+          },
+          branchNode: {
+            nodeShape: 'rectangle',
+            fillColor: '#eee',
+            textColor: 'black',
+            strokeColor: 'gray',
+            popupFillColor: 'white',
+            popupTextColor: 'black',
+            selectedFillColor: '#1890ff',
+            selectedTextColor: 'white',
+            selectedStrokeColor: 'gray',
+          },
+        }}
+      />
+    );
+  }
+}
+
+export default StepChartPage;

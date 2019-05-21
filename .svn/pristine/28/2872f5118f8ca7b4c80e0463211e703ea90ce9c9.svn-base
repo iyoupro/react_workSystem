@@ -1,0 +1,84 @@
+import React, { Component } from 'react';
+import { Button, Select } from 'antd';
+import styles from './QueryRule.less';
+
+const Option = Select.Option;
+
+export default class QueryRule extends Component {
+  constructor(props) {
+    super(props);
+    this.type = 'rule';
+    this.state = { rule: '', inputValue1: '', operator: '', inputValue2: '' };
+  }
+
+  handleInputValue1Change = (value) => {
+    const { operator, inputValue2 } = this.state;
+    const { index, onRuleChange } = this.props;
+    const rule = `${value} ${operator} ${inputValue2}`;
+    this.setState({ inputValue1: value, rule });
+    if (onRuleChange && value !== '' && operator !== '' && inputValue2 !== '') onRuleChange(index, rule);
+  }
+
+  handleOperatorChange = (value) => {
+    const { inputValue1, inputValue2 } = this.state;
+    const { index, onRuleChange } = this.props;
+    const rule = `${inputValue1} ${value} ${inputValue2}`;
+    this.setState({ operator: value, rule });
+    if (onRuleChange && inputValue1 !== '' && value !== '' && inputValue2 !== '') onRuleChange(index, rule);
+  }
+
+  handleInputValue2Change = (value) => {
+    const { operator, inputValue1 } = this.state;
+    const { index, onRuleChange } = this.props;
+    const rule = `${inputValue1} ${operator} ${value}`;
+    this.setState({ inputValue2: value, rule });
+    if (onRuleChange && inputValue1 !== '' && operator !== '' && value !== '') onRuleChange(index, rule);
+  }
+
+  render() {
+    const { deleteThis } = this.props;
+    return (
+      <div className={styles.ruleWrapper} >
+        <Select
+          showSearch
+          style={{ width: 200 }}
+          placeholder="Select a person"
+          optionFilterProp="children"
+          onChange={this.handleInputValue1Change}
+          filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
+        >
+          <Option value="a">a</Option>
+          <Option value="b">b</Option>
+          <Option value="c">c</Option>
+        </Select>
+        <Select
+          key="inputValue1"
+          showSearch
+          style={{ width: 200 }}
+          placeholder="Select a person"
+          optionFilterProp="children"
+          onChange={this.handleOperatorChange}
+          filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
+        >
+          <Option value="+">+</Option>
+          <Option value="-">-</Option>
+          <Option value="*">*</Option>
+          <Option value="/">/</Option>
+        </Select>,
+        <Select
+          showSearch
+          style={{ width: 200 }}
+          placeholder="Select a person"
+          optionFilterProp="children"
+          onChange={this.handleInputValue2Change}
+          filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
+        >
+          <Option value="1">1</Option>
+          <Option value="2">2</Option>
+          <Option value="3">3</Option>
+        </Select>,
+        <Button className={styles.button} shape="circle" icon="delete" onClick={deleteThis} />
+      </div>
+    );
+  }
+}

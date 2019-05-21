@@ -1,0 +1,118 @@
+import React, { memo, useState } from 'react';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import uniqueId from 'lodash/uniqueId';
+import cloneDeep from 'lodash/cloneDeep';
+import styles from './index.less';
+
+const findItemIndexByKey = (listValue, key) => {
+  for (let i = 0, len = listValue.length; i < len;i += 1) if (key === listValue[i].key) return i;
+  return -1;
+}
+
+export const DragDropWrapper = memo(props => {
+  const { className, style, data, onChange, children } = props;
+  const { value, selectList, selectedItems } = data;
+
+  const reorderList = (sourceItems, sourceListId, destinationItemIndex, destinationListId) => {
+    let newSourceListValue = cloneDeep(value[sourceListId]);
+    const newDestinationListValue = sourceListId !== destinationListId ? cloneDeep(value[destinationListId]) : newSourceListValue;
+    const addedItems = [];
+    sourceItems.map(sourceItemIndex => {
+        addedItems.push(cloneDeep(newSourceListValue[sourceItemIndex]));
+        newSourceListValue[sourceItemIndex].shouldDelete = true;
+      }
+    );
+    newDestinationListValue.splice(destinationItemIndex, 0, ...addedItems);
+    console.log(newDestinationListValue)
+    newSourceListValue = newSourceListValue.filter(sourceItem => !sourceItem.shouldDelete);
+    const newValue = { ...data.value };
+    newValue[sourceListId] = newSourceListValue;
+    newValue[destinationListId] = newDestinationListValue;
+    console.log(sourceItems, addedItems, value[sourceListId], newSourceListValue)
+    onChange({ ...data, isDragging: false, selectedItems: [] });
+  };
+
+  const onDragStart = result => {
+    if (!onChange || !result.source) return;
+    const { droppableId, index } = result.source;
+    const isDragItemInSelectItems = droppableId === selectList && selectedItems && selectedItems.indexOf(index) !== -1;
+    onChange({ 
+      ...data, 
+      isDragging: true, 
+      selectList: isDragItemInSelectItems ? selectList : droppableId, 
+      selectedItems: isDragItemInSelectItems ? selectedItems: [index], 
+    });
+  }
+
+  const onDragEnd = result => {
+    const { destination } = result;
+    if(!onChange) return;
+    if (!destination || selectedItems.indexOf(destination.index) !== -1) {
+      onChange({ ...data, isDragging: false, selectedItems: [] })
+      return;
+    }
+    console.log(result.destination.index)
+    reorderList(selectedItems, selectList, result.destination.index, result.destination.droppableId)
+  }
+
+  return (
+    <DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd} >
+      {children}
+    </DragDropContext>
+  );
+});
+
+const shouldNotUpdate = (preProps, nextProps) => {
+  // for (const prop in preProps) {
+  //   if (prop !== 'data' && prop !== 'onChange' && preProps[prop] !== nextProps[prop]) return false;
+  //   if (prop === 'data' && (preProps.data.value[preProps.listId] !== nextProps.data.value[nextProps.listId] ||
+  //     preProps.data.selectedItems !== nextProps.data.selectedItems)) return false;
+  // }
+  // return true;
+  return false;
+}
+
+export const SortableList = memo(props => {
+  const { className, style, listId, data, ItemRender, direction, multiSelect, onChange, ...otherProps } = props;
+  const value = data.value[listId];
+  const handleSelect = (event, index) => {
+    if (!onChange || event.defaultPrevented || event.button !== 0) return;
+    event.preventDefault();
+    const newSelectItems = !data.selectList || data.selectList !== listId ? [] : cloneDeep(data.selectedItems);
+    if (newSelectItems.indexOf(index) === -1) newSelectItems.push(index);
+    else newSelectItems.splice(newSelectItems.indexOf(index), 1);
+    onChange({ ...data, selectList: listId, selectedItems: newSelectItems });
+  }
+
+  return (
+    <Droppable droppableId={listId} direction={direction}>
+      {(provided, snapshot) => (
+        <div
+          ref={provided.innerRef}
+          className={`${className} ${styles.scrollListWrapper} ${direction === 'horizontal' ? styles.horizontal : styles.vertical}`}
+        >
+          {value.map((itemData, index) => 
+            <Draggable key={itemData.key} draggableId={itemData.key} index={index} >
+              {(provided, snapshot) => (
+                <ItemRender
+                  connectDragRef={provided.innerRef}
+                  connectDrag={provided.draggableProps}
+                  connectDragHandle={provided.dragHandleProps}
+                  connectDragStyle={provided.draggableProps.style}
+                  handleSelect={event => handleSelect(event, index)}
+                  data={itemData}
+                  index={index}
+                  isDragging={data.isDragging && data.selectList === listId && data.selectedItems && data.selectedItems.indexOf(index) !== -1}
+                  isSelected={data.selectList === listId && data.selectedItems && data.selectedItems.indexOf(index) !== -1}
+                  {...otherProps}
+                />
+              )}
+            </Draggable>
+            )}
+          {provided.placeholder}
+        </div>
+      )}
+    </Droppable>
+  );
+});
+

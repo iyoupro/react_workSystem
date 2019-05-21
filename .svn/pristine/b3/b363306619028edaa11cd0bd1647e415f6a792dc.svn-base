@@ -1,0 +1,122 @@
+import React, { Component } from 'react';
+import { DropWrapper, DropArea } from '../components/CustomSort';
+import FormItem from '../components/FormItem/';
+import styles from './CustomSortPage.less';
+
+const items = [
+  {
+    name: '1',
+    title: '标题',
+  },
+  {
+    name: 'dept',
+    title: '起止时间',
+  },
+  {
+    name: 'sex',
+    title: '多行文字',
+  },
+  {
+    name: 'age',
+    title: '单行文字',
+  },
+  {
+    name: 'jobNo',
+    title: '输入框 ',
+  },
+  {
+    name: 'jobNo',
+    title: '数字输入框',
+  },
+  {
+    name: 'jobNo',
+    title: '单选框',
+  },
+  {
+    name: 'jobNo',
+    title: '多选框',
+  },
+  {
+    name: 'jobNo',
+    title: '选择器',
+  },
+  {
+    name: 'jobNo',
+    title: '日期选择',
+  },
+  {
+    name: 'jobNo',
+    title: '时间选择',
+  },
+  {
+    name: 'jobNo',
+    title: '滑动条',
+  },
+  {
+    name: 'jobNo',
+    title: '开关',
+  },
+  {
+    name: 'jobNo',
+    title: '自动完成',
+  },
+];
+
+class CustomSortPage extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { newItemWidth: 2 };
+  }
+
+  componentDidMount () {
+   window.addEventListener('keyup', this.handleKeyUp);
+  }
+
+  componentWillUnMount() {
+   window.removeEventListener('keyip', this.handleKeyUp);
+  }
+  
+  setNewItemWidth = (newItemWidth) => {
+    this.dropArea.setItemsSize({ width: newItemWidth });
+    this.setState({ newItemWidth });
+  }
+
+  revoke = () => {
+    this.dropArea.revoke();
+  }
+  
+  handleKeyUp = (event) => {
+    if (event.ctrlKey && event.key === 'z') this.revoke();
+  }
+
+  render() {
+    return (
+      <DropWrapper onKeyDown={this.onKeyDown} style={{ width: '100%', height: '100%', background: '#fafafa', fontSize: '16px', display: 'flex', flexWrap: 'wrap' }}>
+        <DropArea AreaId="0" fix style={{ width: '100%', height: '100%' }} >
+          <div className={styles.componentLib}>
+            <div className={styles.buttonWrapper}>
+              <div className={styles.button} style={{ background: this.state.newItemWidth === 1 ? '#40a9ff' : '#1890ff' }} onClick={() => this.setNewItemWidth(1)}>一列</div>
+              <div className={styles.button} style={{ background: this.state.newItemWidth === 2 ? '#40a9ff' : '#1890ff' }} onClick={() => this.setNewItemWidth(2)}>两列</div>
+              <div className={styles.button} style={{ background: this.state.newItemWidth === 3 ? '#40a9ff' : '#1890ff' }} onClick={() => this.setNewItemWidth(3)}>三列</div>
+              <div className={styles.button} style={{ background: '#1890ff' }} onClick={() => this.revoke()}>撤销</div>
+            </div>
+            <DropArea
+              AreaId="1" fix defaultItems={items
+              } direction="row" defaultItemSize={{ width: 2.2, height: 10 }}
+              style={{ width: '90%', height: '80%', background: '#fff', justifyContent: 'space-between' }}
+              Item={FormItem} itemStyle={{ marginTop: '5%' }}
+            />
+          </div>
+          <DropArea
+            getRef={dropArea => this.dropArea = dropArea} AreaId="2" fix={false} direction="row" defaultItemSize={{ width: 2, height: 10 }} // eslint-disable-line
+            newItemSize={{ width: this.state.newItemWidth, height: 10 }}
+            style={{ width: '60%', height: '95%', background: '#fff', boxShadow: '1px 1px 1px 1px grey' }}
+            Item={FormItem} itemStyle={{ marginTop: '0%' }}
+          />
+        </DropArea>
+      </DropWrapper>
+    );
+  }
+}
+
+export default CustomSortPage;

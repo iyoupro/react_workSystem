@@ -1,0 +1,23 @@
+import React, { Component } from 'react';
+// import PropTypes from 'prop-types';
+import { DragDropContext } from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
+import TouchBackend from 'react-dnd-touch-backend';
+
+class DropWrapper extends Component {
+  render() {
+    const { style } = this.props;
+    return (
+      <div
+        style={{ ...style }}
+      >
+        {this.props.children}
+      </div>
+    );
+  }
+}
+
+let Backend = HTML5Backend;
+if (/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)) Backend = TouchBackend;
+
+export default DragDropContext(Backend)(DropWrapper);

@@ -1,0 +1,48 @@
+import React, { memo } from 'react';
+import { Select } from 'antd';
+import CheckBox from './ItemContent/CheckBox';
+import Radio from './ItemContent/Radios';
+import Time from './ItemContent/Date';
+import styles from './Item.less';
+// console.log(styles.horizontalLine);
+
+const Option = Select.Option;
+const contents = { radio: Radio, checkbox: CheckBox, time: Time };
+
+const onSetItemTitle = (newTitle, data, setItem) => {
+  data.title = newTitle;
+  // console.log(event.target.value);
+  setItem(data);
+}
+
+
+
+const Item = memo(props => {
+  // // const horizontalLine = this.horizontalLine;
+  // this.title.addEventListener('click',function(){
+  //   this.horizontalLine.style.width='500px';
+  // })
+  const { data, setItem } = props;
+  const { title, introduce, type, inputValue } = data;
+  const ItemContent = contents[type];
+  return (
+    <div className={styles.wrapper}>
+      {/* title in this */}
+      {/* introduce in this */}
+      {/* {ItemContent && <ItemContent {...props} />} */}
+      <input className={styles.title} value={title} onChange={event => onSetItemTitle(event.target.value, data, setItem)} />
+      {/* <hr className={styles.horizontalLine} noshade="noshade" ref={ref => this.horizontalLine = ref}/> */}      
+      <Select className={styles.type} defaultValue={type} style={{ width: 120 }}>
+        <Option value="选择题">选择题</Option>
+        <Option value="多选题">多选题</Option>
+        <Option value="下拉列表" >下拉列表</Option>
+        <Option value="段落">段落</Option>
+      </Select>
+      <input placeholder='说明' className={styles.instructions} value={inputValue} />
+      <Radio />
+      
+    </div>
+  );
+});
+
+export default Item;

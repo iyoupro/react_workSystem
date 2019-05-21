@@ -1,0 +1,10 @@
+/**
+ * @param  {...Function} fns
+ * @returns {Object}
+ */
+const pipe = (...fns) => (props = {}) => fns.reduce((v, f) => {
+  console.log(v, f);
+  return f(v);
+}, props)
+
+export default pipe

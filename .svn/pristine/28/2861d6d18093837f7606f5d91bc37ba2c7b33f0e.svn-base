@@ -1,0 +1,18 @@
+.wrapper{
+  width: 100%;
+  .line{
+    display:flex;
+    .declaraction{
+      width: 100px;
+    }
+    .underline {
+      width: 100px;
+      height: 0;
+      border: 0;
+      border-top: 1px dashed grey;
+      background-color: transparent;
+      position: absolute;
+      top: calc(~'90%');
+    }
+  }
+}

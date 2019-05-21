@@ -1,0 +1,153 @@
+import * as React from 'react';
+import { DragDropContext } from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
+import { Divider } from 'antd';
+import SortItem from './SortItem';
+import SortPlaceholderItem from './SortPlaceholderItem';
+import filter from 'lodash/filter';
+
+const update = require('immutability-helper');
+
+class SortList extends React.Component {
+  constructor(props: {}) {
+    super(props);
+    this.moveItem = this.moveItem.bind(this);
+    const { items, fixed } = props;
+    this.state = {
+      items: filter(items, (item) => {
+        return fixed.indexOf(item.name) === -1;
+      }),
+      fixedItems: filter(items, (item) => {
+        return fixed.indexOf(item.name) !== -1;
+      }),
+    };
+  }
+
+  onChange() {
+    const { items, fixedItems } = this.state;
+    const order = (items || []).map((item) => {
+      return item.name;
+    });
+    const fixed = (fixedItems || []).map((item) => {
+      return item.name;
+    });
+    if (this.props.onChange) {
+      this.props.onChange({ order, fixed });
+    }
+  }
+
+
+  moveItem(dragId, hoverId) {
+    const { items, fixedItems } = this.state;
+    let dragSoure = '';
+    let hoverSource = '';
+    let dragItem;
+    let dragIndex = items.findIndex((item) => {
+      return item.name === dragId;
+    });
+    if (dragIndex === -1) {
+      dragSoure = 'fixed';
+      dragIndex = fixedItems.findIndex((item) => {
+        return item.name === dragId;
+      });
+      dragItem = fixedItems[dragIndex];
+    } else {
+      dragSoure = 'main';
+      dragItem = items[dragIndex];
+    }
+    let hoverIndex = items.findIndex((item) => {
+      return item.name === hoverId;
+    });
+    if (hoverIndex === -1) {
+      hoverSource = 'fixed';
+      hoverIndex = fixedItems.findIndex((item) => {
+        return item.name === hoverId;
+      });
+    } else {
+      hoverSource = 'main';
+    }
+    if (hoverIndex === -1) {
+      if (dragSoure === 'main') {
+        hoverSource = 'fixed';
+      } else {
+        hoverSource = 'main';
+      }
+      hoverIndex = 0;
+    }
+    if (hoverSource === dragSoure) {
+      if (hoverSource === 'main') {
+        this.setState(
+          update(this.state, {
+            items: {
+              $splice: [[dragIndex, 1], [hoverIndex, 0, dragItem]],
+            },
+          }), this.onChange
+        );
+      } else {
+        this.setState(
+          update(this.state, {
+            fixedItems: {
+              $splice: [[dragIndex, 1], [hoverIndex, 0, dragItem]],
+            },
+          }), this.onChange
+        );
+      }
+    } else if (dragSoure === 'main') {
+      // 从主到fixed
+      this.setState(
+        update(this.state, {
+          items: {
+            $splice: [[dragIndex, 1]],
+          },
+          fixedItems: {
+            $splice: [[hoverIndex, 0, dragItem]],
+          },
+        }), this.onChange
+      );
+    } else {
+      // 从fixed到主
+      this.setState(
+        update(this.state, {
+          items: {
+            $splice: [[hoverIndex, 0, dragItem]],
+          },
+          fixedItems: {
+            $splice: [[dragIndex, 1]],
+          },
+        }), this.onChange
+      );
+    }
+  }
+
+
+  render() {
+    const { fixedItems, items } = this.state;
+    const renderCore = (renderItems, emtpyText) => {
+      if (renderItems && renderItems.length > 0) {
+        return renderItems.map((item, index) => (
+          <SortItem
+            index={index}
+            key={item.name}
+            id={item.name}
+            text={item.title}
+            moveItem={this.moveItem}
+          />
+        ));
+      }
+      return (<SortPlaceholderItem moveItem={this.moveItem} text={emtpyText} />);
+    };
+    return (
+      <div>
+        {
+          renderCore(fixedItems, '固定项目拖在这里来')
+        }
+        <Divider />
+        {
+          renderCore(items, '没有项目')
+        }
+      </div>
+    );
+  }
+}
+
+export default DragDropContext(HTML5Backend)(SortList);

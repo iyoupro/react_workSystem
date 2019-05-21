@@ -1,0 +1,151 @@
+/** @format */
+
+import React, { memo, useReducer } from 'react';
+import PropTypes from 'prop-types';
+import { Radio, Button } from 'antd';
+import QueueAnim from 'rc-queue-anim';
+import uniqueId from 'lodash/uniqueId';
+import cloneDeep from 'lodash/cloneDeep';
+import styles from './QueryGroup.less';
+import QueryRule from './QueryRule';
+
+const RadioButton = Radio.Button;
+const RadioGroup = Radio.Group;
+const ButtonGroup = Button.Group;
+
+const conditionReducer = (value, action) => {
+  const { type, index, newCondition, groupType, props } = action;
+  const newValue = value;
+  switch (type) {
+    case 'init':
+      for (let i = 0, length = newValue.conditions.length; i < length; i += 1) {
+        if (!newValue.conditions[i].key) newValue.conditions[i].key = uniqueId();
+      }
+      break;
+    case 'setGroupType':
+      newValue.type = groupType;
+      break;
+    case 'addRule':
+      newValue.conditions.splice(index < 0 ? 0 : index, 0, {
+        name: 'status',
+        op: null,
+        value: [],
+        key: uniqueId(),
+      });
+      break;
+    case 'addGroup':
+      newValue.conditions.splice(index < 0 ? 0 : index, 0, {
+        type: 'OR',
+        conditions: [],
+        key: uniqueId(),
+      });
+      break;
+    case 'deleteCondition':
+      newValue.conditions.splice(index, 1);
+      break;
+    case 'setCondition':
+      newValue.conditions[index] = newCondition;
+      break;
+    default:
+      break;
+  }
+  props.onChange(newValue);
+  return newValue;
+};
+
+const onChildGroupChange = (onChange, value) => {
+  onChange(value);
+};
+
+const QueryGroup = memo(props => {
+  const { root, value, onDelete, onChange } = props;
+  const [_, dispatch] = useReducer(conditionReducer, value, { type: 'init', props });
+
+  return (
+    <div className={`${styles.groupWrapper} ${root ? styles.root : ''}`}>
+      {
+        <div className={styles.operatorWrapper}>
+          <RadioGroup
+            onChange={event =>
+              dispatch({ type: 'setGroupType', groupType: event.target.value, props })
+            }
+            value={value.type}
+          >
+            <RadioButton
+              className={`${styles.button} ${styles.leftButton}`}
+              value="AND"
+              disabled={!root ? true : value.conditions.length < 2}
+            >
+              AND
+            </RadioButton>
+            <RadioButton
+              className={`${styles.button} ${styles.leftButton}`}
+              value="OR"
+              disabled={!root ? false : value.conditions.length < 2}
+            >
+              OR
+            </RadioButton>
+          </RadioGroup>
+          <ButtonGroup>
+            <Button
+              className={`${styles.button} ${styles.rightButton}`}
+              icon="plus"
+              onClick={() => dispatch({ type: 'addRule', index: value.conditions.length, props })}
+            >
+              Add rule
+            </Button>
+            <Button
+              className={`${styles.button} ${styles.rightButton}`}
+              disabled={!root}
+              icon="plus-circle"
+              onClick={() => dispatch({ type: 'addGroup', index: value.conditions.length, props })}
+            >
+              Add group
+            </Button>
+            {!root && (
+              <Button
+                className={`${styles.button} ${styles.deleteButton}`}
+                icon="delete"
+                onClick={onDelete}
+              />
+            )}
+          </ButtonGroup>
+        </div>
+      }
+      <QueueAnim>
+        {value.conditions &&
+          value.conditions.map((condition, index) => {
+            if (condition.type) {
+              return (
+                <QueryGroup
+                  key={condition.key}
+                  value={condition}
+                  onChange={() => onChildGroupChange(onChange, value)}
+                  onDelete={() => dispatch({ type: 'deleteCondition', props, index })}
+                />
+              );
+            }
+            return (
+              <QueryRule
+                key={condition.key}
+                condition={condition}
+                onDelete={() => dispatch({ type: 'deleteCondition', index, props })}
+                setCondition={newCondition =>
+                  dispatch({ type: 'setCondition', index, newCondition, props })
+                }
+              />
+            );
+          })}
+      </QueueAnim>
+    </div>
+  );
+});
+
+QueryGroup.propTypes = {
+  root: PropTypes.bool,
+  value: PropTypes.object,
+  onChange: PropTypes.func,
+  onDelete: PropTypes.func,
+};
+
+export default QueryGroup;

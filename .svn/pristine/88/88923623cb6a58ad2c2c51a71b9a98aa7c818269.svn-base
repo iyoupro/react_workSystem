@@ -1,0 +1,24 @@
+
+.drTable {
+  & :global(.ant-table-fixed-left) {
+    border-right: 1px solid #000;
+    box-shadow: none;
+  }
+  & :global(.ant-table-fixed-right) {
+    box-shadow: none;
+  }
+  // & :global(table) {
+  //   table-layout: fixed;
+  //   & .cell {
+  //     padding: 0 !;
+  //   };
+
+  // }
+};
+
+.calcPlaceholder {
+  position: absolute;
+  visibility: hidden;
+  width: fit-content;
+  height: fit-content;
+}

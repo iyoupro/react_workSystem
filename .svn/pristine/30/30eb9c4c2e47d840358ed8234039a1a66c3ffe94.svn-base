@@ -1,0 +1,15 @@
+import React, { useRef } from 'react';
+import styles from './QueryBuilderPage.less';
+import FormPage from './FormPage/';
+
+const QueryBuildPage = () =>  {
+  let a ;
+  return (
+    <div className={styles.wrapper}>
+    <button onClick={()=> console.log(a)}></button>
+      <FormPage getData={a}/>
+    </div>
+  );
+}
+
+export default QueryBuildPage;

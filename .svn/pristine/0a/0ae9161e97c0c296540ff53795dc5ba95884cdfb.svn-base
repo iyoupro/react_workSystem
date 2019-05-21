@@ -1,0 +1,15 @@
+.ruleWrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  position: relative;
+  width: 97%;
+  height: 50px;
+  background: yellow;
+  border: 1px solid red;
+  margin: 0 0 10px 3%;
+  & > .button {
+    position: absolute;
+    right: 0.5%;
+  }
+}

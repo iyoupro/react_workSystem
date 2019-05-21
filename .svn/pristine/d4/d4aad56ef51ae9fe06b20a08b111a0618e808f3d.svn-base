@@ -1,0 +1,78 @@
+import React, { Component } from 'react';
+import { Radio, Button } from 'antd';
+import styles from './QueryGroup.less';
+import QueryRule from './QueryRule';
+
+const RadioButton = Radio.Button;
+const RadioGroup = Radio.Group;
+const ButtonGroup = Button.Group;
+
+export default class QueryGroup extends Component {
+  constructor(props) {
+    super(props);
+    this.type = 'group';
+    this.condition = 'AND';
+    this.state = { tree: props.tree };
+    this.rules = [];
+    for (let i = 0; i < props.tree.length; i += 1) {
+      this.rules.push('');
+    }
+  }
+
+  onConditionChange = (event) => {
+    this.condition = event.target.value;
+  }
+
+  deleteNode = (index) => {
+    const { tree } = this.state;
+    tree.splice(index, 1);
+    this.setState({ tree });
+    this.rules.splice(index, 1);
+  }
+
+  addNode = (index, type) => {
+    const { tree } = this.state;
+    tree.splice(index < 0 ? 0 : index, 0, { type, operator: '' });
+    this.setState({ tree });
+    this.rules.push('');
+  }
+
+
+  onRuleChange = (index, rule) => {
+    this.rules[index] = rule;
+    if (this.props.onRuleChange && this.type === 'group') this.props.onRuleChange(this.props.index, { condition: this.condition, rules: this.rules });
+  }
+
+
+  render() {
+    const { head, deleteThis } = this.props;
+    const { tree } = this.state;
+    return (
+      <div className={`${styles.groupWrapper} ${head && styles.head}`}>
+        {
+          <div className={styles.operatorWrapper}>
+            <RadioGroup onChange={this.onConditionChange} defaultValue="AND" style={{ marginLeft: '0.5%' }}>
+              <RadioButton value="AND" disabled={tree.length < 2}>AND</RadioButton>
+              <RadioButton value="OR" disabled={tree.length < 2}>OR</RadioButton>
+            </RadioGroup>
+            <ButtonGroup style={{ marginRight: '0.5%' }}>
+              <Button icon="plus" onClick={() => this.addNode(tree.length, 'rule')}>Add rule</Button>
+              <Button icon="plus-circle" onClick={() => this.addNode(tree.length, 'group')}>Add group</Button>
+              {!head && <Button icon="delete" onClick={deleteThis} />}
+            </ButtonGroup>
+          </div>
+        }
+        {
+          tree && tree.length > 0 && tree.map((node, index) => {
+            if (node.type === 'rule') {
+              return <QueryRule key={index} index={index} deleteThis={() => this.deleteNode(index)} onRuleChange={this.onRuleChange} />;
+            }
+            if (node.type === 'group') {
+              return <QueryGroup tree={[]} key={index} index={index} deleteThis={() => this.deleteNode(index)} onRuleChange={this.onRuleChange} />;
+            }
+          })        
+        }
+      </div>
+    );
+  }
+}

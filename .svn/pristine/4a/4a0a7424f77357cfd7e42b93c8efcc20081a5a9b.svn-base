@@ -1,0 +1,59 @@
+import React, { memo } from 'react'; 
+import produce from 'immer';
+import uniqueId from 'lodash/uniqueId';
+import { Radio, Checkbox, Icon } from 'antd';
+import Input from '../components/Input';
+import styles from './Choose.less';
+
+
+const MyRadio = memo(({ data, mode, isSelected, setData, ...props}) => {
+  const { options, layout, type } = data;
+  const Choose = type === 'Radio' ? Radio : Checkbox;
+  const Group = Choose.Group;
+
+  const onTitleChange = (event, optionIndex) => {
+    setData('options', produce(options, draftOptions => {
+      draftOptions[optionIndex].title = event.target.value;
+    }));
+  }
+
+  const onAddRadio = () => {
+    setData('options', produce(options, draftOptions => {
+      draftOptions.push({ title: 'newItem', id: uniqueId() })
+    }));
+  }
+
+  const onDeleteRadio = (optionIndex) => {
+    setData('options', produce(options, draftOptions => {
+      draftOptions.splice(optionIndex, 1)
+    }));
+  }
+console.log(layout);
+  return (
+    <Group name="radiogroup" className={styles.wrapper}>
+      {options && options.map((option, optionIndex) => 
+        <Choose key={option.id} className={`${styles.chooseLine} ${isSelected ? styles.selected : ''}`} style={{ width: `${100 / layout - 1.3}%`, overflow:'hidden'}} value={option.id} disabled={mode !== 'write'}>
+          <Input  
+            inputWrapperStyle={{ width: '80%'}}
+            inputClassName={styles.option} 
+            // underlineClassName={styles.underLine}
+            // underlineClassName={styles.focusUnderLine}
+            // inputWrapperClassName={styles.option}
+            autoSize={false}
+            showUnderline={isSelected}
+            placeholder="Please input option title"
+            value={option.title}
+            onChange={event => onTitleChange(event, optionIndex)} />  
+            {isSelected && <Icon className={styles.closeIcon} type='close' onClick={() => onDeleteRadio(optionIndex)}/>}         
+        </Choose>)}
+      {mode === 'edit' && 
+        <Choose disabled value={'AddGroup'} className={styles.chooseLine} > 
+          <span className={styles.chooseAdd} onClick={onAddRadio}>add option...</span>
+        </Choose>
+      }
+    </Group>
+
+  );
+});
+
+export default MyRadio;

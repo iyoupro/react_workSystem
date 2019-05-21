@@ -1,0 +1,118 @@
+import React, { memo, useState, useEffect, useRef } from 'react';
+import { DropTarget, DragSource } from 'react-dnd';
+import uniqueId from 'lodash/uniqueId';
+import flow from 'lodash/flow';
+import isEqual from 'lodash/isEqual';
+import cloneDeep from 'lodash/cloneDeep';
+import { ReactUtil } from '../../utils/'
+import DragItem from './DragItem';
+import DragPreview from './DragPreview';
+import styles from './DropArea.less';
+
+const SourceSpec = {
+  beginDrag(props, monitor, component){
+    // 返回需要注入的属性
+    return {
+      id: '123'
+    }
+  },
+}
+
+function SourceCollect(connect, monitor) { // Collect中return的对象将作为props传递给当前DraggableComponent组件
+  return {
+    connectDragSource: connect.dragSource(),
+    connectDragPreview: connect.dragPreview(),
+    dragging: monitor.isDragging(),
+  }
+}
+
+const TargetSpec = {
+  canDrop(props, monitor) {
+    return monitor.isOver() && monitor.isOver({ shallow: true });
+  },
+  drop(props, monitor, component) {
+    const draggedItem = monitor.getItem();
+    if (props.itemFasten || props.areaId === draggedItem.areaId) return; // DropArea不响应来自自身的拖拽Item
+    props.addItem(draggedItem.data);    
+  },
+};
+
+function TargetCollect(connect, monitor) {
+  // Collect中return的对象将作为props传递给当前DropArea组件
+  return {
+    connectDropTarget: connect.dropTarget(),
+    hoverDraggedItem: monitor.isOver() && monitor.isOver({ shallow: true }) && monitor.getItem(), // 将拖拽对象信息作为组件的props
+  };
+}
+
+const DropArea = flow(
+  DragSource('FLEX_DND', SourceSpec, SourceCollect),
+  DropTarget('FLEX_DND', TargetSpec, TargetCollect),
+)(props => {
+  const { connectDropTarget, connectDragSource, className, style, children, ItemRender, value,
+    areaId, couldAreaDrag, itemFasten, flexDirection,
+    addItem, swapItem,
+    hoverDraggedItem,
+    ...otherProps
+  } = props;
+  // console.log(`DropArea${areaId} render`);
+  let dropArea = connectDropTarget(
+    <div className={`${className || ''} ${styles.scrollWrapper}`} style={{ ...style, flexDirection }} >
+      {value && value.map((data, index) =>
+        <DragItem
+          key={data.key}
+          index={index}
+          data={data}
+          ItemRender={ItemRender}
+
+          areaId={areaId}
+          itemFasten={itemFasten}
+
+          swapItem={swapItem}
+          addItem={addItem}
+
+          {...otherProps}
+        /> 
+      )}
+      {hoverDraggedItem && hoverDraggedItem.areaId !== areaId && !itemFasten && 
+        <DragItem isPreview data={hoverDraggedItem.data} ItemRender={ItemRender}/>
+      }
+      {children}
+    </div>
+  );
+  if (couldAreaDrag) dropArea = connectDragSource(dropArea);
+  return dropArea;
+});
+
+DropArea.defaultProps = {
+  itemFasten: false,
+  flexDirection: "row",
+  couldAreaDrag: false,
+}
+
+// React-DND没法获取纯函数组件实例中的局部变量方法， 用高阶组件把状态提出来，通过props传进去获取.
+const WithDataHandle = ({ value, defaultValue, onChange, ...props }) => { 
+  const [innerValue, setValue] = useState(defaultValue) // 非受控模式渲染用值
+  const usedValue = value || innerValue; // 受控和非受控使用不同值渲染Item
+
+  const swapItem = (dragItemIndex, hoverItemIndex) => {
+    const newValue = value ? cloneDeep(usedValue) : usedValue; // 非受控不用深拷贝
+    const [draggedItem] = newValue.splice(dragItemIndex, 1);
+    newValue.splice(hoverItemIndex, 0, draggedItem);
+    if (!value) setValue(newValue);
+    if (onChange) onChange(newValue);
+  }
+
+  const addItem = (data, insertIndex = usedValue.length) => {
+    const newValue = value ? cloneDeep(usedValue) : usedValue; // 非受控不用深拷贝
+    newValue.splice(insertIndex, 0, { ...data, key: uniqueId() });
+    if (!value) setValue(newValue);
+    if (onChange) onChange(newValue);
+  }
+
+  return (
+    <DropArea value={usedValue} addItem={addItem} swapItem={swapItem} {...props} />
+  );
+};
+
+export default memo(WithDataHandle);

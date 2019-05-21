@@ -1,0 +1,61 @@
+import React from 'react';
+import styles from './Popup.less';
+
+const Popup = (props) => {
+  return (
+    <div className="popup">
+      {props.mode==='flowChart' &&
+        <div className="popup-content-flowChart">
+          {
+            props.selectedNode && props.selectedNode.children && props.selectedNode.children.length === 1 &&
+            <div className="popup-content-menu" onClick={
+                ()=> { 
+                  const newNode = props.createNewNode(props.selectedNode);
+                  props.flowChartUpdatePos();
+                  props.renderNode('append');
+                  props.renderNode('update');
+                  props.selectNode(newNode.id);
+                }
+              } 
+            >
+              新增节点
+            </div>
+          }
+          {
+            props.selectedNode && props.selectedNode.children && props.selectedNode.children.length === 1 &&
+            <div className="popup-content-menu"
+              onClick={
+                ()=> {
+                  props.createNewBranch(props.selectedNode);
+                  props.flowChartUpdatePos();
+                  props.renderNode('append');
+                  props.renderNode('update');
+                  props.selectNone();
+                }
+              }
+            >
+              新增分支
+            </div>
+          }
+          {
+            props.selectedNode && props.selectedNode.parent.length === 1 && props.selectedNode.children.length === 1 &&
+            <div className="popup-content-menu" onClick={
+              () => {
+                  props.deleteNode(props.selectedNode);
+                  props.flowChartUpdatePos();
+                  props.renderNode('exit');
+                  props.renderNode('update');
+                  props.selectNone(true);
+                }
+              } 
+            >
+              删除节点
+            </div>
+          }
+        </div>
+      }
+    </div>
+  );
+}
+
+export default Popup;

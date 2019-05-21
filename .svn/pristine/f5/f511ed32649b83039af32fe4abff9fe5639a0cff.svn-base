@@ -1,0 +1,60 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  height: fit-content;
+  justify-content: center;
+  align-items: center;
+  transition: all 1s ease;
+  position: relative;
+  &.show {
+    margin-top: 128px;
+  }
+  &.head {
+    margin: auto;
+    margin-top: 15px;
+  }
+}
+
+.item {
+  visibility: hidden;
+  width: 0px;
+  height: 0px;
+  color: transparent;
+  background: transparent;
+  transition: all 1s ease;
+  position: relative;
+  &.show {
+    visibility: visible;
+    color: white;
+    background: blue;
+    width: 250px;
+    height: 125px;
+    margin: 0 15px;
+    & .icon {
+      color: red;
+    }
+  }
+  & .icon {
+    font-size: 24px;
+    position: absolute;
+    margin: auto;
+    color: transparent;
+    left: 50%;
+    bottom: 0%;
+    transform: translate(-50%, 0);
+    transition: font-size 0.2s ease;
+    &:hover {
+      font-size: 26px;
+      cursor: pointer;
+      color: white;
+    }
+  }
+}
+
+.childWrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: fit-content;
+  height: fit-content;
+}

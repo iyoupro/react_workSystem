@@ -1,0 +1,13 @@
+.gridLayoutPageWrapper {
+  width: 100%;
+  min-height: 100%;
+  background: #eee;
+  & > .gridLayout {
+    user-select: none;
+    height: 600px;
+    & > .grid {
+      background: #fff7e6,  
+    }
+  }
+}
+

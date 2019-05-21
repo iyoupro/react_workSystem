@@ -1,0 +1,38 @@
+.wrapper{
+  width: 100%;
+  min-height:80px;
+  background: white;
+  padding:12px 24px;
+  margin-top:24px;
+  border-top:none;
+  // &:active{
+  //   box-shadow:0 0 4px 4px #ccc;
+  // }
+  & .title{
+    width:80%;
+    outline:none;
+    font-size: 16px;
+    border:none;
+    border-bottom:1px solid gray;
+    margin-right: 5%;
+    &:focus {
+      border:none;
+      border-bottom:1px solid blue;
+    }
+    
+  }
+  // .horizontalLine{
+  //   background-color: red;
+  //   border: none;
+  //   width: 5px;
+  //   height: 4px;
+  //   transition: width 2s ease;      
+  // }
+  .instructions{
+    width:100%;
+    outline:none;
+    font-size: 14px;
+    border:none;
+    border-bottom:1px dashed gray;
+  }
+}

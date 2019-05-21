@@ -1,0 +1,130 @@
+import React, { Component } from 'react';
+import { findDOMNode } from 'react-dom';
+import { DragSource, DropTarget } from 'react-dnd';
+import flow from 'lodash/flow';
+import styles from './DraggableComponent.less';
+import itemTypes from './itemTypes';
+import images from '../../assets/config';
+
+const TargetSpec = {
+  canDrop(props, monitor) {
+    return monitor.isOver() && monitor.isOver({ shallow: true });
+  },
+  drop(props, monitor, component) {
+    const sourceItem = monitor.getItem();
+    const dropItSelf = findDOMNode(component) === findDOMNode(sourceItem.DOM);
+    const sameArea = findDOMNode(component).parentNode === findDOMNode(sourceItem.DOM).parentNode;
+    if (!props.fix && !dropItSelf && !sameArea) props.addItem(sourceItem.data, props.index);
+    if (!sourceItem.fix && !dropItSelf && !sameArea) sourceItem.remove();
+    if (!props.fix && !dropItSelf && sameArea) {
+      let indexOffset = 0;
+      const selectedItems = props.selectedItems.slice();
+      if (selectedItems.length === 0) selectedItems.push(props.index);
+      for (let i = 0, length = selectedItems.length; i < length; i += 1) {
+        if (selectedItems < props.index) indexOffset += 1;
+      }
+      sourceItem.remove();
+      props.addItem(sourceItem.data, props.index - indexOffset);
+    }
+  },
+};
+
+function TargetCollect(connect, monitor) {
+  return {
+    connectDropTarget: connect.dropTarget(),
+    isOver: monitor.isOver() && monitor.isOver({ shallow: true }),
+    canDrop: monitor.canDrop(),
+    dragSourceInfo: monitor.getItem(),
+  };
+}
+
+const SourceSpec = {
+  beginDrag(props, monitor, component) {
+    const { fix, data, index, sourceAreaId, selectedItems, items, deleteItem } = props;
+    if (selectedItems.indexOf(index) !== -1) {
+      props.setItemsDragging(true);
+      const dataArr = [];
+      for (let i = selectedItems.length - 1; i >= 0; i -= 1) {
+        dataArr.push({ ...items[selectedItems[i]], selected: false });
+      }
+      const remove = () => deleteItem(selectedItems);
+      return { data: dataArr, sourceAreaId, fix, index, DOM: component, remove };
+    }
+    props.cancelSelect();
+    const remove = () => deleteItem([index]);
+    return { data: [{ ...data }], sourceAreaId, fix, index, DOM: component, remove };
+  },
+  endDrag(props) {
+    props.setItemsDragging(false);
+    props.cancelSelect();
+  },
+};
+
+function SourceCollect(connect, monitor) {
+  return {
+    connectDragSource: connect.dragSource(),
+    connectDragPreview: connect.dragPreview(),
+    dragging: monitor.isDragging(),
+  };
+}
+
+class DraggableComponent extends Component {
+  componentDidMount() {
+    const img = new Image();// eslint-disable-line
+    img.onload = () => this.props.connectDragPreview && this.props.connectDragPreview(img);
+    img.src = images.load2;
+  }
+
+  render() {
+    const { connectDragSource, connectDropTarget, preView, fix, data, index,
+      itemsDragging, dragging, isOver, selectedItems, onSelect, dragSourceInfo } = this.props;
+    const select = () => {
+      // console.log('select', index, data, data.selected);
+      onSelect(index);
+    };
+    // onClick={() => deleteItem([index])
+    const isDragging = (itemsDragging && selectedItems.indexOf(index) !== -1) || dragging;
+    const group = [];
+    if (!preView) {
+      group.push(
+        connectDragSource(connectDropTarget(
+          <div
+            key="dragSourceItem" onClick={select}
+            className={`${styles.wrapper} ${!fix ? styles.notFix : ''} ${isDragging ? styles.drag : ''}
+              ${isOver ? styles.dropPreView : ''} ${data.selected ? styles.selected : ''}`}
+          >
+            {(!isOver || fix) && data.title}
+            {!fix && isOver && dragSourceInfo.data[dragSourceInfo.data.length - 1].title}
+          </div>)),
+      );
+    }
+    if (!fix && (isOver || preView)) {
+      for (let i = dragSourceInfo.data.length - (preView ? 1 : 2); i >= 0; i -= 1) {
+        group.push(
+          <div
+            key={`newItempreView${i}`}
+            className={`${styles.wrapper} ${!fix ? styles.notFix : ''} ${(isOver || preView) ? styles.dropPreView : ''}`}
+          >
+            {dragSourceInfo.data[i].title}
+          </div>,
+        );
+      }
+      if (!isDragging && !preView) {
+        group.push(
+          <div
+            key="dragSourcePreView"
+            className={`${styles.wrapper} ${!fix ? styles.notFix : ''} ${isOver ? styles.hover : ''}`}
+          >
+            {data.title}
+          </div>,
+        );
+      }
+    }
+    return group;
+  }
+}
+
+export default flow(
+  DragSource(itemTypes.CARD, SourceSpec, SourceCollect),
+  DropTarget(itemTypes.CARD, TargetSpec, TargetCollect),
+)(DraggableComponent);

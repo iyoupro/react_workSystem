@@ -1,0 +1,18 @@
+import React, { memo } from 'react';
+import { Slider, InputNumber } from 'antd';
+import styles from './SliderInput.less';
+
+const SliderInput = props => {
+  const { range, value, setValue, width, wrapperClassName } = props;
+  return (
+    <div className={`${styles.wrapper} ${wrapperClassName}`}>
+      {range[0] < 0 && 
+        <InputNumber style={{ width: 0.3 * width }} min={range[0]} max={range[1]} value={value[0]} onChange={changedValue => setValue([changedValue, value[1]])}/>
+      }
+      <Slider className={styles.slider} style={{ width: range[0] < 0 ? 0.4 * width : 0.5714 * width }} range={range[0] < 0} min={range[0]} max={range[1]}  value={range[0] < 0 ? value : value[1]} onChange={changedValue => setValue(range[0] < 0 ? changedValue : [value[0], changedValue])}/>
+      <InputNumber style={{ width: range[0] < 0 ? 0.3 * width :  0.4286 * width }} min={range[0]} max={range[1]} value={value[1]} onChange={changedValue => setValue([value[0], changedValue])}/>
+    </div>
+  );
+}
+
+export default memo(SliderInput);

@@ -1,0 +1,23 @@
+import React from "react";
+import ToolBoxItem from './ToolBoxItem';
+
+class ToolBox extends React.Component {
+  render() {
+    return (
+      <div className="toolbox">
+        <span className="toolbox__title">Toolbox</span>
+        <div className="toolbox__items">
+          {this.props.items.map(item => (
+            <ToolBoxItem
+              key={item.i}
+              item={item}
+              onTakeItem={this.props.onTakeItem}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
+}
+
+export default ToolBox;

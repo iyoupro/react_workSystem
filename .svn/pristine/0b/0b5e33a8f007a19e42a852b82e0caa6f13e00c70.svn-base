@@ -1,0 +1,23 @@
+/** @format */
+
+import { useEffect } from 'react';
+import cloneDeep from 'lodash/cloneDeep';
+import { getHeadNode, getTailNode } from './utils/';
+
+const calcNodePos = (props, chartInfo) => {
+  const { chartData } = props;
+  const { chartWidth, nodeWidth, rowDistance, colDistance } = chartInfo;
+  console.log(getHeadNode(chartData));
+};
+
+const renderNode = (props, chartInfo) => {
+  useEffect(() => {
+    const usedProps = cloneDeep(props);
+    const { nodeSize } = usedProps;
+    chartInfo.chartWidth = chartInfo.chartWrapper.clientWidth;
+    chartInfo.nodeWidth = (chartInfo.chartWidth * nodeSize) / 100;
+    calcNodePos(usedProps, chartInfo);
+  });
+};
+
+export default { renderNode };

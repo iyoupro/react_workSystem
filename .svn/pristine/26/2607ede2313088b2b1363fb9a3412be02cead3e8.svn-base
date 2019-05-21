@@ -1,0 +1,141 @@
+// @flow
+import React, { Component } from 'react';
+import antd, { Icon } from 'antd';
+// import { isEqual, indexOf } from 'lodash-es';
+import CollapseHeader from './CollapseHeader';
+import CollapseItem from './CollapseItem';
+
+import isEqual from 'lodash/isEqual';
+import indexOf from 'lodash/indexOf';
+
+type Props = {
+  dataSource: Array<Object>,
+  // 添加事件
+  onClick: (item: Object) => void,
+  // 是否可以添加
+  add: boolean,
+  // 是否可编辑
+  edit: boolean,
+  // 左侧icon
+  leftIcon: string,
+  // 右侧icon
+  rightIcon: string,
+  // 编辑事件
+  onEdit: () => void,
+  // 移除事件
+  onRemove: () => void,
+  // 默认激活面板
+  defaultActiveKey: string
+};
+type State = {
+  openKey: Array<string>
+};
+
+const Panel = antd.Collapse.Panel;
+
+/**
+ * 折叠面板  基于antd Collapse Icon封装 包含自定义折叠面板头部 自定义折叠面板item
+ * @param {Props}
+ */
+class Collapse extends Component {
+  static Panel = Panel;
+  state: State;
+  props: Props;
+  constructor(props: Props) {
+    super(props);
+    const { activeKey } = props;
+    this.state = {
+      openKey: activeKey || []
+    };
+  }
+
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if (!isEqual(prevState.openKey, nextProps.activeKey)) {
+      return {
+        openKey: nextProps.activeKey
+      };
+    }
+    return null;
+  }
+
+  // 折叠面板变化回调
+  onChange = (key: Array<string>) => {
+    if (key) {
+      this.setState({ openKey: key });
+    }
+  };
+
+  // 点击item
+  onClick = (id: number, name: string, item: Object) => {
+    const { onClick } = this.props;
+    if (onClick) {
+      onClick(id, name, item);
+    }
+  };
+
+  // 编辑
+  onEdit = (id: number, name: string, item: Object) => {
+    const { onEdit } = this.props;
+    if (onEdit) {
+      onEdit(id, name, item);
+    }
+  };
+
+  // 移除
+  onRemove = (id: number, name: string, item: Object) => {
+    const { onRemove } = this.props;
+    if (onRemove) {
+      onRemove(id, name, item);
+    }
+  };
+
+  render() {
+    const { dataSource, edit = false, add = true, defaultActiveKey, onDelGroup } = this.props;
+    const { openKey } = this.state;
+    return (
+      <antd.Collapse bordered={false} >
+        {dataSource &&
+          dataSource.map((item) => {
+            return (
+              <Panel
+                showArrow={false}
+                header={
+                  <CollapseHeader
+                    text={item.name}
+                    icon={
+                      <Icon
+                        type={indexOf(openKey, item.id.toString()) === -1 ? 'folder' : 'folder-open'}
+                        style={{ fontSize: 18, color: '#d8d8d8' }}
+                      />
+                    }
+                    onDelGroup={() => {
+                      onDelGroup(item);
+                    }}
+                    checked={indexOf(openKey, item.id.toString()) !== -1}
+                  />
+                }
+                key={item.id}
+              >
+                {item.items &&
+                  item.items.map((option, index) => {
+                    return (
+                      <CollapseItem
+                        key={index}
+                        text={option.name}
+                        onClick={() => this.onClick(item.id, item.name, option)}
+                        edit={edit}
+                        add={add}
+                        onEdit={() => this.onEdit(item.id, item.name, option)}
+                        onRemove={() => this.onRemove(item.id, option.name, option)}
+                      />
+                    );
+                  })}
+              </Panel>
+            );
+          })}
+      </antd.Collapse>
+    );
+  }
+}
+
+export default Collapse;

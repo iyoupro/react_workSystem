@@ -1,0 +1,20 @@
+import React from 'react';
+// import brace from 'brace';
+import AceEditor from 'react-ace';
+
+import 'brace/mode/json';
+import 'brace/theme/github';
+
+const AceEditorTest = () => {
+  return (<AceEditor
+    mode="json"
+    theme="github"
+    onChange={(newValue) => {
+      console.log('change', newValue);
+    }}
+    name="AceEditor1"
+   // editorProps={{ $blockScrolling: true }}
+  />);
+};
+
+export default AceEditorTest;

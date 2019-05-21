@@ -1,0 +1,12 @@
+import React, { memo } from 'react';
+import { Input } from 'antd';
+import styles from './Paragraph.less';
+
+const { TextArea } = Input;
+const Paragraph = memo(({ data, mode, isSelected, setData, ...props}) => {
+  return (
+    <TextArea rows={4}  className={styles.wrapper} disabled={mode !== 'write' }/> 
+  );
+});
+
+export default Paragraph;

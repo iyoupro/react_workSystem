@@ -1,0 +1,24 @@
+[
+  {
+    "id": "0",
+    "data": "开始",
+    "parent": [],
+    "children": [
+      {
+        "id": "1"
+      }
+    ],
+    "brother": []
+  },
+  {
+    "id": "1",
+    "data": "结束",
+    "parent": [
+      {
+        "id": "0"
+      }
+    ],
+    "children": [],
+    "brother": []
+  }
+]

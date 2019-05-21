@@ -1,0 +1,49 @@
+// @flow
+import React, { Component } from 'react';
+import { Icon } from 'antd';
+import styles from './CollapseHeader.less';
+
+type Props = {
+  // 头部文本内容
+  text: string,
+  // 图标
+  icon: Object
+};
+type State = {};
+
+/**
+ * 折叠面板头部组价 自定义折叠面板头部基本组件
+ *
+ * @param {Props}
+ */
+class CollapseHeader extends Component {
+  state: State;
+  props: Props;
+  constructor(props: Props) {
+    super(props);
+    this.state = {};
+  }
+
+  render() {
+    const { text, icon, onDelGroup } = this.props;
+    const onClick = (event) => {
+      event.preventDefault();
+      if (onDelGroup) onDelGroup();
+    };
+    return (
+      <div className={styles.header}>
+        {icon}
+        <span className={styles.text}>
+          <div className={styles.textContent}>
+            <span>{text}</span>
+            <span className={styles.deleteIcon} onClick={onClick}>
+              <Icon type="delete" />
+            </span>
+          </div>
+        </span>
+      </div>
+    );
+  }
+}
+
+export default CollapseHeader;

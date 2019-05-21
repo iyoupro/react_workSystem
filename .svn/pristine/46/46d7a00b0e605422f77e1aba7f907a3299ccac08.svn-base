@@ -1,0 +1,17 @@
+import React from 'react';
+import { Button, Popconfirm } from 'antd';
+import styles from './index.less';
+
+const DeleteableBox = ({ text, confirm, onClick, children }) => {
+  return (
+    <div className={styles.wrapper}>
+      <div className={styles.action} >
+        <Popconfirm title={text} onConfirm={confirm}> <Button icon="delete" onClick={onClick} /></Popconfirm>
+      </div>
+      {children}
+    </div>
+  );
+};
+
+export default DeleteableBox;
+

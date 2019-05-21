@@ -1,0 +1,39 @@
+[{
+  "id": "0",
+  "data": "开始",
+  "parent": [],
+  "children": [{
+    "id": "1" 
+  }],
+  "brother": [],
+  "shapeInfo": {
+    "nodeType": "rectangle",
+    "fillColor": "#fcffe6",
+    "textColor": "black",
+    "strokeColor": "gray",
+    "popupFillColor": "white",  
+    "popupTextColor": "black",
+    "selectedFillColor": "#1890ff",
+    "selectedTextColor": "white",
+    "selectedStrokeColor": "gray"
+  }
+},{
+  "id": "1",
+  "data": "结束",
+  "parent": [{
+    "id": "0" 
+  }],
+  "children": [],
+  "brother": [],
+  "shapeInfo": {
+    "nodeType": "ellipse",
+    "fillColor": "#fcffe6",
+    "textColor": "black",
+    "strokeColor": "gray",
+    "popupFillColor": "white",
+    "popupTextColor": "black",
+    "selectedFillColor": "#1890ff",
+    "selectedTextColor": "white",
+    "selectedStrokeColor": "gray"
+  }
+}]

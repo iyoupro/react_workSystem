@@ -1,0 +1,134 @@
+import React, { memo, useState } from 'react';
+import { Button, Radio, Select } from 'antd';
+import { DragDropWrapper, DropArea } from '../components/FlexWrapDNDArea';
+import images from '../assets/config'
+import className from 'classnames';
+import styles from './FormDesignPage.less';
+
+const value = [
+  {
+    type: 'input',
+    title: '输入框',
+    key: 'input',
+  },
+  {
+    type: 'selectNum',
+    title: '数字输入框',
+    key: 'selectNum',
+  },
+  {
+    type: 'downSelect',
+    title: '下拉选择框',
+    key: 'downSelect',
+  },
+  {
+    type: 'datePicker',
+    title: '日期选择',
+    key: 'datePicker',
+  },
+  {
+    type: 'textArea',
+    title: '多行文本框',
+    key: 'textArea',
+  },
+  {
+    type: 'switch',
+    title: '开关',
+    key: 'switch',
+  }
+];
+
+const Item = memo(props => {
+  const { connectDrag, connectDragPreview, data, index, areaId, isDragging, isPreview, isPlaced, isFasten } = props;
+  const { type, title } = data;
+  return connectDrag(
+    <div
+      className={className(styles.item, {
+        [styles.dragging]: isDragging,
+        [styles.preview]: isPreview,
+        [styles.placed]: isPlaced,
+      })}
+      style={{ margin: areaId === 'libArea' ? '8px' : '', width: areaId === 'libArea' ? 'calc((100% - 32px) / 2)' : '50%'}}
+    >
+      {title}
+    </div>    
+  );
+})
+
+const FormDesignPage = props => {
+  const [itemWidth, setItemWidth] = useState('2');
+  const [itemDirection, setItemDirection] = useState('vertical');
+  const [formDesignData, setFormDesignData] = useState([]);
+  // componentDidMount () {
+  //  window.addEventListener('keyup', this.handleKeyUp);
+  // }
+
+  // componentWillUnMount() {
+  //  window.removeEventListener('keyup', this.handleKeyUp);
+  // }
+  
+  // setAllItemWidth = (width) => {
+  //   this.dropArea.setAllItem({ width });
+  //   this.setState({ newItemWidth: width });
+  // }
+
+  // setAllItemVertical = (vertical) => {
+  //   this.dropArea.setAllItem({ vertical });
+  //   this.setState({ vertical });
+  // }
+
+  // revoke = () => {
+  //   this.dropArea.revoke();
+  // }
+  
+  // handleKeyUp = (event) => {
+  //   if (event.ctrlKey && event.key === 'z') this.revoke();
+  // }
+  return (
+    <DragDropWrapper className={styles.wrapper} >
+      <DropArea className={styles.dustbin} areaId='dustbin' itemFasten >
+        <div className={styles.formComponentLib}>
+          <div className={styles.operationPanel}>
+            <Radio.Group className={styles.radio} value={itemWidth} onChange={e => setItemWidth(e.target.value)} >
+              <Radio.Button className={styles.button} value='2'>两列</Radio.Button>
+              <Radio.Button className={styles.button} value='3'>三列</Radio.Button>
+              <Radio.Button className={styles.button} value='4'>四列</Radio.Button>
+            </Radio.Group>
+            <Select className={styles.select} value={itemDirection} onChange={value => setItemDirection(value)}>
+              <Select.Option value="vertical">水平</Select.Option>
+              <Select.Option value="horizontal">竖直</Select.Option>
+            </Select>
+            <Button.Group>
+              <Button icon="undo">undo-{11}</Button>
+              <Button icon="redo">redo-{12}</Button>
+            </Button.Group>
+          </div>
+          <DropArea
+            className={styles.libArea}
+            areaId='libArea'
+            defaultValue={value}
+            ItemRender={Item}
+            itemFasten
+            flexDirection="row"
+            
+            // custom props
+            sb={true}
+          />
+        </div>
+        <DropArea
+          className={styles.formDesignArea}
+          areaId='formDesignArea'
+          value={formDesignData}
+          onChange={newValue => setFormDesignData(newValue)}
+          ItemRender={Item}
+          itemFasten={false}
+          flexDirection="row"
+        />
+        <div className={styles.itemAttributePanel}  > 
+        </div>
+      </DropArea>
+    </DragDropWrapper>
+  );
+}
+
+export default FormDesignPage;

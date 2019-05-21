@@ -1,0 +1,15 @@
+import React, { Component } from 'react';
+import styles from './DelBoxPage.less';
+import DelBox from '../components/DelBox/';
+
+class DelBoxPage extends Component {
+  render() {
+    return (
+        <DelBox  text="确认" confirm="取消要删除吗？" onClick={()=>console.log('333')}>
+          <div style={{width: '600px', height: '400px'}}>456</div>
+        </DelBox> 
+    );
+  }
+}
+
+export default DelBoxPage;

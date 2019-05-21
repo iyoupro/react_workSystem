@@ -1,0 +1,63 @@
+/** @format */
+
+import React, { useRef } from 'react';
+import { Affix, Button, Icon, BackTop, Tooltip } from 'antd';
+import Section from './Section';
+import Input from './components/Input';
+import styles from './index.less';
+
+import { pipe } from '../../rehook/';
+import { initPage, withSetData } from './handler';
+
+const FormsPage = ({ data, setData, setSectionData, mode, setMode, addItem, ...props }) => {
+  const { title, sections } = data;
+  const pageInfo = { deleteTimer: null, header: useRef(null) };
+  const backtoTop = () => pageInfo.header.current.scrollIntoView({ behavior: 'smooth' });
+  return (
+    <div className={styles.wrapper} >
+      <div ref={pageInfo.header} className={styles.header} >
+        <Input
+          inputWrapperClassName={styles.title}
+          inputClassName={styles.titleInput} 
+          focusUnderlineClassName={styles.titleFocusUnderline} 
+          placeholder="请输入表单标题"
+          value={title}
+          autoSize
+          showUnderline={false}
+          onChange={event => setData('title', event.target.value)} 
+        />
+      </div>
+      <div className={styles.content}>
+        {sections && sections.map((section, sectionIndex) => (
+          <Section
+            key={section.id}
+            sectionIndex={sectionIndex}
+            data={section}
+            setData={(prop, newPropData) => setSectionData(index, prop, newPropData)}
+            mode={mode}
+            pageInfo={pageInfo}
+            {...props}
+          />
+        ))}
+      </div>
+      <div className={styles.affix}>
+        <Tooltip placement="right" title={'新增项'}>
+          <Button shape="circle" icon="plus" onClick={addItem}/>
+        </Tooltip>
+        <Tooltip placement="right" title={'新增块'}>
+          <Button shape="circle" icon="block" />
+        </Tooltip>
+      </div>
+      <Tooltip placement="top" title={'回到顶部'}>
+        <Button className={styles.toTop} size="large" shape="circle" icon="to-top" onClick={backtoTop}/>
+      </Tooltip>
+    </div>
+  );
+};
+
+// FormsPage.defaultProps = {
+//   mode: 'edit',
+//   data: initialData,
+// };
+
+export default pipe(initPage, FormsPage);

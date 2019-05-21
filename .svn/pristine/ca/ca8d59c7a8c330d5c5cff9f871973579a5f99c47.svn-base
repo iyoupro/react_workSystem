@@ -1,0 +1,113 @@
+import  { withHandlers, withState, lifecycle, pipe } from '../../rehook';
+import uniqueId from 'lodash/uniqueId';
+
+const initialData = {
+  title: '未命名表单',
+  sections: [
+    {
+      id: 'secition1',
+      totalScore: 0,
+      items: [
+        {
+          id: 'item1',
+          type: 'SectionTitle',
+          title: '未命名标题',
+          declaraction: null,
+        },
+        {
+          id: 'item2',
+          type: 'MyRadio',
+          title: 'radio1',
+          score: 0,
+          isRequired: true,
+          declaraction: 'aaaa',
+          inputValue: null,
+          options: [{ title: '单选1', id: 'option1' }, { title: '单选2', id: 'option2' }, { title: '单选3', id: 'option3'}],
+          layout: 1,
+        },
+        {
+          id: 'item3',
+          type: 'Checkbox',
+          title: 'checkbox1',
+          score: 0,
+          isRequired: false,
+          declaraction: null,
+          inputValue: null,
+          options: [{ title: '多选1', id: 'option1' }, { title: '多选2', id: 'option2' }, { title: '多选3', id: 'option3'}],
+          layout: 2,
+        },
+        {
+          id: 'item4',
+          type: 'Paragraph',
+          score: 0,
+          isRequired: true,
+          title: 'paragrap1',
+          declaraction: 'ccc',
+          inputValue: null,
+        },
+        {
+          id: 'item5',
+          type: 'Time',
+          score: 0,
+          isRequired: true,
+          title: '选择时间',
+          declaraction: '请选择时间：',
+          inputValue: null,
+        },
+      ],
+    },
+  ],
+};
+
+const initPage = pipe(
+  withState('data', 'reRender', ownProps => ownProps.data || initialData),
+  withState('mode', 'setMode', ownProps => ownProps.mode || 'edit'),
+  withState('selectedItem', 'setSelectedItem', ownProps => ownProps.data.sections[0].items[0]),
+  withHandlers({ updateData: ({ data, reRender }) => () => reRender(data) }),
+  withHandlers({ 
+    findSelectedItem: ({ data, selectedItem }) => () => {
+      for (let i = 0, len = data.sections.length; i < len; i += 1) {
+        for (let j = 0, length = data.sections[i].items.length; j < length; j += 1) {
+          if (data.sections[i].items[j] === selectedItem) {
+            return [data.sections[i].items, j];
+          }
+        }
+      }
+      return [null, null]
+    }
+  }),
+  withHandlers({  
+    addItem: ({ findSelectedItem, setSelectedItem, updateData }) => () => {
+      const [targetItems, selectedItemIndex] = findSelectedItem();
+      const newItem = {
+        id: uniqueId(),
+        type: 'MyRadio',
+        title: 'newRadio',
+        score: 0,
+        isRequired: false,
+        declaraction: null,
+        inputValue: null,
+        options: [{ title: 'option1', id: uniqueId() }],
+        layout: 1,
+      };
+      targetItems.splice(selectedItemIndex + 1, 0, newItem);
+      updateData();
+      setSelectedItem(newItem);
+    },
+    deleteItem: ({ findSelectedItem, setSelectedItem, updateData }) => () => {
+      const [targetItems, selectedItemIndex] = findSelectedItem();
+      setSelectedItem(targetItems[0]);
+      targetItems.splice(selectedItemIndex, 1);
+      updateData();
+    }
+  })
+);
+
+
+
+const setData = ({ data, updateData }) => (prop, newPropData) => {
+  data[prop] = newPropData;
+  updateData();
+}
+
+export default { initPage, withSetData: withHandlers({ setData }) };

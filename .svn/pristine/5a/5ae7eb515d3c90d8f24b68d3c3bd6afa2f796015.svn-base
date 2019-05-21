@@ -1,0 +1,97 @@
+import React, { Component } from 'react';
+import { DropWrapper, DropArea } from '../components/CustomSort';
+import FormItem from '../components/FormItem/';
+import styles from './CustomSortPage.less';
+
+const items = [
+  {
+    type: 'input',
+    title: '输入框',
+  },
+  {
+    type: 'selectNum',
+    title: '数字输入框',
+  },
+  {
+    type: 'downSelect',
+    title: '下拉选择框',
+  },
+  {
+    type: 'datePicker',
+    title: '日期选择',
+  },
+  {
+    type: 'textArea',
+    title: '多行文本框',
+  },
+  {
+    type: 'swith',
+    title: '开关',
+  }
+];
+
+class CustomSortPage extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { newItemWidth: 2, vertical: false };
+  }
+
+  componentDidMount () {
+   window.addEventListener('keyup', this.handleKeyUp);
+  }
+
+  componentWillUnMount() {
+   window.removeEventListener('keyip', this.handleKeyUp);
+  }
+  
+  setAllItemWidth = (width) => {
+    this.dropArea.setAllItem({ width });
+    this.setState({ newItemWidth: width });
+  }
+
+  setAllItemVertical = (vertical) => {
+    this.dropArea.setAllItem({ vertical });
+    this.setState({ vertical });
+  }
+
+  revoke = () => {
+    this.dropArea.revoke();
+  }
+  
+  handleKeyUp = (event) => {
+    if (event.ctrlKey && event.key === 'z') this.revoke();
+  }
+
+  render() {
+    return (
+      <DropWrapper onKeyDown={this.onKeyDown} style={{ width: '100%', height: '100%', background: '#fafafa', fontSize: '16px', display: 'flex', flexWrap: 'wrap' }}>
+        <DropArea AreaId="0" fix style={{ width: '100%', height: '100%'}} >
+          <div className={styles.componentLib}>
+            <div className={styles.buttonWrapper}>
+              <div className={styles.button} style={{ background: this.state.newItemWidth === 2 ? '#bfbfbf' : '#fff',borderRight:'0' }} onClick={() => this.setAllItemWidth(2)}>两列</div>
+              <div className={styles.button} style={{ background: this.state.newItemWidth === 3 ? '#bfbfbf' : '#fff',borderRight:'0' }} onClick={() => this.setAllItemWidth(3)}>三列</div>
+              <div className={styles.button} style={{ background: this.state.newItemWidth === 4 ? '#bfbfbf' : '#fff',borderRight:'0' }} onClick={() => this.setAllItemWidth(4)}>四列</div>
+              <div className={styles.button} style={{ background: '#fff',borderRight:'0' }} onClick={() => this.revoke()}>撤销</div>
+              <div className={styles.button} style={{ background: '#fff' }} onClick={() => this.setAllItemVertical(!this.state.vertical)}>{this.state.vertical ? '垂直' : '水平'}</div>              
+            </div>
+            <DropArea
+              AreaId="1" fix defaultItems={items
+              } direction="row" defaultItemProps={{ width: 2.2, height: 16 }}
+              style={{ width: '90%', height: '80%', background: '#fff', justifyContent: 'space-between' }}
+              Item={FormItem} itemStyle={{ marginTop: '5%' }}
+            />
+          </div>
+          <DropArea
+            getRef={dropArea => this.dropArea = dropArea} AreaId="2" fix={false} direction="row" defaultItemProps={{ width: 2, height: 13, vertical: this.state.vertical}} // eslint-disable-line
+            newItemProps={{ width: this.state.newItemWidth, height: 13,  vertical: this.state.vertical}}
+            style={{ width: '60%', height: '100%', background: '#fff', border: '1px solid #d9d9d9'}}
+            Item={FormItem} itemStyle={{ marginTop: '-1px',marginLeft:'-1px' }}
+          />
+
+        </DropArea>
+      </DropWrapper>
+    );
+  }
+}
+
+export default CustomSortPage;

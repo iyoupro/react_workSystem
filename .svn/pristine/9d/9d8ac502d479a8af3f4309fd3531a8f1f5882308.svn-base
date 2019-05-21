@@ -1,0 +1,36 @@
+import React from 'react';
+import CustomSort from '../components/CustomSort';
+
+const items = [
+  {
+    name: 'name',
+    title: '姓名',
+  },
+  {
+    name: 'dept',
+    title: '部门',
+  },
+  {
+    name: 'sex',
+    title: '性别',
+  },
+  {
+    name: 'age',
+    title: '年龄',
+  },
+  {
+    name: 'jobNo',
+    title: '工号',
+  },
+];
+
+const fixed = [];
+
+const CustomSortPage = () => {
+  return <div style={{ flex: 1, background:'grey', padding: 10 }}>
+    <CustomSort items={items} onChange={({ sort, order }) => {
+    }} />
+  </div>;
+};
+
+export default CustomSortPage;

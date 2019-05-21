@@ -1,0 +1,142 @@
+/** @format */
+
+import React from 'react';
+import { Router, Route, Switch, Link } from 'dva/router';
+import { IntlProvider } from 'react-intl';
+import IndexPage from './routes/IndexPage';
+// import DargTest from './routes/DargTest';
+import AceEditor from './routes/AceEditor';
+// import SortableComponent from './routes/SortableComponent';
+// import ShowcaseLayout from './routes/ShowcaseLayout';
+import Container from './components/dnd/Container';
+import StepChart from './routes/StepChartPage';
+import CustomSort from './routes/CustomSortPage';
+import CustomSortList from './routes/CustomSortList';
+// import SlateEditor from './routes/SlateEditor';
+import OrganizationChart from './routes/OrganizationChartPage';
+import QueryBuild from './routes/QueryBuilderPage';
+import DelBox from './routes/DelBoxPage';
+import FuncConfig from './components/dataflow/FunctionConfig';
+// import TablePage from './routes/TablePage';
+import Rehooks from './routes/Rehooks';
+// import StepChartPage2 from './routes/StepChartPage2';
+import Table from './routes/TablePage';
+import Table2 from './routes/TablePage2';
+import QuillPage from './routes/QuillPage';
+import EvalPage from './evalTpl/';
+import zh from '../locales/zh.json';
+import FormsPage from './routes/FormPage';
+import SheetPage from './routes/SheetPage';
+
+import styles from './router.less';
+
+function RouterConfig({ history }) {
+  return (
+    <IntlProvider locale="en" messages={zh}>
+      <Router history={history}>
+        <div className={styles.wrapper}>
+          <div className={styles.nav}>
+            <li>
+              <Link to="/">home</Link>
+            </li>
+            <li>
+              <Link to="/editor">editor</Link>
+            </li>
+            <li>
+              <Link to="/drag">drag</Link>
+            </li>
+            <li>
+              <Link to="/sort">sort</Link>
+            </li>
+            <li>
+              <Link to="/toolbox">toolbox</Link>
+            </li>
+            <li>
+              <Link to="/dnd">dnd</Link>
+            </li>
+            {/* <li>
+            <Link to="/sortlist">sortlist</Link>
+          </li> */}
+            <li>
+              {/* <Link to="/flowChart">flowChart</Link> */}
+            </li>
+            <li>
+              <Link to="/stepChart">stepChart</Link>
+            </li>
+            <li>
+              <Link to="/customSort">customSort</Link>
+            </li>
+            <li>
+              <Link to="/customSortList">customSortItem</Link>
+            </li>
+            <li>
+              <Link to="/slateEditor">SlateEditor</Link>
+            </li>
+            <li>
+              <Link to="/organizationChart">organizationChart</Link>
+            </li>
+            <li>
+              <Link to="/queryBuild">queryBuild</Link>
+            </li>
+            <li>
+              <Link to="/func">funcConfig</Link>
+            </li>
+            <li>
+              <Link to="/DelBox">DelBox</Link>
+            </li>
+            <li>
+              <Link to="/Table">Table</Link>
+            </li>
+            <li>
+              <Link to="/rehooks">Rehooks</Link>
+            </li>
+            <li>
+              <Link to="/quill">Quill</Link>
+            </li>
+            <li>
+              <Link to="/formsPage">FormsPage</Link>
+            </li>
+            <li>
+              <Link to="/sheet">SheetPage</Link>
+            </li>
+          </div>
+          <div className={styles.content}>
+            <Switch>
+              <Route path="/" exact component={IndexPage} />
+              {
+                <Route path="/editor" exact component={AceEditor} />
+                /*   <Route path="/drag" exsact component={DargTest} />
+              <Route path="/sort" exact component={SortableComponent} /> */
+              }
+              {/* <Route path="/toolbox" exact component={ShowcaseLayout} /> */}
+              <Route path="/dnd" exact component={Container} />
+              {/* <Route path="/sortlist" exact component={SortList} /> */}
+              {/* <Route path="/flowChart" exact component={FlowChart} /> */}
+              <Route path="/stepChart" exact component={StepChart} />
+              <Route path="/customSort" exact component={CustomSort} />
+              <Route path="/customSortList" exact component={CustomSortList} />
+              <Route path="/organizationChart" exact component={OrganizationChart} />
+              <Route path="/queryBuild" exact component={QueryBuild} />
+              <Route path="/func" exact component={FuncConfig} />
+              <Route path="/DelBox" exact component={DelBox} />
+              <Route path="/Table" exact component={Table} />
+              <Route path="/Table2" exact component={Table2} />
+              <Route path="/rehooks" exact component={Rehooks} />
+              <Route path="/quill" exact component={QuillPage} />
+              <Route path="/formsPage" exact component={FormsPage} />
+              <Route path="/sheet" exact component={SheetPage} />
+              {/* <Route path="/slateEditor" exact component={SlateEditor} /> */}
+              <Route
+                component={() => {
+                  return <div>没有找到呢</div>;
+                }}
+              />
+            </Switch>
+          </div>
+        </div>
+      </Router>
+    </IntlProvider>
+  );
+}
+
+export default RouterConfig;

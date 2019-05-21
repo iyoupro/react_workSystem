@@ -1,0 +1,77 @@
+import React, { memo, useState } from 'react';
+import SortableList from '../components/SortableList'
+import styles from './SortablePage.less'
+
+const listValue = [
+  {
+    type: 'input',
+    title: '输入框',
+    key: 'input',
+  },
+  {
+    type: 'selectNum',
+    title: '数字输入框',
+    key: 'selectNum',
+  },
+  {
+    type: 'downSelect',
+    title: '下拉选择框',
+    key: 'downSelect',
+  },
+  {
+    type: 'datePicker',
+    title: '日期选择',
+    key: 'datePicker',
+  },
+  {
+    type: 'textArea',
+    title: '多行文本框',
+    key: 'textArea',
+  },
+  {
+    type: 'switch',
+    title: '开关',
+    key: 'switch',
+  }
+];
+
+const Item = memo(props => {
+  const { data, index, connectDragRef, connectDrag, connectDragHandle, isDragging } = props;
+  const { type, title } = data;
+  return (
+    <div
+      className={styles.item}
+      ref={connectDragRef}
+      {...connectDrag}
+      {...connectDragHandle}
+    >
+      {data.title}
+    </div>
+  );
+})
+
+const SortablePage = props => {
+  const [value, setValue] = useState(listValue);
+
+  return (
+    <div className={styles.wrapper}>
+      <SortableList
+        className={styles.list}
+        listId='list1'
+        defaultValue={value}
+        // onChange={newValue => setValue(newValue)}
+        ItemRender={Item}
+        
+      />
+      <SortableList
+        className={styles.list}
+        listId='list2'
+        value={value}
+        onChange={newValue => setValue(newValue)}
+        ItemRender={Item}
+      />
+    </div>
+  );
+}
+
+export default SortablePage;

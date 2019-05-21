@@ -1,0 +1,63 @@
+const React = require('react');
+const createReactClass = require('create-react-class');
+const PropTypes = require('prop-types');
+
+const DragTarget = createReactClass({
+  propTypes: {
+    // All props not listed here are forwarded to the root element without
+    // modification.
+    onDrop: PropTypes.func.isRequired,
+    component: PropTypes.any,  // component type
+    shouldDragHighlight: PropTypes.func,
+    style: PropTypes.any,
+  },
+  getDefaultProps() {
+    return {
+      component: "div",
+      shouldDragHighlight: () => true,
+    };
+  },
+  getInitialState() {
+    return { dragHover: false };
+  },
+  handleDrop(e, data) {
+    e.stopPropagation();
+    e.preventDefault();
+    this.setState({ dragHover: false });
+    this.props.onDrop(e, data);
+  },
+  handleDragEnd() {
+    this.setState({ dragHover: false });
+  },
+  handleDragOver(e) {
+    e.preventDefault();
+  },
+  handleDragLeave() {
+    this.setState({ dragHover: false });
+  },
+  handleDragEnter(e) {
+    this.setState({ dragHover: this.props.shouldDragHighlight(e) });
+  },
+  render() {
+    const opacity = this.state.dragHover ? { "opacity": 0.3 } : {};
+    const Component = this.props.component;
+
+    const forwardProps = Object.assign({}, this.props);
+    delete forwardProps.component;
+    delete forwardProps.shouldDragHighlight;
+
+    return (
+      <Component
+        {...forwardProps}
+        style={Object.assign({}, this.props.style, opacity)}
+        onDrop={this.handleDrop}
+        onDragEnd={this.handleDragEnd}
+        onDragOver={this.handleDragOver}
+        onDragEnter={this.handleDragEnter}
+        onDragLeave={this.handleDragLeave}
+      />
+    );
+  },
+});
+
+module.exports = DragTarget;

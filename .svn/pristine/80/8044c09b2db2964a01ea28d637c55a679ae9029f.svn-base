@@ -1,0 +1,6 @@
+import EvalTplDetail from './EvalTplDetail';
+import EvalDetail from './EvalDetail';
+import EvalConclusion from './EvalConclusion';
+import { TestQuestion, TplQuestionForm } from './questionBank';
+
+export { EvalTplDetail, TestQuestion, EvalDetail, EvalConclusion, TplQuestionForm };

@@ -1,0 +1,32 @@
+
+.text {
+  margin-left: 10px;
+  font-size: 14;
+  color: #333;
+}
+
+
+.icon {
+  display: none !important;
+  background: #f5f5f5;
+}
+
+.item {
+  padding: 8px 0;
+  margin-left: 8px; 
+  cursor: pointer;
+  position: relative;
+  &:hover {
+    .icon {
+      display: flex !important;;
+      justify-content: space-around;
+      align-items: center;
+      position: absolute;
+      right: 0;
+    }
+  }
+}
+
+.item:hover {
+  background: #f5f5f5;
+}

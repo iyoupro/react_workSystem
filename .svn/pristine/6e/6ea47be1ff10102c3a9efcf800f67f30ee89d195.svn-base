@@ -1,0 +1,4 @@
+.wrapper{
+  width: 96%;
+  text-indent: 28px;
+}

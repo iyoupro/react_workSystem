@@ -1,0 +1,112 @@
+import React, { memo, useState } from 'react';
+import { DragDropWrapper, SortableList } from '../components/SortableList'
+import styles from './SortablePage.less'
+
+const listValue1 = [
+  {
+    type: 'input',
+    title: '输入框',
+    key: 'input',
+  },
+  {
+    type: 'selectNum',
+    title: '数字输入框',
+    key: 'selectNum',
+  },
+  {
+    type: 'downSelect',
+    title: '下拉选择框',
+    key: 'downSelect',
+  },
+  {
+    type: 'datePicker',
+    title: '日期选择',
+    key: 'datePicker',
+  },
+  {
+    type: 'textArea',
+    title: '多行文本框',
+    key: 'textArea',
+  },
+  {
+    type: 'switch',
+    title: '开关',
+    key: 'switch',
+  }
+];
+
+const listValue2 = [
+  {
+    type: 'abc',
+    title: 'abc',
+    key: 'abc',
+  },
+  {
+    type: '123',
+    title: '123',
+    key: '123',
+  },
+  {
+    type: '456',
+    title: '456',
+    key: '456',
+  },
+  {
+    type: 'qwe',
+    title: 'qwe',
+    key: 'qwe',
+  },
+  {
+    type: 'rty',
+    title: 'rty',
+    key: 'rty',
+  },
+  {
+    type: 'nbv',
+    title: 'nbv',
+    key: 'nbv',
+  }
+];
+
+const listValue={ list1: listValue1, list2: listValue2}
+
+const Item = memo(props => {
+  const { data, index, connectDragRef, connectDrag, connectDragHandle, isDragging } = props;
+  const { type, title } = data;
+  return (
+    <div
+      className={styles.item}
+      ref={connectDragRef}
+      {...connectDrag}
+      {...connectDragHandle}
+    >
+      {data.title}
+    </div>
+  );
+})
+const SortablePage = props => {
+  const [value, setValue] = useState(listValue);
+  const direction = 'vertical'; // vertical horizontal
+  return (
+    <div className={`${styles.wrapper} ${direction === 'vertical' ? styles.vertical : styles.horizontal}`}> 
+      <DragDropWrapper value={value} onChange={newValue => setValue(newValue)} >
+        <SortableList
+          className={`${styles.list} ${direction === 'vertical' ? styles.vertical : styles.horizontal}`}
+          direction={direction}
+          listId='list1'
+          value={value['list1']}
+          ItemRender={Item}
+        />
+        <SortableList
+          className={`${styles.list} ${direction === 'vertical' ? styles.vertical : styles.horizontal}`}
+          direction={direction}
+          listId='list2'
+          value={value['list2']}
+          ItemRender={Item}
+        />
+      </DragDropWrapper>
+    </div>
+  );
+}
+
+export default SortablePage;

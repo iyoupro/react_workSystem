@@ -1,0 +1,48 @@
+import React from 'react';
+import { compose } from 'recompose';
+import withState from './chartState';
+import withHandleRender from './handleRender';
+import withHandleNodeOperation from './handleNodeOperation';
+import withShaples from './shaples';
+import styles from './index.less';
+import Popup from './Popup';
+
+const NodeChart = (props) => {
+  // console.log(props);
+  return (
+    <div id="chartWrapper" className="chartWrapper" style={{ ...props.style }} >
+      <svg id="chartView" className="chartView" style={{ width: '99%', height: '99%' }}>
+        <defs>
+          {
+            <filter id="nodeShadow" x="-50%" y="-50%" width="200%" height="200%">
+              <feOffset result="offOut" in="SourceGraphic" dx="2" dy="2" />
+              {/* <feFlood flood-color="rgba(0,0,0,0.5)"/> */}
+              <feColorMatrix
+                result="matrixOut" in="offOut" type="matrix"
+                values="0.2 0 0 0 0 0 0.2 0 0 0 0 0 0.2 0 0 0 0 0 1 0"
+              />
+              <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="4" />
+              <feBlend in="SourceGraphic" in2="blurOut" mode="normal" />
+            </filter>
+          }
+          {
+            props.nodeShaples.map(shaple => shaple)
+          }
+        </defs>
+        <g className="group">
+          <g className="lineGroup" />
+          <g className="nodeGroup" />
+        </g>
+      </svg>
+      <Popup
+        mode={props.mode} modalState={props.modalState} updateModalState={props.updateModalState}
+        setNodeData={props.setNodeData}
+        createNewNode={props.createNewNode} createNewBranch={props.createNewBranch}
+        selectNode={props.selectNode} selectNone={props.selectNone} deleteNode={props.deleteNode}
+        selectedNode={props.selectedNode} renderNode={props.renderNode} flowChartUpdatePos={props.flowChartUpdatePos}
+      />
+    </div>
+  );
+};
+
+export default compose(withState, withShaples, withHandleNodeOperation, withHandleRender)(NodeChart); // eslint-disable-line

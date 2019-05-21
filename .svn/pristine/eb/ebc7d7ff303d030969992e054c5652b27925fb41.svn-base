@@ -1,0 +1,8 @@
+.chartWrapper {
+  user-select: none;
+}
+
+.chartView {
+  width: 99%;
+  height: 99%;
+}

@@ -1,0 +1,23 @@
+import React, { memo } from 'react';
+import CheckBox from './itemContent/CheckBox';
+import Radio from './itemContent/Radio';
+import Time from './itemContent/Time';
+import styles from './Item.less';
+
+const contents = { Radio, CheckBox, Time }; // 这几种Item有额外的ItemContent
+
+const Item = memo(props => {
+  const { data, setItem } = props;
+  const { title, declaraction, type, inputValue } = data;
+  const ItemContent = contents[type];
+  return (
+    <li className={styles.wrapper}>
+      {/* <input className={styles.title} value={title} onChange={event => onSetItemTitle(event.target.value, data, setItem)} />
+      <input className={styles.declaraction} placeholder='说明'  value={inputValue} /> */}
+      {/* <hr className={styles.horizontalLine} noshade="noshade" ref={ref => this.horizontalLine = ref}/> */}      
+      {ItemContent && <ItemContent {...props} />}
+    </li>
+  );
+});
+
+export default Item;

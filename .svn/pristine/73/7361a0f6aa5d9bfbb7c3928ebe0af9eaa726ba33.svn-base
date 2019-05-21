@@ -1,0 +1,43 @@
+import React from 'react';
+import { withState, pipe, withHandlers } from '../rehook';
+import { Input } from 'antd';
+
+
+const enhance = pipe(
+  withState('state1', 'setState1'),
+  withState('state2', 'setState2'),
+  withState('value', 'setValue', ''),
+  withHandlers({
+    onChange: ({ setValue }) => (value) => {
+      setValue(value);
+    }
+  }),
+  withHandlers({
+    // onChange: ({ setValue }) => (value) => {
+    //   setValue(value);
+    // },
+    onChange2: ({ setValue,onChange }) => (e) => {
+      console.log(e);
+      onChange(e.target.value);
+    }
+  })
+);
+
+const Test2 = ({ value, setValue }) => {
+  return (<div style={{ margin: "20px" }}>
+    <div>{value}</div>
+    <Input  onChange={(e)=>{
+      setValue(e.target.value)
+    }}></Input>
+  </div>);
+};
+
+
+const Test = ({ value, onChange2 }) => {
+  return (<div style={{ margin: "20px" }}>
+    <div>{value}</div>
+    <Input value={value} onChange={onChange2}></Input>
+  </div>);
+};
+
+export default pipe(enhance, Test);

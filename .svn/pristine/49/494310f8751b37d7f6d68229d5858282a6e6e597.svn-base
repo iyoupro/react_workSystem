@@ -1,0 +1,25 @@
+import React from 'react';
+import { Input } from 'antd';
+
+const { TextArea } = Input;
+
+type Props = {};
+
+/**
+ * 面试结论
+ *
+ * @class EvalConclusion
+ * @extends {Component}
+ */
+const EvalConclusion = ({ resultTitle, result, mode, summaryTitle, summary, onResultChange, onSummaryChange }: Props) => {
+  return (
+    <div>
+      <div>{resultTitle}</div>
+      <Input onChange={onResultChange} value={result} disabled={mode !== 'write'} />
+      <div>{summaryTitle}</div>
+      <TextArea disabled={mode !== 'write'} rows={6} onChange={onSummaryChange} value={summary} />
+    </div>
+  );
+};
+
+export default EvalConclusion;

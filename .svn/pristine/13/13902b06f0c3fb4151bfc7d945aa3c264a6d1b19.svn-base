@@ -1,0 +1,18 @@
+import React from 'react';
+import styles from './index.less';
+
+const FormItem = ({ ...props }) => {
+  const { data, selectItem, setItem, deleteItem, inFixArea, dragging, preView, selected, placeholder } = props; // eslint-disable-line
+  return (
+    <div
+      onClick={()=> selectItem()}
+      className={`${styles.wrapper} ${dragging ? styles.dragging : ''} ${placeholder ? styles.placeholder : ''}
+        ${preView ? styles.preView : ''} ${selected ? styles.selected : ''}`}
+    >
+      {inFixArea && data.title}
+      {!inFixArea && data.title}
+    </div>
+  );
+};
+
+export default FormItem;

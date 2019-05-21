@@ -1,0 +1,40 @@
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import { DropTarget,  } from 'react-dnd'
+import { findDOMNode } from 'react-dom'
+import itemTypes from './itemTypes';
+
+
+const spec = {
+  canDrop(props, monitor) {
+    return monitor.isOver() && monitor.isOver({shallow: true});
+  },
+  drop(props, monitor, component) {
+    const sourceItem = monitor.getItem();
+    const dropItSelf = findDOMNode(component) === findDOMNode(sourceItem.DOM).parentNode;
+    !sourceItem.fix && sourceItem.remove();
+  }
+};
+
+function collect(connect, monitor) {
+  return {
+    connectDropTarget: connect.dropTarget(),
+    isOver: monitor.isOver(),
+    canDrop: monitor.canDrop()
+  };
+}
+
+class DropWrapper extends Component {
+  render () {
+    const {connectDropTarget} = this.props;
+    return connectDropTarget(
+      <div 
+        style={{  ...this.props.style }}
+      >
+        {this.props.children}
+      </div>
+    );
+  }
+}
+
+export default DropTarget(itemTypes.CARD, spec, collect)(DropWrapper);

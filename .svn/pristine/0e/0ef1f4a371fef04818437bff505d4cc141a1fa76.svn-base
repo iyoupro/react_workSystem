@@ -1,0 +1,13 @@
+import React, { memo } from 'react';
+import { Tabs } from 'antd';
+import styles from './index.less';
+import data from './menuData';
+
+const Home = props => {
+  return (
+    <div>
+    </div>
+  );
+}
+
+export default memo(Home);

@@ -1,0 +1,41 @@
+import React, { memo } from 'react';
+import Checkbox from './itemContent/Checkbox';
+import Radio from './itemContent/Radio';
+import Time from './itemContent/Time';
+import Input from './components/Input';
+import styles from './Item.less';
+
+import { pipe } from '../../rehook/';
+import { withSetData } from './handler';
+
+const contents = { Radio, Checkbox, Time }; // 这几种Item有额外的ItemContent
+
+const Item = ({ data, mode, setData, ...props }) => {
+  const { title, declaraction, type, inputValue } = data;
+  const ItemContent = contents[type];
+  return (
+    <li className={styles.wrapper}>
+      <Input 
+        inputClassName={styles.title} 
+        underlineClassName={styles.underLine}
+        underlineClassName={styles.focusUnderLine}
+        autoSize={false}
+        showUnderline
+        value={title}
+        onChange={event => setData('title', event.target.value)} />
+      {declaraction &&   
+        <Input 
+          inputClassName={styles.declaraction} 
+          underlineClassName={styles.underLine}
+          underlineClassName={styles.focusUnderLine}
+          autoSize={false}
+          showUnderline
+          value={declaraction}
+          onChange={event => setData('declaraction', event.target.value)} />      
+      }
+      {ItemContent && <ItemContent data={data} mode={mode} setData={setData} {...props} />}
+    </li>
+  );
+};
+
+export default pipe(withSetData, Item);

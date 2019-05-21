@@ -1,0 +1,77 @@
+.wrapper {
+  width: 100%;
+  height: 100%;
+  background: #f5f5f5;
+  font-size: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  align-content: flex-start;
+  justify-content: center;
+  text-align: center;
+  // border: 1px solid black;
+  // border-radius: 4px;
+  // font-weight: bold;
+
+  // 组件和文字的间距
+  &.notInFix {
+    text-align: left;
+    position: relative;
+    justify-content: left;
+    padding: 0 32px;
+    // border: 1px solid #e8e8e8;    
+    background: #fff;
+  }
+  .clearance{
+
+    width: calc(~"100% - 160px");
+    margin-left: 40px;
+    display: block;
+  }
+  .antdIconClose{
+    position: absolute;
+    right: 16px;
+    display: none;
+  }
+  // 字段名在左，水平
+  .horizontal{
+    width:80px;
+
+  }
+  // 字段名在上，垂直
+  .vertical{
+    width:90%;
+    margin: 4px auto 4px 40px;
+    // margin-left: 40px;
+    // margin-bottom: 5px;
+    .clearance{
+      width:75%;
+    }
+  }
+  
+
+  &:hover {
+    background: #e6f7ff;
+    .antdIconClose{
+      display: block;
+    }
+  };
+  &.dragging {
+    opacity: 0.3;
+  };
+  &.selected {
+    // border: 1px solid red;
+    background: #bfbfbf;
+  };
+  &.preView {
+    background: #d9f7be;
+    border: 1px dashed black;
+  };
+  &.draggedOverSelf {
+    background: #ff7875;
+  };
+  &.placeholder {
+    background: #5cdbd3;
+  }
+  transition: all 0.3s ease;
+}

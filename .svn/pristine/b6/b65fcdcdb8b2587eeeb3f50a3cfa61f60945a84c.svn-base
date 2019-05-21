@@ -1,0 +1,31 @@
+.headWrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  height: 64px;
+  padding: 0 16px;
+  border-bottom: 1.5px solid #e5e5e5;
+  &.inSponsor {
+    border: 0;
+    i:first-child {
+      font-size: 16px;
+    };
+    i:last-child {
+      opacity: 0;
+      cursor: default;
+    };
+    & > span {
+      font-size: 16px;
+      color: #383838;
+    };
+  };
+  & > i {
+    color: grey;
+    font-size: 20px;
+    cursor: pointer;
+    &:hover {
+      color: #69c0ff;
+    };
+  };
+}

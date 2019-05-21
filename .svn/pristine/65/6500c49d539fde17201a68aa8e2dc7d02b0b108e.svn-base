@@ -1,0 +1,64 @@
+// @flow
+import React, { Component } from 'react';
+import { Icon, Row, Col,Button } from 'antd';
+
+import styles from './CollapseItem.less';
+
+type Props = {
+  text: string,
+  checked: boolean,
+  onClick: () => void,
+  edit: boolean,
+  add: boolean,
+  // 左侧icon TODO
+  leftIcon: string,
+  // 右侧icon TODO
+  rightIcon: string,
+  // 编辑事件
+  onEdit: () => void,
+  // 移除事件
+  onRemove: () => void
+};
+type State = {
+};
+
+
+/**
+ * 折叠面板列表Item组件  自定义折叠面板基本构成组件
+ * 
+ * @param {Props} 
+ */
+class CollapseItem extends Component {
+  state: State;
+  props: Props;
+  constructor(props: Props) {
+    super(props);
+    this.state = {};
+  }
+
+  render() {
+    const { checked = true, text, onClick, edit, add, onEdit, onRemove } = this.props;
+    let type = 'plus';
+    if (!checked) {
+      type = 'check';
+    }
+    return (
+      <Row className={styles.item}>
+        <Col span={24}>
+          {
+            add && <Button icon={<Icon type={type} />} height="smallLest" shape="circleBorder" onClick={onClick} />
+          }
+          <span className={styles.text}>{text}</span>
+        </Col>
+        {
+          edit && <Col span={6} offset={6} className={styles.icon}>
+            <Icon type="edit" style={{ fontSize: 20, cursor: 'pointer', color: '#bbbbbb' }} onClick={onEdit} />
+            <Icon type="delete" style={{ fontSize: 20, cursor: 'pointer', color: '#bbbbbb' }} onClick={onRemove} />
+          </Col>
+        }
+      </Row>
+    );
+  }
+}
+
+export default CollapseItem;

@@ -1,0 +1,118 @@
+/** @format */
+import { Input, InputNumber } from 'antd';
+
+import React, { Component } from 'react';
+import styles from './StepChartPage.css';
+import NodeChart from '../components/NodeChart';
+import { Fragment } from 'react';
+const initialChartData = [
+  {
+    id: '0',
+    data: {
+      title: 'start',
+    },
+    parent: [],
+    children: [
+      {
+        id: '1',
+      },
+    ],
+    brother: [],
+  },
+  {
+    id: '1',
+    data: {
+      title: 'end',
+    },
+    parent: [
+      {
+        id: '0',
+      },
+    ],
+    children: [],
+    brother: [],
+  },
+];
+
+const AddNodeInput = ({ onInputChange, isBranchNode }) => {
+  const data = { title: '', condition: '', name: '', info: '' };
+  return (
+    <React.Fragment>
+      <Input
+        key="0"
+        placeholder="请输入节点title"
+        onChange={e => {
+          data.title = e.target.value;
+          onInputChange(data);
+        }}
+      />
+      {isBranchNode && (
+        <Input
+          key="1"
+          placeholder="请输入节点condition"
+          onChange={e => {
+            data.condition = e.target.value;
+            onInputChange(data);
+          }}
+        />
+      )}
+      <Input
+        key="2"
+        placeholder="请输入节点name"
+        onChange={e => {
+          data.name = e.target.value;
+          onInputChange(data);
+        }}
+      />
+      <Input
+        key="3"
+        placeholder="请输入节点info"
+        onChange={e => {
+          data.info = e.target.value;
+          onInputChange(data);
+        }}
+      />
+    </React.Fragment>
+  );
+};
+
+const AddBranchInput = props => {
+  let data = {};
+  return [<Input />, <Input />, <Input />];
+};
+
+class StepChartPage extends Component {
+  onChange = chartData => {
+    console.log(chartData);
+  };
+
+  onSelect = selectedNode => {
+    console.log(selectedNode);
+  };
+
+  render() {
+    return (
+      <div className={styles.App}>
+        <NodeChart
+          onChange={this.onChange}
+          onSelect={this.onSelect}
+          initialChartData={initialChartData}
+          mode="stepChart"
+          nodeSize={50} // 节点大小占容器大小的百分比
+          textPos={38} //  文字的距节点顶部的百分比
+          nodeShadow={false} // 所有节点是否有阴影
+          style={{
+            // 流程的box
+            height: '80%',
+            width: '30%',
+          }}
+          rowDistance={0.75} // 节点大小的倍数
+          colDistance={0.1} // 节点大小的倍数
+          AddNodeInput={AddNodeInput}
+        />
+      </div>
+    );
+  }
+}
+
+export default StepChartPage;

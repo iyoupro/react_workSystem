@@ -1,0 +1,99 @@
+import React, { Component } from 'react';
+import { DropWrapper, DropArea } from '../components/CustomSort';
+import { Switch, Divider } from 'antd';
+import cn from 'classnames';
+
+import styles from './CustomSortList.less';
+
+const defaultItems = [
+  {
+    name: 'name',
+    title: '姓名',
+  },
+  {
+    name: 'dept',
+    title: '部门',
+  },
+  {
+    name: 'sex',
+    title: '性别',
+  },
+  {
+    name: 'age',
+    title: '年龄',
+  },
+  {
+    name: 'jobNo',
+    title: '工号',
+  },
+];
+
+const FixedItem = ({ data, selectItem, dragging, preView, selected, placeholder }) => {
+  return (
+    <div
+      onMouseUp={event => event.nativeEvent.target.localName !== 'span' && selectItem()}
+      className={`${styles.item} ${dragging ? styles.dragging : ''} ${placeholder ? styles.placeholder : ''}
+        ${preView ? styles.preView : ''} ${selected ? styles.selected : ''}`}
+    >
+      {data.title}
+    </div>
+  );
+};
+
+const SortItem = ({ data, selectItem, dragging, preView, selected, placeholder }) => {
+  return (
+    <div onMouseUp={event => event.nativeEvent.target.localName !== 'span' && selectItem()}
+      className={cn(styles.item, {
+        [styles.dragging]: dragging,
+        [styles.placeholder]: placeholder,
+        [styles.preView]: preView,
+        [styles.selected]: selected,
+      })}
+    >
+      {data.title}
+      <Switch checkedChildren="显示" unCheckedChildren="隐藏" defaultChecked />
+    </div>
+  );
+};
+
+class CustomSortList extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { items: defaultItems, fixItems: [] };
+  }
+
+  onFixChange = (items) => {
+    this.setState({ fixItems: items });
+    console.log('onFixChange:', items);
+  }
+
+  onChange = (items) => {
+    console.log('onChange:', items);
+    this.setState({ items });
+  }
+
+  render() {
+    const { items, fixItems } = this.state;
+    return (
+      <DropWrapper>
+        <DropArea
+          className={styles.container} defaultItems={fixItems}
+          AreaId="1" fix={false} direction="column"
+          Item={FixedItem}
+          onChange={this.onFixChange}
+        />
+        <span> 固定项目拖到上方:</span>
+        <Divider />
+        <DropArea
+          className={styles.container}
+          fix={false} defaultItems={items} direction="column"
+          Item={SortItem}
+          onChange={this.onChange}
+          style={{ background: 'red' }}
+        />
+      </DropWrapper>
+    );
+  }
+}
+
+export default CustomSortList;

@@ -1,0 +1,11 @@
+import React, { memo } from 'react';
+import styles from './CheckBox.less';
+
+const CheckBox = memo(props => {
+  const { options } = props;
+  return (
+    <div></div>
+  );
+});
+
+export default CheckBox;

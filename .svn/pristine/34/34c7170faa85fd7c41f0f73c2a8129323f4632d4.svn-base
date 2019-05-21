@@ -1,0 +1,36 @@
+import React from 'react';
+import Item from './item';
+import styles from './index.less';
+
+const OrganizaitonChart = (props) => {
+  let wrapper = null;
+  const _handleMouseDown = (event) => {
+    document.addEventListener('mouseup', _handleMouseUp);
+    document.addEventListener('mousemove', _handleMouseMove);
+  } 
+
+  const _handleMouseUp = (event) => {
+    document.removeEventListener('mousemove', _handleMouseMove);
+    document.removeEventListener('mouseup', _handleMouseUp);
+  }
+
+  const _handleMouseMove = (event) => {
+    wrapper.scrollLeft -= event.movementX;
+    wrapper.scrollTop -= event.movementY;
+  }
+  
+  const { items } = props;
+  return (
+    <div ref={ref => wrapper = ref} className={styles.wrapper}
+      style={{ display: 'flex', flexDirection: 'row' }}
+      onMouseDown={_handleMouseDown} >
+      {
+        items.map(item => <Item key={item.id} data={item} show/>)
+      }
+      <div style={{background: 'black', width: '100%', height: '100%'}}></div>
+    </div>
+  );
+  
+};
+console.log(OrganizaitonChart.wrapper);
+export default OrganizaitonChart;

@@ -1,0 +1,93 @@
+import React, { Component } from 'react';
+import { Icon, Menu, Dropdown, } from 'antd';
+import { findDOMNode } from 'react-dom';
+import styles from './item.less';
+
+class Item extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { showChildren: false };
+  }
+
+  getItemBound = () => {
+    return this.item.getBoundingClientRect();
+  }
+
+  handleTransitionend = () => {
+    this.childrenItem[0].item.removeEventListener('transitionend', this.handleTransitionend);
+    this.item.scrollIntoView({ behavior: 'smooth' });
+    this.renderLines();
+  }
+
+  expendChildren = () => {
+    this.clearCanvas();
+    this.setState(preState => ({ showChildren: !preState.showChildren }));
+    this.childrenItem[0].item.addEventListener('transitionend', this.handleTransitionend);
+  }
+
+  clearCanvas = () => {
+    this.canvas.setAttribute("width", 0);
+    this.props.parentItem && this.props.parentItem.clearCanvas();
+  }
+
+  renderLines = () => {
+    const itemBound = this.getItemBound();
+    const wrapperBound = this.wrapper.getBoundingClientRect();
+    this.canvas.setAttribute("width", wrapperBound.width);
+    this.canvas.setAttribute("height", wrapperBound.height);
+    const ctx = this.canvas.getContext("2d");
+    ctx.beginPath(); 
+    ctx.lineWidth = 1; 
+    ctx.strokeStyle='#000000';
+    const firstChildBound = this.childrenItem[0].getItemBound();
+    const lastChildBound = this.childrenItem[this.childrenItem.length - 1].getItemBound()
+    ctx.moveTo(itemBound.left - wrapperBound.left + itemBound.width / 2, itemBound.bottom - wrapperBound.top);
+    ctx.lineTo(itemBound.left - wrapperBound.left + itemBound.width / 2, (itemBound.bottom + firstChildBound.top - wrapperBound.top - itemBound.top) / 2);
+    ctx.moveTo(firstChildBound.left - wrapperBound.left + firstChildBound.width / 2, (itemBound.bottom + firstChildBound.top - wrapperBound.top - itemBound.top) / 2);
+    ctx.lineTo(lastChildBound.left - wrapperBound.left + lastChildBound.width / 2, (itemBound.bottom + firstChildBound.top - wrapperBound.top - itemBound.top) / 2);
+    this.childrenItem.map(child => {   
+      const childItemBound = child.getItemBound(); 
+      ctx.moveTo(childItemBound.left - wrapperBound.left + childItemBound.width / 2, (itemBound.bottom + childItemBound.top - wrapperBound.top - itemBound.top) / 2);
+      ctx.lineTo(childItemBound.left - wrapperBound.left + childItemBound.width / 2, childItemBound.top - itemBound.top);
+    });
+    ctx.stroke();
+    this.props.parentItem && this.props.parentItem.renderLines();
+  }
+
+  render() {
+    const { data, show, head, mode, ItemNode, itemMarginAround, itemMarginTop, firstItemMarginTop } = this.props;
+    const { showChildren } = this.state;
+    this.childrenItem = [];
+    return (
+      <div className={`${styles.wrapper} ${head ? styles.head : ''} ${show ? styles.show : ''}`} ref={ref => this.wrapper = ref}
+        style={{ transform: show && !head ? `translate(0, ${itemMarginTop})` :
+          head && show ? `translate(0, ${firstItemMarginTop})` : 'translate(0, 0)' }}
+      >
+        <canvas ref={ref => this.canvas = ref} className={`${styles.canvas} ${showChildren ? styles.show : ''}`} />
+        <div className={`${styles.item} ${show ? styles.show : ''}`} ref={ref => this.item = ref} 
+          style={{ margin: show ? `0 ${itemMarginAround}` : '0px' }}
+        >
+          <ItemNode data={data} ref={ref => this.item = findDOMNode(ref)} expendChildren={this.expendChildren} show={show} showChildren={showChildren} />
+        </div>
+        <div className={`${styles.childWrapper} ${showChildren ? styles.show : ''}`}>
+          {data.children &&
+            data.children.map(item => 
+              <Item
+                key={item.key} 
+                ref={ref=> ref && this.childrenItem.push(ref)}
+                data={item} parentItem={this}
+                show={showChildren && show}
+                showChildren={showChildren}
+                ItemNode={ItemNode}
+                itemMarginAround={itemMarginAround}
+                itemMarginTop={itemMarginTop}
+                firstItemMarginTop={firstItemMarginTop}
+              />)
+          }
+        </div>
+      </div>
+    );
+  }
+};
+
+export default Item;

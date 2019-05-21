@@ -1,0 +1,55 @@
+import React, { memo } from 'react';
+import { Icon, Menu, Dropdown } from 'antd';
+import styles from './Item.less';
+
+const Item = props => {
+  const { data, treeNodeSize, direction, isExpand, isExpandRecently, onItemClick, mode } = props;
+  const onClick = ({ key }) => onItemClick(data, key);
+
+  const leftMenu = (
+    <Menu onClick={onClick}>
+      <Menu.Item key="addBrotherDepartMent">
+        新增同级部门
+      </Menu.Item>
+      <Menu.Item key="addChildDepartMent">
+        新增子部门
+      </Menu.Item>
+    </Menu>
+  );
+
+  const rightMenu = (
+    <Menu onClick={onClick} >
+      <Menu.Item key="renameDepartMent">
+        更名
+      </Menu.Item>
+      <Menu.Item key="transferDepartMent">
+        划转
+      </Menu.Item>
+      <Menu.Item key="mergeDepartMent">
+        合并
+      </Menu.Item>
+    </Menu>
+  );
+
+  return (
+    <div
+      className={`${styles.wrapper} ${isExpandRecently ? styles.ExpandRecently : ''}`}
+      style={{ width: treeNodeSize[0], height: treeNodeSize[1] }}
+    >
+      <div className={`${styles.label} ${mode === 'simple' ? styles.simple : ''}`} >{data.label}</div>
+      {mode === 'detail' &&
+        <div className={styles.footer} >
+          <Dropdown overlay={leftMenu} placement='bottomCenter' >
+            <Icon className={styles.icon} type="plus" />
+          </Dropdown>
+          <Dropdown overlay={rightMenu} placement='bottomCenter' >
+            <Icon className={styles.icon} type="bars" />
+          </Dropdown>
+        </div>
+      }
+      {data.children && data.children.length > 0 && <Icon className={`${styles.simpleModeExpand} treeView-expand`} type={isExpand ? 'up' : 'down'} />}
+    </div>
+  );
+}
+
+export default memo(Item);

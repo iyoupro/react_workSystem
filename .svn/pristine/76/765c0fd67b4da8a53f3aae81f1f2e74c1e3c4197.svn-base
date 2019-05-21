@@ -1,0 +1,43 @@
+import React, { Component } from 'react';
+import { Icon } from 'antd';
+import styles from './item.less';
+import { className } from 'classnames';
+
+class Item extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { showChildren: false };
+  }
+
+  onClick = () => {
+    this.setState(preState => ({ showChildren: !preState.showChildren }));
+    this.childrenWrapper.addEventListener('transitionend', this.handleTransitionend);
+  }
+
+  handleTransitionend = () => {
+    this.childrenWrapper.removeEventListener('transitionend', this.handleTransitionend);
+    this.item.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  render() {
+    const { data, show, head } = this.props;
+    const { showChildren } = this.state;
+    return (
+      <div className={`${styles.wrapper} ${show && !head ? styles.show : ''}`}>
+        <div className={`${styles.item} ${show ? styles.show : ''}`} ref={ref => this.item = ref}>
+          {data.label}
+          {data.children &&
+            <Icon className={styles.icon} type={!showChildren ? "down-circle" : "up-circle"} theme="outlined" onClick={this.onClick} />
+          }
+        </div>
+        <div className={`${styles.childWrapper} `} ref={ref => this.childrenWrapper = ref}>
+          {data.children &&
+            data.children.map(item => <Item key={item.key} data={item} show={showChildren && show} />)
+          }
+        </div>
+      </div>
+    );
+  }
+};
+
+export default Item;

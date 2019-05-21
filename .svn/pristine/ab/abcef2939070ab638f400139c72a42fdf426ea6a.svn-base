@@ -1,0 +1,97 @@
+import React, { useRef, memo } from 'react';
+import { Select, Icon, Switch, Button, Radio, Tooltip } from 'antd';
+import Choose from './itemContent/Choose';
+import Time from './itemContent/Time';
+import Paragraph from './itemContent/Paragraph';
+import Input from './components/Input';
+import styles from './Item.less';
+
+const Option = Select.Option;
+
+const types = {
+  Paragraph: { name: '段落', extraContent: Paragraph },
+  Radio: { name: '单选', extraContent: Choose },
+  Checkbox: { name: '多选', extraContent: Choose },
+  Time: { name: '日期', extraContent: Time }
+};
+
+const Item = ({ data, setData, mode, isSelected, setSelectedItem, copyItem, deleteItem, pageInfo, ...props }) => {
+  const { title, declaraction, type, inputValue, layout, timeType, isRequired } = data;
+  const thisItem = useRef(null);
+  const ExtraContent = types[type] && types[type].extraContent;
+  const onClickItem = event => {
+    if (typeof event.nativeEvent.target.className === 'string' && event.nativeEvent.target.className.indexOf(styles.deleteIcon) !== -1) {
+      thisItem.current.style['max-height'] = `${thisItem.current.clientHeight}px`;
+      setTimeout(() => thisItem.current.classList.add(styles.delete), 0);
+      let timeOut = 0;
+      pageInfo.deleteTimer = setInterval(() => {
+        timeOut += 1;
+        if (thisItem.current.clientHeight === 0 || timeOut >= 30) {
+          deleteItem();
+          clearInterval(pageInfo.deleteTimer);
+          pageInfo.deleteTimer = null;             
+        }
+      }, 17);
+    }
+    else if (!pageInfo.deleteTimer && !isSelected) setSelectedItem(data);
+  }
+  return (
+    <li ref={thisItem} className={`${styles.wrapper} ${isSelected ? styles.isSelected : ''}`} onClick={onClickItem}>
+      {isRequired && <span className={styles.required}>*</span> }
+      <Input 
+        inputWrapperClassName={styles.title} 
+        inputClassName={styles.titleInput} 
+        underlineClassName={styles.underLine}
+        underlineClassName={styles.focusUnderLine}
+        autoSize={false}
+        showUnderline={isSelected}
+        value={title}
+        onChange={event => setData('title', event.target.value)} />
+      {type !== 'SectionTitle' && isSelected && 
+        <Select className={styles.typeSelect} value={types[type].name} onSelect={value => setData('type', value)}>
+          {Object.keys(types) && Object.keys(types).filter(itemType => itemType !== type).map(itemType => <Option key={itemType} value={itemType}>{types[itemType].name}</Option>)}
+        </Select>  
+      }
+      {declaraction !== null &&   
+        <Input 
+          inputWrapperClassName={styles.declaraction} 
+          inputClassName={styles.declaractionInput} 
+          underlineClassName={styles.underLine}
+          underlineClassName={styles.focusUnderLine}
+          autoSize={false}
+          showUnderline={isSelected}
+          value={declaraction}
+          placeholder=" Explain"
+          onChange={event => setData('declaraction', event.target.value)} />      
+      }
+      {ExtraContent && <ExtraContent data={data} mode={mode} setData={setData} isSelected={isSelected} {...props} />}
+      {isSelected && type !== 'SectionTitle' && <hr className={styles.horizontalLine} /> }
+      {type !== 'SectionTitle' && 
+        <div className={styles.footer}>
+          { (type === 'Radio' || type === 'Checkbox') &&
+            <Radio.Group size='small' className={styles.footerItem} disabled={!isSelected} value={layout} onChange={e => setData('layout', e.target.value)}>
+              <Radio.Button value={1}>一列</Radio.Button>
+              <Radio.Button value={2}>两列</Radio.Button>
+              <Radio.Button value={3}>三列</Radio.Button>
+              <Radio.Button value={4}>四列</Radio.Button>
+            </Radio.Group>
+          }
+          <Tooltip placement="top" title={'克隆项'}>
+            <Button className={`${styles.footerItem} ${styles.copyIcon}`} shape="circle" icon="copy" />
+          </Tooltip>
+          <Tooltip placement="top" title={'删除项'}>
+            <Button className={`${styles.footerItem} ${styles.deleteIcon}`} shape="circle" icon="delete" />
+          </Tooltip>
+          必填：<Switch className={styles.footerItem} disabled={!isSelected} checkedChildren="是" unCheckedChildren="否" defaultChecked onChange={value => setData('isRequired', value)}/>
+          显示说明：<Switch className={styles.footerItem} disabled={!isSelected} checkedChildren="是" unCheckedChildren="否" checked={typeof declaraction === 'string' ? true : false} onChange={value => setData('declaraction', value ? '' : null)}/>
+        </div>
+      }
+    </li>
+  );
+};
+
+const shouldNotUpdate = (preProps, nextProps) => {
+  return preProps.data === nextProps.data && preProps.mode === nextProps.mode && preProps.isSelected === nextProps.isSelected && preProps.provided === nextProps.provided;
+}
+
+export default memo(Item, shouldNotUpdate);

@@ -1,0 +1,34 @@
+import React, { Component } from 'react';
+import styles from './OrganizationChartPage.less';
+import OrganizaitonChart from '../components/OrganizationChart/';
+import ItemNode from '../components/OrganizationChart/ItemShape';
+import items from './OrganizationChartPageData.json';
+
+class OrganizaitonChartPage extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { mode: 'detail', direction: 'row' };
+  }
+  render() {
+    const { mode, direction } = this.state;
+    return (
+      <div className={styles.wrapper}>
+        <OrganizaitonChart
+          mode={mode}
+          direction={direction}
+          scale={1}
+          items={items}
+          ItemNode={ItemNode}
+          itemMarginBrother="24px"
+          itemMarginParent="96px"
+        />
+        <div style={{ height: '15px', width: '15px', background: 'black', position: 'fixed', left: '95%', top: '5%', cursor: 'pointer'}}
+          onClick={() => this.setState({mode: mode === 'detail'? 'simplify' : 'detail'})} />
+        <div style={{ height: '15px', width: '15px', background: 'red', position: 'fixed', left: '90%', top: '5%', cursor: 'pointer'}}
+          onClick={() => this.setState({direction: direction === 'row'? 'column' : 'row'})} />
+      </div>
+    );
+  }
+}
+
+export default OrganizaitonChartPage;

@@ -1,0 +1,33 @@
+.popup {
+  position: absolute;
+  display: none;
+  align-items: center;
+  width: auto;
+}
+
+.popup-content-flowChart {
+  background: transparent;
+  margin-left: 7px;
+  height: 100%;
+  border-radius: 5%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  & div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 33%;
+    background: transparent;
+  }
+}
+
+.popup-content-menu {
+  opacity: 0.5;
+  transition: all 0.3s ease;
+  &:hover {
+    opacity: 1;
+  }
+}

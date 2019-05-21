@@ -1,0 +1,32 @@
+{
+  "entry": "src/index.js",
+  "env": {
+    "development": {
+      "extraBabelPlugins": [
+        "dva-hmr",
+        "babel-polyfill",
+        "transform-runtime",
+        "transform-decorators-legacy",
+        ["import", { "libraryName": "antd", "libraryDirectory": "es", "style": "css" }]
+      ]
+    },
+    "production": {
+      "extraBabelPlugins": [
+        "babel-polyfill",
+        "transform-runtime",
+        "transform-decorators-legacy",
+        ["import", { "libraryName": "antd", "libraryDirectory": "es", "style": "css" }]
+      ]
+    }
+  },
+   "proxy": {
+    "/api": {
+      "target": "http://192.168.3.207:8081/",
+      "changeOrigin": true
+    },
+     "/socket.io": {
+      "target": "http://192.168.3.207:8081/",
+      "changeOrigin": true
+    }
+   } 
+}

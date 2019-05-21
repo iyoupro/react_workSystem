@@ -1,0 +1,159 @@
+import React, { Component } from 'react';
+import { Modal, Input, InputNumber, Alert } from 'antd';
+import styles from './Popup.less';
+
+class Popup extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      nodeData: { data: '', condition: '' },
+      newBranch: [{}, {}],
+      inputValue: '',
+    };
+  }
+  onOK = () => {
+    switch (this.props.modalState) {
+      case 'setNodeData':
+        this.props.setNodeData(this.props.selectedNode, this.state.nodeData);
+        this.props.renderNode('update');
+        break;
+      case 'addNewNode':
+        const newNode = this.props.createNewNode(this.props.selectedNode, this.state.nodeData.data);
+        this.props.flowChartUpdatePos();
+        this.props.renderNode('append');
+        this.props.renderNode('update');
+        this.props.selectNode(newNode.id);
+        break;
+      case 'addNewBranch':
+        const newBranch = this.props.createNewBranch(this.props.selectedNode, this.state.newBranch);
+        this.props.flowChartUpdatePos();
+        this.props.renderNode('append');
+        this.props.renderNode('update');
+        this.props.selectNone();
+        break;
+      case 'deleteNode':
+        this.props.deleteNode(this.props.selectedNode, 'deleteNode');
+        this.props.flowChartUpdatePos();
+        this.props.renderNode('exit');
+        this.props.renderNode('update');
+        this.props.selectNone(true);
+        break;
+      case 'deleteBranch':
+        this.props.deleteNode(this.props.selectedNode, 'deleteBranch');
+        this.props.flowChartUpdatePos();
+        this.props.renderNode('exit');
+        this.props.renderNode('update');
+        this.props.selectNone();
+        break;
+      default:
+        break;
+    }
+    this.onCancel();
+  }
+
+  onInputNumberChange = (value) => {
+    const newBranch = [];
+    for (let i = 0; i < value; i += 1) {
+      newBranch.push({});
+    }
+    this.setState({ newBranch });
+  }
+
+  onCancel = () => {
+    this.props.updateModalState('close');
+    this.setState({ inputValue: '', newBranch: [{}, {}] });
+  }
+
+  render() {
+    const { selectedNode, modalState, updateModalState, mode } = this.props;
+    return (
+      selectedNode && modalState !== 'close' &&
+      <Modal
+        visible
+        width={'40%'}
+        closable={false}
+        okButtonProps={{ disabled: modalState === 'showChoose' }}
+        onOk={this.onOK}
+        onCancel={this.onCancel}
+      >
+        { // 选中节点其下层节点不是分支
+          modalState === 'showChoose' && selectedNode.children.length > 0 &&
+          <div className={styles.content} onClick={() => updateModalState('addNewNode')}>
+            新增节点
+          </div>
+        }
+        { // 选中节点不是分支节点, 且其下层节点不是分支。
+          selectedNode.brother.length === 0 && selectedNode.children.length === 1 &&
+          modalState === 'showChoose' && mode === 'flowChart' &&
+          <div className={styles.content} onClick={() => updateModalState('addNewBranch')}>
+            新增分支
+          </div>
+        }
+        { // 选中节点不是分支节点并且其相邻的节点至少有一个不是分支节点, 且选中节点不是尾节点。
+          selectedNode.brother.length === 0 && selectedNode.children.length === 1 &&
+          selectedNode.parent.length === 1 && modalState === 'showChoose' &&
+          <div className={styles.content} onClick={() => updateModalState('deleteNode')}>
+            删除节点
+          </div>
+        }
+        {
+          selectedNode.children.length > 1 && modalState === 'showChoose' &&
+          // 选中节点的下层节点为分支节点
+          <div className={styles.content} onClick={() => updateModalState('deleteBranch')}>
+            删除分支
+          </div>
+        }
+        {
+          modalState === 'showChoose' &&
+          // 选中节点的下层节点为分支节点
+          <div className={styles.content} onClick={() => updateModalState('setNodeData')}>
+            设置节点
+          </div>
+        }
+        {
+          modalState === 'addNewBranch' &&
+          <InputNumber min={2} max={99} defaultValue={2} onChange={this.onInputNumberChange} />
+        }
+        {
+          modalState === 'addNewBranch' &&
+          this.state.newBranch.map((_, index) =>
+            <div key={index} style={{ marginTop: '16px' }}>
+              {`请输入分支${index + 1}信息:`}
+              <Input
+                placeholder="信息"
+                onChange={(e) => {
+                  const { newBranch } = this.state;
+                  newBranch[index].data = e.target.value;
+                  this.setState({ newBranch });
+                }}
+              />
+              {`请输入分支${index + 1}条件:`}
+              <Input
+                placeholder="条件"
+                onChange={(e) => {
+                  const { newBranch } = this.state;
+                  newBranch[index].condition = e.target.value;
+                  this.setState({ newBranch });
+                }}
+              />
+            </div>,
+            )
+        }
+        {
+          (modalState === 'addNewNode' || modalState === 'setNodeData') &&
+          <Input placeholder="请输入节点信息" onChange={e => this.setState({ nodeData: { condition: this.state.nodeData.condition, data: e.target.value } })} />
+        }
+        {
+          modalState === 'setNodeData' && selectedNode.brother.length > 0 &&
+          <Input placeholder="请输入分支条件" onChange={e => this.setState({ nodeData: { data: this.state.nodeData.data, condition: e.target.value } })} />
+        }
+        {
+          (modalState === 'deleteNode' || modalState === 'deleteBranch') &&
+            <Alert message={`是否确认删除该节点${modalState === 'deleteBranch' ? '下的分支' : ''}?`} type="warning" />
+        }
+      </Modal>
+    );
+  }
+};
+
+export default Popup;

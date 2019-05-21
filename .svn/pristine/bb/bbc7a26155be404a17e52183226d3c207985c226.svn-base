@@ -1,0 +1,20 @@
+.wrapper {
+  padding: 0;
+  width: 60%;
+  margin-top: 44px;
+  height: fit-content;
+  box-shadow: 0px 0px 5px 0.5px grey;
+  list-style: none;
+  padding-inline-start: 0;
+  padding-inline-end: 0;
+  margin-block-end: 0;
+  margin-block-start: 0;
+  overflow: visible;
+  & .dragIcon{
+    cursor: move;
+    height: 32px;
+    line-height: 32px;
+    // border: 1px solid red;
+    width: calc(~'100% + 40px');
+  }
+};

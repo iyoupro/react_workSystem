@@ -1,0 +1,25 @@
+import * as React from 'react';
+import { DropTarget } from 'react-dnd';
+import { sortTarget, SORT_TYPE } from './lib';
+import className from 'classnames';
+import styles from './SortItem.less';
+
+class SortPlaceholderItem extends React.Component {
+  render() {
+    const {
+      text,
+      connectDropTarget,
+      isOverCurrent,
+    } = this.props;
+    return connectDropTarget && connectDropTarget(
+      <div className={className(styles.item, { [styles.hovered]: isOverCurrent })}>
+        {text || '没有固定项目'}
+      </div>);
+  }
+}
+
+
+export default DropTarget(SORT_TYPE, sortTarget, (connect, monitor) => ({
+  connectDropTarget: connect.dropTarget(),
+  isOverCurrent: monitor.isOver({ shallow: true }),
+}))(SortPlaceholderItem);

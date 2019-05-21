@@ -1,0 +1,84 @@
+import React from 'react';
+import { Router, Route, Switch, Link } from 'dva/router';
+import IndexPage from './routes/IndexPage';
+// import DargTest from './routes/DargTest';
+import AceEditor from './routes/AceEditor';
+// import SortableComponent from './routes/SortableComponent';
+// import ShowcaseLayout from './routes/ShowcaseLayout';
+import Container from './components/dnd/Container';
+import SortList from './routes/SortListPage';
+import NodeChart from './routes/NodeChartPage';
+import CustomSort from './routes/CustomSortPage';
+import CustomSortList from './routes/CustomSortList';
+// import SlateEditor from './routes/SlateEditor';
+import OrganizationChart from './routes/OrganizationChartPage';
+
+import styles from './router.less';
+
+function RouterConfig({ history }) {
+  return (
+    <Router history={history}>
+      <div className={styles.wrapper} >
+        <ul className={styles.nav}>
+          <li>
+            <Link to="/">home</Link>
+          </li>
+          <li>
+            <Link to="/editor">editor</Link>
+          </li>
+          <li>
+            <Link to="/drag">drag</Link>
+          </li>
+          <li>
+            <Link to="/sort">sort</Link>
+          </li>
+          <li>
+            <Link to="/toolbox">toolbox</Link>
+          </li>
+          <li>
+            <Link to="/dnd">dnd</Link>
+          </li>
+          {/* <li>
+            <Link to="/sortlist">sortlist</Link>
+          </li> */}
+          <li>
+            <Link to="/nodeChart">nodeChart</Link>
+          </li>
+          <li>
+            <Link to="/customSort">customSort</Link>
+          </li>
+          <li>
+            <Link to="/customSortList">customSortItem</Link>
+          </li>
+          <li>
+            <Link to="/slateEditor">SlateEditor</Link>
+          </li>
+          <li>
+            <Link to="/organizationChart">organizationChart</Link>
+          </li>
+        </ul>
+        <Switch>
+          <Route path="/" exact component={IndexPage} />
+          {<Route path="/editor" exact component={AceEditor} />
+        /*   <Route path="/drag" exact component={DargTest} />
+          <Route path="/sort" exact component={SortableComponent} /> */}
+          {/* <Route path="/toolbox" exact component={ShowcaseLayout} /> */}
+          <Route path="/dnd" exact component={Container} />
+          {/* <Route path="/sortlist" exact component={SortList} /> */}
+          <Route path="/nodeChart" exact component={NodeChart} />
+          <Route path="/customSort" exact component={CustomSort} />
+          <Route path="/customSortList" exact component={CustomSortList} />
+          <Route path="/organizationChart" exact component={OrganizationChart} />
+          {/* <Route path="/slateEditor" exact component={SlateEditor} /> */}
+          <Route
+            component={() => {
+              return <div>没有找到呢</div>;
+            }}
+          />
+        </Switch>
+      </div>
+    </Router>
+  );
+}
+
+export default RouterConfig;

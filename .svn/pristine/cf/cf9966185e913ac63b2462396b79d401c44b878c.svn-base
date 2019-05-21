@@ -1,0 +1,178 @@
+// @flow
+import React from 'react';
+import Button from '@/components/general/Button';
+import Loading from '@/components/feedback/Loading';
+import { withRouter } from 'react-router-dom';
+import { compose, withState, withHandlers, mapProps, withPropsOnChange, flattenProp } from 'recompose';
+import findIndex from 'lodash/findIndex';
+import remove from 'lodash/remove';
+import { parseMatchParamValue, parseLocationSearchValue } from '../lib/withRouterParsers';
+import EvalConclusion from './EvalConclusion';
+import TestQuestion from './questionBank/TestQuestion';
+import { noticeHoc } from './hoc';
+
+import styles from './EvalTplDetail.less';
+
+const url = '/api/biz/common/eval/tpl';
+
+// 评价模板
+const enhance = compose(
+  withRouter,
+  withState('tplState', 'setTplState', ({ mode }) => {
+    return {
+      visible: false,
+      mode: mode || 'edit'
+    };
+  }),
+  withState('evalTpl', 'setEvalTpl'),
+  mapProps(({ match, location, tplId, modul, ...rest }) => {
+    const id = tplId || parseMatchParamValue(match, 'id');
+    const bizId = bizId || parseLocationSearchValue(location, 'bizId');
+    const bizName = bizId || parseLocationSearchValue(location, 'bizName');
+    return {
+      id,
+      modul,
+      bizId,
+      bizName,
+      ...rest
+    };
+  }),
+  flattenProp('tplState'),
+  withPropsOnChange(['changeQuestion'], ({ setEvalTpl, evalTpl, changeQuestion }) => {
+    if (evalTpl) {
+      const index = findIndex(evalTpl.categories, { name: changeQuestion.name });
+      if (index !== -1) {
+        evalTpl.categories[index].items.push(changeQuestion.data);
+      } else {
+        evalTpl.categories.push({ name: changeQuestion.name, items: [changeQuestion.data], tplId: evalTpl.id });
+      }
+      setEvalTpl(evalTpl);
+    }
+  }),
+  noticeHoc,
+  withPropsOnChange(['id'], ({ id, setEvalTpl, onError }) => {
+    if (id) {
+      get(`${url}/${id}`).then(({ data, error }) => {
+        if (error) {
+          onError(error);
+        } else {
+          setEvalTpl(data);
+        }
+      });
+    }
+  }),
+  withHandlers(() => {
+    return {
+      onChange: ({ setTplState, tplState }) => (change) => {
+        setTplState({ ...tplState, ...change });
+      },
+      onRemove: ({ evalTpl, setEvalTpl }) => (title, name) => {
+        const index = findIndex(evalTpl.categories, { name: title });
+        if (index !== -1) {
+          remove(evalTpl.categories[index].items, (o) => {
+            return o.name === name;
+          });
+        }
+        setEvalTpl(evalTpl);
+      },
+      onTplChange: ({ setEvalTpl }) => (evalTpl) => {
+        setEvalTpl(evalTpl);
+      },
+      onTplCategoriesChange: ({ evalTpl, setEvalTpl }) => (name, data) => {
+        const index = findIndex(evalTpl.categories, { name });
+        if (index !== -1) {
+          const index2 = findIndex(evalTpl.categories[index].items, { name: data.name });
+          if (index2 !== -1) {
+            evalTpl.categories[index].items[index2] = data;
+          }
+        }
+        setEvalTpl(evalTpl);
+      },
+
+      onSave: ({ evalTpl, onError, onSuccess, intl, mode, onCommit, result, summary, bizName, bizId, goBack }) => () => {
+        if (mode === 'edit') {
+          post(`${url}/${evalTpl.id}`, evalTpl.categories).then(({ error }) => {
+            if (error) {
+              onError(error);
+            } else {
+              onSuccess(intl.formatMessage({ id: 'common.success' }));
+            }
+          });
+        } else if (mode === 'write') {
+          let score = 0;
+          evalTpl.categories.forEach((category) => {
+            category.items.forEach((item) => {
+              if (item.score) {
+                score += item.score;
+              }
+            });
+          });
+          if (onCommit) {
+            onCommit(evalTpl, { result, summary, score });
+          } else {
+            saveRow('comm_eval', { result, summary, score, content: evalTpl, bizName, bizId }).then(({ error, data }) => {
+              if (error) {
+                onError(error);
+              } else {
+                onSuccess(intl.formatMessage({ id: 'common.success' }));
+                goBack();
+              }
+            });
+          }
+        }
+      }
+    };
+  })
+);
+
+
+const EvalTplDetail = ({ intl, mode, result, summary, evalTpl, onSave, onRemove, onChange, onTplChange, onTplCategoriesChange }) => {
+  if (!evalTpl) {
+    return <Loading />;
+  }
+  const onSummaryChange = (event) => {
+    onChange({ summary: event.target.value });
+  };
+  const onResultChange = (event) => {
+    onChange({ result: event.target.value });
+  };
+  return (
+    <div className={styles.content}>
+      <div className={styles.rowContent}>
+        {evalTpl.categories.map((item, index) => {
+          return (
+            <TestQuestion
+              onChange={onTplCategoriesChange}
+              intl={intl}
+              title={item.name}
+              dataSource={item.items}
+              key={index}
+              mode={mode}
+              remove={onRemove}
+            />
+          );
+        })}
+        <div className={styles.check}>
+          {mode === 'check' && evalTpl.requireResult && (
+            <EvalConclusion
+              mode={mode}
+              result={result}
+              summary={summary}
+              onResultChange={onResultChange}
+              onSummaryChange={onSummaryChange}
+              resultTitle={intl.formatMessage({ id: 'common.text.option' })}
+              summaryTitle={intl.formatMessage({ id: 'common.text.synthesis' })}
+            />
+          )}
+          {mode !== 'check' && (
+            <div className={styles.button}>
+              <Button text={intl.formatMessage({ id: 'common.text.save' })} onClick={onSave} />
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default enhance(EvalTplDetail);

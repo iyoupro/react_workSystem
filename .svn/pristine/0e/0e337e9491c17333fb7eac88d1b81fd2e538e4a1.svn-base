@@ -1,0 +1,81 @@
+/** @format */
+
+import React, { memo, useState, useEffect, useRef } from 'react';
+import { Grid } from 'react-virtualized';
+import styles from './TablePage2.less';
+import { getData } from '../lib/utils';
+
+const init = (props, info) => {
+  const [table, setTable] = useState({ dataSource: null, columns: null, pageSize: 40, schema: null });
+  useEffect(() => {
+    if (!info.isInit.current) {
+      getData('/api/schema/pers_employee').then(({ error, data }) => {
+        table.schema = data;
+        setTable(table);
+      });
+      getData('/api/class/pers_employee', { page: 1, pageSize: 400 }).then(({ error, data }) => {
+        const columns = [];
+        for (let prop in data.rows[0]) {
+          columns.push({ key: prop, title: prop, dataIndex: prop, width: 200 });
+        }
+        columns[0].width = 50;
+        columns[1].width = 100;
+        columns[0].fixed = 'left';
+        columns[1].fixed = 'left';
+        columns.push({
+          key: 'action',
+          title: 'action',
+          dataIndex: 'action',
+          fixed: 'right',
+          width: 75,
+          render: (title, record) => (
+            <Popconfirm title="Sure to delete?" onConfirm={() => handleDelete(title, record.key)}>
+              <a href="javascript:;">Delete</a>
+            </Popconfirm>
+          ),
+        });
+        data.rows.map(row => (row.key = row.id));
+        table.dataSource = data.rows;
+        table.columns = columns;
+        setTable(table);
+      });
+      info.isInit.current = true;
+    }
+  });
+  return table;
+};
+
+const list = [
+  ['Brian Vaughn', 'Software Engineer', 'San Jose', 'CA', 95125 /* ... */ ]
+  // And so on...
+];
+
+function cellRenderer ({ columnIndex, key, rowIndex, style }) {
+  // console.log(columnIndex, key, rowIndex, style);
+  return (
+    <div
+      key={key}
+      style={style}
+    >
+      {list[rowIndex][columnIndex]}
+    </div>
+  )  
+}
+
+const TablePage2 = props => {
+  const info = { isInit: useRef(false) };
+  const { dataSource, columns } = init(props, info);
+  return (
+    <Grid
+      cellRenderer={cellRenderer}
+      columnCount={list[0].length}
+      columnWidth={100}
+      rowHeight={60}
+      height={300}
+      rowCount={list.length}
+      width={300}
+    />
+  );
+};
+
+export default TablePage2;

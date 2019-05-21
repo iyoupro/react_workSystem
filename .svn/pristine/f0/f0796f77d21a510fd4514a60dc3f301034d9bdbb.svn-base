@@ -1,0 +1,19 @@
+import React, { Component } from 'react';
+// import PropTypes from 'prop-types';
+import { DragDropContext } from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
+
+class DropWrapper extends Component {
+  render() {
+    const { style } = this.props;
+    return (
+      <div
+        style={{ ...style }}
+      >
+        {this.props.children}
+      </div>
+    );
+  }
+}
+
+export default DragDropContext(HTML5Backend)(DropWrapper);

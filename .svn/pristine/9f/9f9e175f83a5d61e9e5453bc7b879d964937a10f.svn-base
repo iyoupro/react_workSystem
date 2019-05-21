@@ -1,0 +1,68 @@
+import React, { memo, useState } from 'react';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import uniqueId from 'lodash/uniqueId';
+import cloneDeep from 'lodash/cloneDeep';
+import styles from './index.less';
+
+const keyCodes = {
+  enter: 13,
+  escape: 27,
+  arrowDown: 40,
+  arrowUp: 38,
+  tab: 9,
+};
+
+
+export const DragDropWrapper = memo(props => {
+  const { className, style, value, onChange, children } = props;
+  const reorderList = (sourceItemIndex, sourceListId, destinationItemIndex, destinationListId) => {
+    const newValue = cloneDeep(value);
+    const [removedItem] = newValue[sourceListId].splice(sourceItemIndex, 1);
+    newValue[destinationListId].splice(destinationItemIndex, 0, removedItem);
+    if (onChange) onChange(newValue);
+  };
+
+  const onDragEnd = result => {
+    const { source, destination } = result;
+    if(!destination) return;
+    reorderList(result.source.index, result.source.droppableId, result.destination.index, result.destination.droppableId)
+  }
+
+  return (
+    <DragDropContext onDragEnd={onDragEnd}>
+      {children}
+    </DragDropContext>
+  );
+});
+
+export const SortableList = memo(props => {
+  const { className, style, listId, value, ItemRender, direction, ...otherProps } = props;
+  return (
+    <Droppable droppableId={listId} direction={direction}>
+      {(provided, snapshot) => (
+        <div
+          ref={provided.innerRef}
+          className={`${className} ${styles.scrollListWrapper} ${direction === 'horizontal' ? styles.horizontal : styles.vertical}`}
+        >
+          {value && value.map((itemData, index) => 
+            <Draggable key={itemData.key} draggableId={itemData.key} index={index} >
+              {(provided, snapshot) => (
+                <ItemRender
+                  connectDragRef={provided.innerRef}
+                  connectDrag={provided.draggableProps}
+                  connectDragHandle={provided.dragHandleProps}
+                  data={itemData}
+                  index={index}
+                  isDragging={snapshot.isDragging}
+                  {...otherProps}
+                />
+              )}
+            </Draggable>
+            )}
+          {provided.placeholder}
+        </div>
+      )}
+    </Droppable>
+  );
+});
+

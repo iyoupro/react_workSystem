@@ -1,0 +1,405 @@
+import { lifecycle, withHandlers, compose } from 'recompose';
+import * as d3 from 'd3';
+
+const chartDidMount = lifecycle({
+  componentDidMount() {
+    const { getWindowResize, renderNode, selectNone, flowChartUpdatePos, nodeSize, updateNodeWidth, mode } = this.props;
+    if (mode === 'flowChart') {
+      const chart = document.getElementById('chartWrapper');
+      updateNodeWidth(chart.clientWidth * (nodeSize || 8) / 100);
+      flowChartUpdatePos();
+    }
+    d3.select('#chartView').on('click', selectNone);
+    window.addEventListener('resize', getWindowResize);
+    renderNode('append');
+    if (mode === 'flowChart') {
+      const chartView = d3.select('#chartWrapper').select('.chartView');
+      const group = chartView.select('.group');
+      function zoomed() {
+        group.attr('transform', d3.event.transform);
+      }
+      chartView.call(d3.zoom()
+        .scaleExtent([0.1, 1])
+        .on('zoom', zoomed));
+    }
+  },
+});
+
+const chartDidUpdate = lifecycle({
+  componentDidUpdate() {
+  }
+}); 
+
+const chartWillUnmount = lifecycle({
+  componentWillUnmount() {
+    window.removeEventListener('resize',this.props.getWindowResize);
+    // d3.select('#flowChart').call(".zoom", null);
+  }
+}); 
+
+const renderNode = ({ chartData, nodeSize, textPos, nodeShadow, selectNode, selectedNode, searchNode, updateModalState, mode }) => (state) => {
+  const chart = document.getElementById('chartWrapper');
+  const chartWidth = chart.clientWidth;
+  const nodeWidth = chartWidth * (nodeSize || 8) / 100;
+  let popupEntry, popupEntryLineRow, popupEntryLineCol, popupEntryOperaArea;
+  const nodeGroup = d3.select('.nodeGroup');
+  const lineGroup = d3.select('.lineGroup');
+  const lines = lineGroup.selectAll('path').data(chartData, d => d.id);
+  const nodes = nodeGroup.selectAll('g').data(chartData, d => d.id);
+  let nodeShape, nodeText, nodeCondition;
+  switch (state) {
+    case 'append':
+      const nodesEnter = nodes.enter().append('g');
+      nodeShape = nodesEnter.append('use');
+      nodeText = nodesEnter.append('foreignObject');
+      nodeCondition = nodesEnter.append('foreignObject');
+      nodesEnter
+        .attr('class', data => `node-${data.id}`)
+        .attr('transform', data => `translate(${data.posX},${data.posY})`)
+        .on('click', () => (d3.event.target.nodeName === 'use' || d3.event.target.nodeName === 'foreignObject') && selectNode(null));
+      nodeShape
+        .attr('xlink:href', data => `#${data.shapeInfo.nodeType}`)
+        .attr('fill', data => data.shapeInfo.fillColor || 'white')
+        .attr('stroke', data => data.shapeInfo.strokeColor || '')
+        .attr('width', `${nodeWidth}`)
+        .attr('height', `${nodeWidth}`)
+        .attr('transform', 'scale(0, 0)')
+        .transition('transform')
+        .duration(500)
+        .attr('transform', 'scale(1, 1)');
+      nodeShadow && nodeShape.attr('filter', `url(#nodeShadow)`);
+      nodeText
+        .text(data => data.data)
+        .attr('class', 'nodeText')
+        .attr('width', `${nodeWidth * 3 / 4}`)
+        .attr('height', `${nodeWidth * (1 - (textPos || 50) / 100)}`)
+        .attr('x', `${nodeWidth / 8}`)
+        .attr('y', `${nodeWidth * (textPos || 50) / 100}` )      
+        .style('overflow', 'hidden')
+        .style('white-space', 'nowrap')
+        .style('text-overflow', 'ellipsis')
+        .style('text-align', 'center')
+        .style('color', data => data.shapeInfo.textColor || 'black')
+        .style('transform', 'scale(0, 0)')
+        .transition('transform')
+        .duration(500)
+        .style('transform', 'scale(1, 1)');
+      nodeCondition
+        .text(data => data.condition)
+        .attr('class', 'nodeCondition')
+        .attr('width', `${nodeWidth * 3 / 4}`)
+        .attr('height', `${nodeWidth}`)
+        .attr('x', `${nodeWidth / 8}`)
+        .attr('y', `${-nodeWidth * 0.1}`)      
+        .style('overflow', 'hidden')
+        .style('white-space', 'nowrap')
+        .style('text-overflow', 'ellipsis')
+        .style('text-align', 'center')
+        .style('color', data => data.shapeInfo.textColor || 'black')
+        .style('transform', 'scale(0, 0)')
+        .transition('transform')
+        .duration(500)
+        .style('transform', 'scale(1, 1)');
+      if (mode === 'flowChart') {
+        popupEntry = nodesEnter.append('circle');
+        popupEntryLineRow = nodesEnter.append('rect');
+        popupEntryLineCol = nodesEnter.append('rect');
+        popupEntryOperaArea = nodesEnter.append('rect');
+      }
+      break;
+    case 'update':
+      // nodeShape = nodes.select('use');
+      nodeText = nodes.select('.nodeText');
+      nodeCondition = nodes.select('.nodeCondition');
+      nodes
+        .transition('transform')
+        .duration(500)
+        .attr("transform", data => `translate(${data.posX},${data.posY})`);
+      nodeText
+        .text(data => data.data);
+      nodeCondition
+        .text(data => data.condition);
+      break;
+    case 'exit':
+      const nodesExit = nodes.exit();
+      nodeShape = nodesExit.select('use');
+      nodeText = nodesExit.select('.nodeText');
+      nodeCondition = nodesExit.select('.nodeCondition');
+      nodeShape
+        .transition()
+        .duration(500)
+        .attr('fill', 'transparent')
+        .style('transform', 'scale(0, 0)');
+      nodeText
+        .transition()
+        .duration(500)
+        .style('color', 'transparent')
+        .style('transform', 'scale(0, 0)');
+      nodeCondition
+        .transition()
+        .duration(500)
+        .style('color', 'transparent')
+        .style('transform', 'scale(0, 0)');
+      nodesExit
+        .transition()
+        .duration(500)
+        .remove();
+      const linesExit = lines.exit();
+      linesExit
+        .remove();
+      break;
+    case 'resize':
+      nodeShape = nodes.select('use');
+      nodeText = nodes.select('.nodeText');
+      nodeCondition = nodes.select('.nodeCondition');
+      nodes
+        .attr("transform", data => `translate(${data.posX},${data.posY})`);
+      nodeShape
+        .attr('width', `${nodeWidth}`)
+        .attr('height', `${nodeWidth}`);
+      nodeText
+        .attr('x', `${nodeWidth / 8}`)
+        .attr('y', `${nodeWidth * (textPos || 50) / 100}` )
+        .attr('width', `${nodeWidth * 3 / 4}`)
+        .attr('height', `${nodeWidth * (1 - (textPos || 50) / 100)}`)
+      nodeCondition
+        .attr('width', `${nodeWidth * 3 / 4}`)
+        .attr('height', `${nodeWidth}`)
+        .attr('x', `${nodeWidth / 8}`)
+        .attr('y', `${-nodeWidth * 0.1}`);   
+      if (mode === 'flowChart' && selectedNode) {
+        const selection = d3.select(".nodeGroup").select(`.node-${selectedNode.id}`);
+        selection.on('mouseover', null);
+        selection.on('mouseover', () => {
+            selection.select('.popupEntry')
+              .transition()
+              .attr('r', `${nodeWidth / 12}`);
+            selection.select('.popupEntryLineRow')
+              .transition()
+              .attr('width', `${nodeWidth / 10}`)
+              .attr('height', `${nodeWidth / 100}`);
+            selection.select('.popupEntryLineCol')
+              .transition()
+              .attr('width', `${nodeWidth / 100}`)
+              .attr('height', `${nodeWidth / 10}`);
+          }
+        );
+      }
+      if (mode === 'flowChart') {
+        popupEntry = nodes.select('.popupEntry');
+        popupEntryLineRow = nodes.select('.popupEntryLineRow');
+        popupEntryLineCol = nodes.select('.popupEntryLineCol');
+        popupEntryOperaArea = nodes.select('.popupEntryOperaArea');
+      }
+      break;
+    default:
+      break;
+  }
+  if (mode === 'flowChart') {
+    const line = state === 'append' ? lines.enter().append("path") : lines; 
+    line
+      .style('fill', "none")
+      .style("stroke", "#000")
+      .style("stroke-width", "2")
+      .style("stroke-dasharray", data => {
+        let maxLength = 0;
+        for (let i = 0, length = data.children.length;i < length;i++) {
+          const childNode = chartData[searchNode(data.children[i].id)];
+          const pathLength = Math.abs(data.posX - childNode.posX) + Math.abs(data.posY - childNode.posY);
+          maxLength = maxLength > pathLength ? maxLength : pathLength;
+        }
+        return `${maxLength}`;        
+      })
+      .attr("d", data => {
+        var path = d3.path();
+        path.moveTo(data.posX + nodeWidth / 2, data.posY + nodeWidth / 2);
+        for (let i = 0, length = data.children.length;i < length;i++) {
+          const childNode = chartData[searchNode(data.children[i].id)];
+          path.lineTo(data.posX + nodeWidth / 2, childNode.posY - nodeWidth * 0.75 / 2);
+          path.lineTo(childNode.posX + nodeWidth / 2, childNode.posY - nodeWidth * 0.75 / 2);
+          path.lineTo(childNode.posX + nodeWidth / 2, childNode.posY + nodeWidth / 5.2);
+          path.lineTo(childNode.posX + nodeWidth / 2 - 15, childNode.posY + nodeWidth / 5.35 - 15);
+          path.lineTo(childNode.posX + nodeWidth / 2, childNode.posY + nodeWidth / 5.2);
+          path.lineTo(childNode.posX + nodeWidth / 2 + 15, childNode.posY + nodeWidth / 5.35 - 15);
+          path.lineTo(childNode.posX + nodeWidth / 2, childNode.posY + nodeWidth / 5.2);
+          length > 1 && path.moveTo(data.posX + nodeWidth / 2, data.posY + nodeWidth / 2);
+        }
+        if (data.children.length !== 0)
+          return path.toString()
+      })
+      .transition()
+      .duration(state === 'resize' ? 1 : 2000)
+      .styleTween("stroke-dashoffset", data => {
+        let maxLength = 0;
+        for (let i = 0, length = data.children.length;i < length;i++) {
+          const childNode = chartData[searchNode(data.children[i].id)];
+          const pathLength = Math.abs(data.posX - childNode.posX) + Math.abs(data.posY - childNode.posY);
+          maxLength = maxLength > pathLength ? maxLength : pathLength;
+        }
+        return d3.interpolateNumber(maxLength, 0);        
+      });    
+  }
+  if (mode === 'flowChart' && (state === 'resize' || state === 'append')) {
+    function clickPopupEntry() {
+      d3.select(this.parentNode).select('.popupEntry')
+        .transition()
+        .attr('r', '0');
+      d3.select(this.parentNode).select('.popupEntryLineRow')
+        .transition()
+        .attr('width', '0')
+        .attr('height', '0');
+      d3.select(this.parentNode).select('.popupEntryLineCol')
+        .transition()
+        .attr('width', '0')
+        .attr('height', '0');
+      updateModalState('showChoose');
+    }
+    popupEntry
+      .on('click', clickPopupEntry)
+      .attr('class', 'popupEntry')
+      .attr('cx', `${nodeWidth * 1.12}`)
+      .attr('cy', `${nodeWidth / 1.95}`)
+      .attr('r', '0')
+      .attr('fill', data => data.shapeInfo.selectedFillColor || 'white');
+    nodeShadow && popupEntry.attr('filter', `url(#nodeShadow)`);
+    popupEntryLineRow
+      .on('click', clickPopupEntry)
+      .attr('class', 'popupEntryLineRow')
+      .attr('x', `${nodeWidth * 1.07}`)
+      .attr('y', `${nodeWidth / 1.95}`)
+      .attr('width', '0')
+      .attr('height', '0')
+      .attr('fill', data => data.shapeInfo.selectedTextColor || 'white');
+    popupEntryLineCol
+      .on('click', clickPopupEntry)
+      .attr('class', 'popupEntryLineCol')
+      .attr('x', `${nodeWidth * 1.115}`)
+      .attr('y', `${nodeWidth / 2.15}`)
+      .attr('width', '0')
+      .attr('height', '0')
+      .attr('fill', data => data.shapeInfo.selectedTextColor || 'white');
+    popupEntryOperaArea
+      .attr('class', 'popupEntryOperaArea')
+      .attr('x', `${nodeWidth * 0.99}`)
+      .attr('y', `${nodeWidth / 3}`)
+      .attr('width', `${nodeWidth / 20}`)
+      .attr('height', `${nodeWidth / 3}`)
+      .attr('fill', 'transparent');
+  }
+}
+
+const getWindowResize = ({ renderNode, flowChartUpdatePos, updateNodeWidth, nodeSize, mode }) => () => {
+  const chart = document.getElementById('chartWrapper')
+  mode === 'flowChart' && updateNodeWidth(document.getElementById('chartWrapper').clientWidth * (nodeSize || 8) / 100);
+  flowChartUpdatePos();  
+  renderNode('resize');
+}
+
+const selectNone = ({ selectedNode, updateSelectedNode, mode }) => (deleteNode = false) => {
+  if (deleteNode) {
+    updateSelectedNode(null);
+    return;
+  }
+  if (selectedNode && (!d3.event || d3.event.target.id === "chartView")) {
+    const selection = d3.select(".nodeGroup").select(`.node-${selectedNode.id}`);
+    selection.select('use')
+    .transition() 
+    .attr('fill', data => data.shapeInfo.fillColor || 'red')
+    .attr('stroke', data => data.shapeInfo.strokeColor || '');
+    selection.select('foreignObject').transition().style('color', data => data.shapeInfo.textColor || 'white');
+    updateSelectedNode(null);
+    selection.on('mouseover', null);
+    selection.on('mouseout', null);
+    if (mode === 'flowChart')
+      hiddenPopupEntry(selection);
+  }
+}
+
+const selectNode = ({ chartData, selectedNode, updateSelectedNode, searchNode, mode, nodeSize }) => (nodeId) => {
+  if (selectedNode) {
+    const selection = d3.select(".nodeGroup").select(`.node-${selectedNode.id}`);
+    selection.select('use')
+    .transition()
+    .attr('fill', data => data.shapeInfo.fillColor || 'red')
+    .attr('stroke', data => data.shapeInfo.strokeColor || '');
+    selection.select('foreignObject').transition().style('color', data => data.shapeInfo.textColor || 'white');
+    if (mode === 'flowChart') {
+      selection.on('mouseover', null);
+      selection.on('mouseout', null);
+      hiddenPopupEntry(selection);
+    }
+  }
+
+  const selection = nodeId ? d3.select(`.node-${nodeId}`) : d3.select(d3.event.target.parentNode);
+  selection.select('use')
+  .transition() 
+  .attr('fill', data => data.shapeInfo.selectedFillColor || 'red')
+  .attr('stroke', data => data.shapeInfo.selectedStrokeColor || '');
+  selection.select('foreignObject').transition().style('color', data => data.shapeInfo.selectedTextColor || 'white');
+
+  let newSelectedNode = chartData[searchNode(selection.attr('class').slice(5))];
+  updateSelectedNode(newSelectedNode);
+  if (mode === 'flowChart') {
+    const chart = document.getElementById('chartWrapper');
+    const chartWidth = chart.clientWidth;
+    const nodeWidth = chartWidth * (nodeSize || 8) / 100;
+    if (!nodeId) {
+      selection.select('.popupEntry')
+        .transition()
+        .duration(100)
+        .attr('r', `${nodeWidth / 12}`);
+      selection.select('.popupEntryLineRow')
+        .transition()
+        .duration(100)
+        .attr('width', `${nodeWidth / 10}`)
+        .attr('height', `${nodeWidth / 100}`);
+      selection.select('.popupEntryLineCol')
+        .transition()
+        .duration(100)
+        .attr('width', `${nodeWidth / 100}`)
+        .attr('height', `${nodeWidth / 10}`);
+    }
+    selection.on('mouseover', () => {
+        selection.select('.popupEntry')
+          .transition()
+          .duration(100)
+          .attr('r', `${nodeWidth / 12}`);
+        selection.select('.popupEntryLineRow')
+          .transition()
+          .duration(100)
+          .attr('width', `${nodeWidth / 10}`)
+          .attr('height', `${nodeWidth / 100}`);
+        selection.select('.popupEntryLineCol')
+          .transition()
+          .duration(100)
+          .attr('width', `${nodeWidth / 100}`)
+          .attr('height', `${nodeWidth / 10}`);
+      }
+    );
+    selection.on('mouseout', () => d3.event.relatedTarget && d3.event.relatedTarget.localName !== 'iframe' && d3.select(d3.event.relatedTarget.parentNode).attr('class') !== `node-${newSelectedNode.id}` && hiddenPopupEntry(selection));
+  }
+}
+
+const hiddenPopupEntry = (selection) => {
+  selection.select('.popupEntry')
+    .transition()
+    .duration(300)
+    .attr('r', '0');
+  selection.select('.popupEntryLineRow')
+    .transition()
+    .duration(300)
+    .attr('width', '0')
+    .attr('height', '0');
+  selection.select('.popupEntryLineCol')
+    .transition()
+    .duration(300)
+    .attr('width', '0')
+    .attr('height', '0');
+}
+
+const chartLifecycle = compose(chartDidMount, chartDidUpdate, chartWillUnmount);
+const chartRenderNode = withHandlers({ renderNode });
+const chartSelect = withHandlers({ selectNode, selectNone });
+const chartResize = withHandlers({ getWindowResize });
+
+export default compose(chartSelect, chartRenderNode, chartResize, chartLifecycle);

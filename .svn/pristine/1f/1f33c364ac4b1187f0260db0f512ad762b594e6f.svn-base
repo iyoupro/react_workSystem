@@ -1,0 +1,32 @@
+import React, { memo } from 'react';
+import { Button, Checkbox, Row, Col } from 'antd';
+import Input from '../components/Input';
+import styles from './Checkbox.less';
+
+const MyCheckBox = memo(({ data, mode, selected, setData, ...props})=> {
+  const { options } = data;
+  // console.log(options)
+  return (
+    <Checkbox.Group className={styles.wrapper} >
+      { options && options.map(option =>
+        <Checkbox key={option.id} className={styles.checkboxLine} value={option.id} disabled={mode !== 'write'}>
+            <Input 
+              // inputClassName={styles.declaraction} 
+              // underlineClassName={styles.underLine}
+              // underlineClassName={styles.focusUnderLine}
+              autoSize
+              showUnderline
+              // value={'options'}
+              placeholder="选项1"
+              onChange={event => setCheckbox('options', event.target.value)} />
+        </Checkbox>)}
+      {mode === 'edit' && 
+        <Checkbox disabled className={styles.checkboxLine}>
+          <span className={styles.checkboxAdd}>添加选项</span>   
+        </Checkbox>  
+      }     
+  </Checkbox.Group>
+  );
+});
+
+export default MyCheckBox;

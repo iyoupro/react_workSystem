@@ -1,0 +1,14 @@
+import React, { memo } from 'react';
+import { Input } from 'antd';
+import styles from './Paragraph.less';
+
+const { TextArea } = Input;
+
+const Paragraph = props => {
+  const { data, mode, setData } = props;
+  const { inputValue } = data;
+
+  return <TextArea rows={4} className={styles.wrapper} disabled={mode !== 'write' } value={inputValue} onChange={event => setData('inputValue', event.target.value)}/> 
+};
+
+export default memo(Paragraph);

@@ -1,0 +1,218 @@
+import React, { useEffect, useRef } from 'react';
+import ReactQuill, { Quill, Mixin, Toolbar } from 'react-quill';
+import { withState, pipe, withHandlers } from '../rehook';
+import 'react-quill/dist/quill.snow.css'; // ES6
+import styles from './QuillPage.less';
+let fonts = ['songTi', 'heiTi','kaiTi','fangSong'];  
+let Font = Quill.import('formats/font');  
+Font.whitelist = fonts;
+Quill.register(Font, true);
+let Size = Quill.import('attributors/style/size');
+Size.whitelist = ['12px', '24px', '36px', '48px'];
+Quill.register(Size, true);
+
+let Inline = Quill.import('blots/inline');
+let Block = Quill.import('blots/block');
+
+class Div extends Block { 
+  static create(value) {
+  let node = super.create(value);
+    console.log(node, value);
+  // if (value.style !== '') { node.setAttribute('style', value.style) }
+  return node;
+  }
+  static formats(node) {
+    // console.log(node.tagName);
+    return {
+      style: node.getAttribute('style') ? node.getAttribute('style') : null
+    }
+  }
+}
+Div.blotName = 'div';
+Div.tagName = 'div';
+Quill.register(Div);
+
+class Table extends Block {
+  static create(value) {
+  let node = super.create();
+  if (value.style !== '') { node.setAttribute('style', value.style) }
+  return node;
+  }
+  static formats(node) {
+    return {
+      style: node.getAttribute('style') ? node.getAttribute('style') : null
+    }
+  }
+}
+Table.blotName = 'table';
+Table.tagName = 'table';
+Quill.register(Table);
+
+class Td extends Block {
+  static create(value) {
+  let node = super.create();
+  if (value.style !== '') { node.setAttribute('style', value.style) }
+  return node;
+  }
+  static formats(node) {
+    return {
+      style: node.getAttribute('style') ? node.getAttribute('style') : null
+    }
+  }
+}
+Td.blotName = 'td';
+Td.tagName = 'td';
+Quill.register(Td);
+
+class Tr extends Block {
+  static create(value) {
+  let node = super.create();
+  if (value.style !== '') { node.setAttribute('style', value.style) }
+  return node;
+  }
+  static formats(node) {
+    return {
+      style: node.getAttribute('style') ? node.getAttribute('style') : null
+    }
+  }
+}
+
+Tr.blotName = 'tr';
+Tr.tagName = 'tr';
+Quill.register(Tr);
+
+// var toolbarOptions = [
+//   ['bold', 'italic', 'underline', 'strike'],        // toggled buttonsqqqq
+//   ['blockquote', 'code-block'],
+
+//   [{ 'header': 1 }, { 'header': 2 }],               // custom button values
+//   [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+//   [{ 'script': 'sub' }, { 'script': 'super' }],      // superscript/subscript
+//   [{ 'indent': '-1' }, { 'indent': '+1' }],          // outdent/indent
+//   [{ 'direction': 'rtl' }],                         // text direction
+
+//   [{ 'size': ['small', false, 'large', 'huge', 'aaa'] }],  // custom dropdown
+//   [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+
+//   [{ 'color': [] }, { 'background': [] }],          // dropdown with defaults from theme
+//   [{ 'font': [] }],
+//   [{ 'align': [] }],
+
+//   ['clean']                                         // remove formatting button
+// ];
+
+// toolbar样式
+const CustomToolbar = () => (
+  <div id="toolbar">
+    <span className="ql-formats">
+      <select className="ql-font">
+        <option value="songTi" />
+        <option value="heiTi" />
+        <option value="kaiTi" />
+        <option value="fangSong" />
+      </select>
+      <select className="ql-size">
+        <option value="12px" />
+        <option value="24px" />
+        <option value="36px" />
+        <option value="48px" />
+      </select>
+      <select className="ql-color" />
+      <select className="ql-background" />
+    </span>
+    <span className="ql-formats">
+      <select className="ql-header">
+        <option value="1" />
+        <option value="2" />
+        <option value="3" />
+        <option value="4" />
+        <option value="5" />
+        <option value="6" />
+        <option defaultValue />
+      </select>
+    </span>
+    <span className="ql-formats">
+      <button className="ql-bold" />
+      <button className="ql-italic" />
+      <button className="ql-underline" />
+      <button className="ql-strike" />
+    </span>
+    <span className="ql-formats">
+      <button className="ql-list" value="ordered" />
+      <button className="ql-list" value="bullet" />
+    </span>
+    <span className="ql-formats">
+      <button className="ql-blockquote" />
+      <button className="ql-code-block" />
+    </span>
+    <span className="ql-formats">
+      <button className="ql-script" value="sub" />
+      <button className="ql-script" value="super" />
+    </span>
+    <span className="ql-formats">
+      <select className="ql-align" />
+    </span>
+    <span className="ql-formats">
+      <button className="ql-link" />
+      <button className="ql-image" />
+      <button className="ql-video" />
+    </span>
+    <span className="ql-formats">
+      <button className="ql-showhtml" />
+    </span>
+  </div>
+);
+
+const options = {
+  debug: "warn",
+  theme: "snow",
+  modules: { // 自定义 toolbar 填写这个属性， 值写上 div 的 id
+    toolbar: "#toolbar"
+  }
+};
+
+const enhance = pipe(
+  withState('value', 'setValue', '<embed> <div style=\"margin:30px auto;width: 730px;\">\r\n    <!--start-->\r\n    <div style=\"width: 600px;height: 800px;background: white;z-index: 2;padding: 2rem  4rem;\">\r\n      <img src=\"data:image/png;base64,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\" style=\"margin-top:-30px;\"/>\r\n      <span style=\"  margin-left: 23%;font-size: 2rem;\"> 聘 书</span>\r\n      <p style=\"font-size: 1.2rem;text-indent:2rem;\">兹聘任钟豪先生/女士为维修工程部教员，聘期年，自至止。</p>\r\n      <br/>\r\n      <p style=\"text-indent:2rem;font-size: 1.2rem;\">特发此证</p>\r\n      <p style=\"padding-left: 55%;font-size: 1.2rem;\">华夏航空维修工程部培训分部</p>\r\n      <p  style=\"padding-left: 65%;font-size: 1.2rem;\"></p>\r\n      <br>\r\n      <span style=\" margin-left: 40%;font-size: 1.6rem;\">续聘记录</span>\r\n      <table  border=\"1\" cellspacing=\"0\" style=\"margin-left: 10%;margin-top: 1%; margin-bottom: 10%;\">\r\n        <tr>\r\n          <td style=\"text-align: center;width: 220px;height: 30px;\">续聘日期</td>\r\n          <td style=\"text-align: center;width: 220px;height: 30px;\">有效期至</td>\r\n        </tr>\r\n        <tr>\r\n          <td style=\"text-align: center;width: 220px;height: 30px;\">2019-11-21</td>\r\n          <td style=\"text-align: center;width: 220px;height: 30px;\">2020-11-21</td>\r\n        </tr>\r\n        <tr>\r\n          <td style=\"text-align: center;width: 220px;height: 30px;\">2020-11-22</td>\r\n          <td style=\"text-align: center;width: 220px;height: 30px;\">2021-11-22</td>\r\n        </tr>\r\n        <tr>\r\n          <td style=\"text-align: center;width: 220px;height: 30px;\">2021-11-23</td>\r\n          <td style=\"text-align: center;width: 220px;height: 30px;\">2022-11-23</td>\r\n        </tr>\r\n      </table>\r\n      <p style=\"font-weight:bold;text-indent:2rem;font-size: 1.2rem;\">备注：</p>\r\n      <span style=\"display: block;width:500px;margin-left:10%;\">续聘周期到期前2个月系统需要提醒（邮件、微信、短信，频率为每周一次） 培训管理员续签聘书，培训管理员如同意续聘，则系统自动生成下一周期（三年） 的续聘记录，并录入系统。续聘日期是对上一聘用日期截止时间进行连续续聘， 而不是培训管理员处理流程日期，如上一聘用日期为：2015年1月1日至2018年1月1日，\r\n        培训管理人员处理流程的时间是2017年10月1日，那么续聘日期应为：2018年1月1日至 2021年1月1日\r\n      </span>\r\n    </div>\r\n    <!--end-->\r\n  </div></embed> '),
+  withHandlers({
+    onChange: ({ setValue }) => (value) => {
+      // value = this.editor.root.innerHTML;
+      // this.setState({value});
+      setValue(value); 
+    }
+  })
+);
+
+const Test = ({ value, onChange }) => {
+  // const info = { init: useRef(null), editor: useRef(null) }
+  // useEffect(() => {
+  //   if (!info.init.current) {
+  //     let html = `
+  //       <div style="color: red">
+  //         12345
+  //         <div style="font-size: 24px">234</div>
+  //       </div>
+  //     `
+  //     info.editor.current.getEditor().clipboard.dangerouslyPasteHTML(html);
+  //     info.init.current = true;
+  //   }
+  // });
+
+  return (<div className={styles.QuillWrapper}>
+    <CustomToolbar />
+    <ReactQuill 
+      // ref={info.editor}
+      theme="snow" 
+      value={value} 
+      modules={{
+        clipboard: {
+          matchVisual: false,
+        }, 
+        toolbar: {
+          container: '#toolbar',
+        },
+      }}
+      onChange={onChange} />
+  </div>);
+};
+
+export default pipe(enhance, Test);

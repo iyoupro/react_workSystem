@@ -1,0 +1,13 @@
+.wrapper{
+  width: 100%;
+  & .radioLine{
+    padding: 4px 0;
+    display: flex;
+  };
+  &  .radioAdd:hover{
+    // outline: dashed;
+    cursor: pointer;
+    color: gray;
+    border-bottom:1px dashed #000;
+  };
+} 

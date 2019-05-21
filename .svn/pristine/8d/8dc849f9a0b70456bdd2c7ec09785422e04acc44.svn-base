@@ -1,0 +1,109 @@
+/** @format */
+
+import React, { useState } from 'react';
+import Section from './Section';
+import Input from './components/Input';
+import uniqueId from 'lodash/uniqueId';
+import styles from './index.less';
+
+const setSection = (sectionId, prop, newPropData, data, setData) => {
+  for (let i = 0; i < data.sections.length; i += 1) {
+    if (data.sections[i].id === sectionId) {
+      data.sections[i][prop] = newPropData;
+      setData(data);
+      return;
+    }
+  }
+};
+
+const onTitleChange = (changedValue, data, setData) => {
+  data.title = changedValue;
+  setData(data);
+}
+
+const FormsPage = props => {
+  const [data, setData] = useState(props.data);
+  const [mode, setMode] = useState(props.mode);
+  const [selectedItem, setSelectedItem] = useState(null);
+
+  return (
+    <div className={styles.wrapper}>
+      <div className={styles.header} >
+        <Input 
+          inputClassName={styles.title} 
+          focusUnderlineClassName={styles.titleFocusUnderline} 
+          placeholder="请输入表单标题"
+          value={data.title}
+          autoSize
+          showUnderline={false}
+          onChange={e => onTitleChange(e.target.value, data, setData)} 
+        />
+      </div>
+      {data.sections.map(section => (
+        <Section
+          key={section.id}
+          mode={mode}
+          section={section}
+          selectedItem={selectedItem}
+          setSection={(prop, newPropData) => setSection(section.id, prop, newPropData, data, setData)}
+        />
+      ))}
+    </div>
+  );
+};
+
+const initialData = {
+  title: '未命名表单',
+  sections: [
+    {
+      id: 'secition1',
+      totalScore: 0,
+      items: [
+        {
+          id: 'item1',
+          type: 'SectionTitle',
+          title: '未命名标题',
+          declaraction: null,
+        },
+        {
+          id: 'item2',
+          type: 'Radio',
+          title: 'radio1',
+          score: 0,
+          isRequired: true,
+          declaraction: 'aaaa',
+          inputValue: null,
+          options: ['选项1', '选项2', '选项3'],
+          layout: 2,
+        },
+        {
+          id: 'item3',
+          type: 'Checkbox',
+          title: 'checkbox1',
+          score: 0,
+          isRequired: false,
+          declaraction: null,
+          inputValue: null,
+          options: ['选项1', '选项2'],
+          layout: 2,
+        },
+        {
+          id: 'item4',
+          type: 'Paragraph',
+          score: 0,
+          isRequired: true,
+          title: 'paragrap1',
+          declaraction: 'ccc',
+          inputValue: null,
+        },
+      ],
+    },
+  ],
+};
+
+FormsPage.defaultProps = {
+  mode: 'edit',
+  data: initialData,
+};
+
+export default FormsPage;

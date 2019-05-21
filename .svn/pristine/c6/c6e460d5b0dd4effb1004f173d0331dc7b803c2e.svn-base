@@ -1,0 +1,14 @@
+.wrapper {
+  width: fit-content;
+  height: fit-content;
+}
+.table {
+  width: fit-content;
+  height: fit-content;
+  // border: 1px solid black;
+  & >tbody > tr {
+    & > td {
+      border: 1px solid black;
+    }
+  }
+}

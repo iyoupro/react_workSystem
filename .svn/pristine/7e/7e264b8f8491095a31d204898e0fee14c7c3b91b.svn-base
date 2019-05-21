@@ -1,0 +1,139 @@
+import  { withHandlers, withState, lifecycle, pipe } from '../../rehook';
+import uniqueId from 'lodash/uniqueId';
+import cloneDeep from 'lodash/cloneDeep';
+import produce from 'immer';
+
+const initialData = {
+  title: '未命名表单',
+  sections: [
+    {
+      id: 'secition1',
+      items: [
+        {
+          id: 'item1',
+          type: 'SectionTitle',
+          title: '',
+          declaraction: null,
+        },
+        {
+          id: 'item2',
+          type: 'Radio',
+          title: '',
+          score: 2,
+          isRequired: true,
+          declaraction: '',
+          inputValue: null,
+          options: [{ title: '', id: 'option1' }, { title: '', id: 'option2' }, { title: '', id: 'option3'}],
+          layout: 1,
+        },
+        {
+          id: 'item3',
+          type: 'Checkbox',
+          title: '',
+          score: 3,
+          isRequired: false,
+          declaraction: null,
+          inputValue: [],
+          options: [{ title: '', id: 'option1' }, { title: '', id: 'option2' }, { title: '', id: 'option3'}],
+          layout: 2,
+        },
+        {
+          id: 'item4',
+          type: 'Paragraph',
+          score: 4,
+          isRequired: true,
+          title: '',
+          declaraction: '',
+          inputValue: null,
+        },
+        {
+          id: 'item5',
+          type: 'Time',
+          score: 5,
+          isRequired: true,
+          title: '',
+          declaraction: '',
+          timeType: 'startEndDate', //,date,time,dateTime 
+          inputValue: null,
+        },
+      ],
+    },
+  ],
+};
+
+const initPage = pipe(
+  withState('data', 'updateData', ownProps => ownProps.data || initialData),
+  withState('mode', 'setMode', ownProps => ownProps.mode || 'edit'),
+  withState('selectedItem', 'setSelectedItem', ownProps => ownProps.data.sections[0].items[0]),
+  withHandlers({
+    setData: ({ data, updateData }) => (prop, newPropData) => {
+      updateData(produce(data, draftData => {
+        draftData[prop] = newPropData
+      }));
+    },
+    setSectionData: ({ data, updateData }) => (sectionIndex, prop, newPropData) => {
+      updateData(produce(data, draftData => {
+        draftData.sections[sectionIndex][prop] = newPropData;
+      }));
+    },
+    setItemData: ({ data, updateData }) => (sectionIndex, itemIndex, prop, newPropData) => {
+      updateData(produce(data, draftData => {
+        draftData.sections[sectionIndex].items[itemIndex][prop] = newPropData;
+      }));
+    },
+    reorderItems: ({ data, updateData }) => (sectionIndex, startItemIndex, endItemIndex) => {
+      updateData(produce(data, draftData => {
+        const [removed] = draftData.sections[sectionIndex].items.splice(startItemIndex, 1);
+        draftData.sections[sectionIndex].items.splice(endItemIndex, 0, removed);
+      }));
+    },
+    findSelectedItem: ({ data, selectedItem }) => () => {
+      for (let i = 0, len = data.sections.length; i < len; i += 1) {
+        for (let j = 0, length = data.sections[i].items.length; j < length; j += 1) {
+          if (data.sections[i].items[j].id === selectedItem.id) {
+            return [i, j];
+          }
+        }
+      }
+      return [null, null]
+    }
+  }),
+  withHandlers({  
+    addItem: ({ data, findSelectedItem, setSelectedItem, updateData }) => () => {
+      const [targetSectionIndex, selectedItemIndex] = findSelectedItem();
+      const newItem = {
+        id: uniqueId(),
+        type: 'Radio',
+        title: '',
+        score: 0,
+        isRequired: false,
+        declaraction: null,
+        inputValue: null,
+        options: [{ title: '', id: uniqueId() }],
+        layout: 1,
+      };
+      updateData(produce(data, draftData => {
+        draftData.sections[targetSectionIndex].items.splice(selectedItemIndex + 1, 0, newItem);
+      }));
+      setSelectedItem(newItem);
+    },
+    deleteItem: ({ data, findSelectedItem, setSelectedItem, updateData }) => () => {
+      const [targetSectionIndex, selectedItemIndex] = findSelectedItem();
+      updateData(produce(data, draftData => {
+        draftData.sections[targetSectionIndex].items.splice(selectedItemIndex, 1);
+      }));
+      setSelectedItem(data.sections[targetSectionIndex].items[0]);
+    },
+    cloneItem: ({ data, findSelectedItem, setSelectedItem, updateData }) => () => {
+      const [targetSectionIndex, selectedItemIndex] = findSelectedItem();
+      const newItem = cloneDeep(data.sections[targetSectionIndex].items[selectedItemIndex]);
+      newItem.id = uniqueId();
+      updateData(produce(data, draftData => {
+        draftData.sections[targetSectionIndex].items.splice(selectedItemIndex + 1, 0, newItem);
+      }));
+      setSelectedItem(newItem);
+    },
+  })
+);
+
+export default { initPage };

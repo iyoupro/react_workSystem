@@ -1,0 +1,12 @@
+/** @format */
+.wrapper {
+  width: 100%;
+  display: flex;
+  & .line {
+    display: flex;
+  };
+  & .cheackboxAdd:hover{
+    cursor: pointer;
+    border-bottom:1px dashed #000;
+  };
+}

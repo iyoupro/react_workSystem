@@ -1,0 +1,11 @@
+import React, { memo } from 'react';
+import styles from './Time.less';
+
+const Time = memo(props => {
+  const { options } = props;
+  return (
+    <div></div>
+  );
+});
+
+export default Time;

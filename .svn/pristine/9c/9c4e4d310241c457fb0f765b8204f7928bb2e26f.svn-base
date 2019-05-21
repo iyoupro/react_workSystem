@@ -1,0 +1,35 @@
+import React, { useState } from 'react';
+import { Dropdown, Icon } from 'antd';
+import DrInput from '../components/DrInput';
+import styles from './DrInputPage.less';
+
+const Menu = (
+  <div style={{ background: 'red', width: 200, height: 200 }}>
+  </div>
+);
+
+const DropdownMenu = (
+  <Dropdown overlay={Menu} trigger={['click']}>
+    <Icon className={styles.dropDownIcon} type='down' />
+  </Dropdown >
+);
+
+const DrInputPage = props => {
+  const [value, setValue] = useState('');
+  const onChange = event => setValue(event.target.value);
+
+  return (
+    <div className={styles.wrapper}>
+      <DrInput
+        className={styles.input}
+        value={value}
+        onChange={onChange}
+        addonAfter={DropdownMenu}
+        showEmptyButton
+        // emptyButtonClassName
+      />
+    </div>
+  );
+}
+
+export default DrInputPage;

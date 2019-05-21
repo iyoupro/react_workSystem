@@ -1,0 +1,142 @@
+import React from 'react';
+import Handsontable from "handsontable";
+import { HotTable } from '@handsontable/react';
+import produce from "immer"
+import 'handsontable/dist/handsontable.full.css';
+import 'handsontable/languages/all';
+import { withState, withPropsOnChange, pipe, withHandlers } from '../rehook';
+import styles from './SheetPage.less';
+
+class CustomSelectEditor extends Handsontable.editors.SelectEditor {
+  constructor(props) {
+    console.log(props)
+    super(props);
+  }
+
+  // getValue() {
+  //   return this.select.value;
+  // }
+
+  setValue(value) {
+    console.log(value);
+    this.select.value = value;
+  }
+
+  prepare(...args) {
+    Handsontable.editors.BaseEditor.prototype.prepare.apply(this, args);
+    const selectOptions = this.cellProperties.selectOptions;
+    let options;
+    if (typeof selectOptions === 'function') {
+      options = this.prepareOptions(selectOptions(this.row, this.col, this.prop));
+    } else {
+      options = this.prepareOptions(selectOptions);
+    }
+    Handsontable.dom.empty(this.select);
+    const objectEach = (object, iteratee) => {
+      for (const key in object) {
+        if (!object.hasOwnProperty || (object.hasOwnProperty && Object.prototype.hasOwnProperty.call(object, key))) {
+          if (iteratee(object[key], key, object) === false) {
+            break;
+          }
+        }
+      }
+    }
+    objectEach(options, (value, key) => {
+      this.options = options;
+      const optionElement = document.createElement('OPTION');
+      optionElement.value = value;
+      Handsontable.dom.fastInnerHTML(optionElement, key);
+      this.select.appendChild(optionElement);
+    });
+  }
+}
+
+const buildSettings = ({ columns }) => {
+  const colHeaders = [];
+  const cols = [];
+  columns.forEach((h) => {
+    colHeaders.push(h.title);
+    const col = { data: h.name, type: h.type };
+    if (col.type === 'date') {
+      col.dateFormat = h.format;
+      col.correctFormat = true;
+    } else if (col.type === 'numeric') {
+      col.numericFormat = h.format;
+    }
+    cols.push(col);
+  });
+  let options = {
+    a: 'male',
+    b: 'fomale',
+    c: 'lam',
+  };
+  cols.push({
+    editor: 'select',
+    selectOptions: options,
+    renderer: function (instance, td, row, col, prop, value, cellProperties) {
+      let span = document.createElement('span');
+      span.innerHTML = options[value] || '';
+      Handsontable.dom.empty(td);
+      td.appendChild(span);
+      return td;
+    }
+  })
+  return {
+    colHeaders, columns: cols, rowHeaders: true, autoColumnSize: true, contextMenu: true,
+    language: 'zh-CN'
+  };
+};
+
+const enhance = pipe(
+  withState('settings', 'setSettings'),
+  withPropsOnChange(['columns'], ({ setSettings, columns }) => {
+    setSettings(buildSettings({ columns }));
+  }),
+  withHandlers({
+    afterChange: ({ data, onChange }) => (changes) => {
+      if (changes) {
+        const data2 = produce(data, draft => {
+          changes.forEach(([row, prop, oldValue, newValue]) => {
+            draft[row][prop] = newValue;
+          })
+        });
+        if (onChange) {
+          onChange(data2);
+        }
+      }
+    }
+  })
+);
+
+const SheetTable = ({ data, settings, afterChange, rowNum }) => {
+
+  console.log(settings)
+  return (
+    <HotTable
+      data={data}
+      width="600" height="300"
+      settings={settings}
+      afterChange={afterChange}
+    />
+  );
+}
+
+const SheetTableWrapper = pipe(enhance, SheetTable);
+
+const SheetPage = () => {
+  return (
+    <div className={styles.wrapper}>
+      <SheetTableWrapper
+        onChange={(changed) => {
+          console.log(changed)
+        }}
+        data={[{ field1: 'f1', field2: '2018-09-01' }, { field1: 'f3', field2: '2018-09-01' }]}
+        columns={[{ name: 'field1', title: '字段1' }, { name: 'field2', title: '字段2', type: 'date', format: 'YYYY-MM-DD' }]}
+      />
+    </div>
+
+
+  );
+}
+
+export default SheetPage;

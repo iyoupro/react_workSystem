@@ -1,0 +1,10 @@
+import React, { memo } from 'react';
+import styles from './CustomTr.less';
+
+const CustomTr = memo(props => {
+  return (
+    <tr {...props} />
+  );
+});
+
+export default CustomTr;

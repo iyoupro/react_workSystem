@@ -1,0 +1,69 @@
+/** @format */
+
+import React, { memo, useState, useEffect, useRef } from 'react';
+import { Popconfirm, Tooltip } from 'antd';
+import DrTable from '../components/DrTable';
+import styles from './TablePage.less';
+import { getData } from '../lib/utils';
+
+const init = (props, info) => {
+  const [table, setTable] = useState({ dataSource: null, columns: null, pageSize: 5000, schema: null, scrollX: 0 });
+  useEffect(() => {
+    if (!info.isInit.current) {
+      getData('/api/class/pers_employee', { page: 1, pageSize: table.pageSize }).then(({ error, data }) => {
+        const columns = [];
+        for (let prop in data.rows[0]) {
+          columns.push({ key: prop, title: prop, dataIndex: prop });
+        }
+        data.rows.map(row => (row.key = row.id));
+        table.dataSource = data.rows;
+        table.columns = columns;
+        setTable(table);
+      });
+      info.isInit.current = true;
+    }
+  });
+  return table;
+};
+
+const handleDelete = (key) => {
+  console.log(key);
+};
+
+const rowSelection = {
+  onChange: (selectedRowKeys, selectedRows) => {
+    // console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+  },
+};
+
+const TablePage = props => {
+  const info = { isInit: useRef(false), calWidth: useRef(null) };
+  const { dataSource, columns, pageSize, scrollX } = init(props, info);
+
+  return (
+    <div className={styles.tablePageWrapper}>
+      <DrTable
+        className={styles.table}
+        dataSource={dataSource}
+        columns={columns}
+        pagination={{ pageSize: 20 }}
+        rowSelection={rowSelection}
+        extraOptions={{
+          lazyload: true,
+          fixItem: [2, 0], // numbers of left, right
+          cellWidth: { 
+            type: 'curPage', 
+            default: 120, 
+            widths: { id: 60, name: 80, action: 70 } 
+          }, // type = numbers, allPage, curPage
+          cellHeight: 60,
+          tableHeight: 700,
+          showDeleteButton: true,
+          onHandleDelete: handleDelete,
+        }}
+      />
+    </div>
+  );
+};
+
+export default TablePage;

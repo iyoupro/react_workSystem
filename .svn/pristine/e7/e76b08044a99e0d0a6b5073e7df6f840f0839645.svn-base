@@ -1,0 +1,35 @@
+import React, { memo } from 'react';
+import { Radio, Row, Col } from 'antd';
+import Input from '../components/Input';
+
+import styles from './Radio.less';
+
+const RadioGroup = Radio.Group;
+
+const MyRadio = memo(({ data, mode, selected, setData, ...props}) => {
+  const { options } = data;
+  // console.log(data);
+  return (
+    <RadioGroup name="radiogroup" className={styles.wrapper}>
+      {options && options.map(option => 
+      <div>
+        <Radio key={option.id} className={styles.line} value={option.id} disabled={mode !== 'write'} >       
+          <Input 
+            // inputClassName={styles.declaraction} 
+            // underlineClassName={styles.underLine}
+            // underlineClassName={styles.focusUnderLine}
+            autoSize
+            showUnderline
+            placeholder="选项1"
+            value={option.title}
+            onChange={event => setData('option.title', event.target.value)} />  
+        </Radio>
+      </div> )}
+      <Radio disabled />
+      <span className={styles.radioAdd}>添加选项  </span>
+    </RadioGroup>
+
+  );
+});
+
+export default MyRadio;

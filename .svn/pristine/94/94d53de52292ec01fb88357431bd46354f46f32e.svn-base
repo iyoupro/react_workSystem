@@ -1,0 +1,17 @@
+import { withState, compose } from "recompose";
+import chartData from './chartData.json';
+
+const initialChartData = chartData;
+const initialSelectedNode = null;
+const initialRenderInfo = {}
+const initialNodeWidth = null;
+const initialChartWidth = null;
+const initialNodeSerialNumber = 2;
+export default compose(
+  withState('chartData', 'updateChartData', initialChartData),
+  withState('selectedNode', 'updateSelectedNode', initialSelectedNode),
+  withState('renderInfo', 'updateRenderInfo', initialRenderInfo),
+  withState('nodeSerialNumber', 'updateNodeSerialNumber', initialNodeSerialNumber),
+  withState('nodeWidth', 'updateNodeWidth', initialNodeWidth),
+  withState('chartWidth', 'updateChartWidth', initialChartWidth),
+);

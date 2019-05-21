@@ -1,0 +1,174 @@
+import React, { Component } from 'react';
+import { findDOMNode } from 'react-dom';
+import { DragSource, DropTarget } from 'react-dnd';
+import { getEmptyImage } from 'react-dnd-html5-backend';
+import flow from 'lodash/flow';
+
+const TargetSpec = {
+  canDrop(props, monitor) {
+    return monitor.isOver() && monitor.isOver({ shallow: true });
+  },
+  drop(props, monitor, component) {
+    const sourceItem = monitor.getItem();
+    // 判断被拖拽的DraggableComponent是不是拖到自己身上
+    const dropToItSelf = findDOMNode(component) === findDOMNode(sourceItem.DOM);
+    // 判断被拖拽的DraggableComponent是不是拖到了原本其所在的DropArea
+    const dropToItSameArea = sourceItem.dragSourceAreaId === props.dragSourceAreaId;
+    // 判断被拖拽对象是不是拖到其所在DropArea下任一多选对象上面
+    const dropToItsSelecedItems = dropToItSameArea ? sourceItem.selectedItems.indexOf(props.index) !== -1 : false; // eslint-disable-line
+    if (!dropToItSelf && !dropToItsSelecedItems) {
+      sourceItem.pushHistory(sourceItem.items);
+      props.pushHistory(props.items);
+    }
+    if (!props.fix && !dropToItSelf && !dropToItsSelecedItems && !dropToItSameArea) {
+      // 若当前被当做DropTarget的DraggableComponent所在的DropArea的fix属性为false并且本次拖拽不是自己拖自己,则在该DropArea下新增被拖拽对象克隆
+      props.addItem(sourceItem.data, props.index);
+      props.onChange();
+    }
+    if (!sourceItem.fix && !dropToItSelf && !dropToItsSelecedItems && !dropToItSameArea) {
+      // 若被拖拽对象所在的DropArea的fix属性为false并且本次拖拽不是自己拖自己，则从该DropArea删除被拖拽对象。
+      sourceItem.remove();
+      sourceItem.onChange();
+    }
+    if (!props.fix && !dropToItSelf && !dropToItsSelecedItems && dropToItSameArea) {
+      // 如果被拖拽对象所在的DropArea的fix属性为false，并且本次拖拽是一次DropArea内部调整顺序的拖拽，并且被拖拽对象不是自己拖自己
+      let indexOffset = 0;
+      const selectedItems = props.selectedItems.slice();
+      if (selectedItems.length === 0) selectedItems.push(sourceItem.index);
+      for (let i = 0, length = selectedItems.length; i < length; i += 1) {
+        if (selectedItems[i] < props.index) indexOffset += 1;
+      }
+      sourceItem.remove(sourceItem);
+      props.addItem(sourceItem.data, props.index - indexOffset);
+      sourceItem.onChange();
+      props.onChange();
+    }
+  },
+};
+
+function TargetCollect(connect, monitor) { // Collect中return的对象将作为props传递给当前DraggableComponent组件
+  return {
+    connectDropTarget: connect.dropTarget(),
+    isOver: monitor.isOver() && monitor.isOver({ shallow: true }), // 判断当前DraggableComponent上是否有拖拽对象
+  };
+}
+
+const SourceSpec = {
+  beginDrag(props, monitor, component) { // 当前组件开始拖拽
+    const { fix, data, index, selectedItems, items, deleteItem, dragSourceAreaId, onChange, pushHistory } = props; // eslint-disable-line
+    if (selectedItems.indexOf(index) !== -1) {
+      // 如果当前DraggableComponent所在的DropArea有多选的组件并且当前DraggableComponent是被选之一
+      // 回调所在DropArea传进来的setSelectedItemsDragging方法通知所在DropArea下所有的DraggleComponent组件开始了群体拖拽
+      props.setSelectedItemsDragging(true);
+      const dataArr = [];
+      for (let i = selectedItems.length - 1; i >= 0; i -= 1) {
+        dataArr.push({ ...items[selectedItems[i]], selected: false }); // eslint-disable-line
+      }
+      const remove = () => deleteItem(selectedItems);
+      // drop成功后通过sourceItem.remove()即可从被拖拽对象所在的DropArea删除所有被拖拽的对象
+      // 所有返回的信息将在作为DropTarget的DropArea或者DraggableComponent上的TargetSpec-drop中以monitor.getItem()取到
+      // 即sourceItem = monitor.getItem()
+      return { data: dataArr, fix, index, DOM: component, remove, selectedItems, dragSourceAreaId, items, pushHistory, onChange }; // eslint-disable-line
+    }
+    // 如果触发拖拽的对象不在其所在DropArea的多选对象里
+    props.setSelectedItemsDragging(true);
+    props.cancelSelect(); // 清空掉其所在DropArea的多选对象。
+    const remove = () => deleteItem([index]);
+    return { data: [{ ...data, selected: false }], fix, index, DOM: component, remove, selectedItems, dragSourceAreaId, items, pushHistory, onChange }; // eslint-disable-line
+  },
+  endDrag(props) {
+    props.setSelectedItemsDragging(false);
+    /* 回调所在DropArea传进来的setSelectedItemsDragging方法,
+    通知所在DropArea下所有的DraggleComponent组件结束了群体拖拽 */
+    props.cancelSelect(); // 清空掉触发拖拽对象所在DropArea的多选对象。
+  },
+};
+
+function SourceCollect(connect, monitor) { // Collect中return的对象将作为props传递给当前DraggableComponent组件
+  return {
+    connectDragSource: connect.dragSource(),
+    connectDragPreview: connect.dragPreview(),
+    dragging: monitor.isDragging(), // 判断当前DraggableComponent是否处于被拖拽状态
+  };
+}
+
+class DraggableComponent extends Component {
+  componentDidMount() { // 更改拖拽对象拖拽时候的样子
+    const { dragPreview, highPerformanceDragPreview, connectDragPreview } = this.props;
+    if (dragPreview !== undefined) connectDragPreview(getEmptyImage());
+    if (highPerformanceDragPreview) {
+      const Img = new Image();
+      Img.onload = connectDragPreview(Img);
+      Img.src = highPerformanceDragPreview;
+    }
+  }
+
+  render() {
+    const { connectDragSource, connectDropTarget, dropPreview, fix, data, index, newItemProps, isOver, onSelect, dragSourceAreaId,
+      selectedItemsDragging, dragging, selectedItems, sourceItem, setItem, deleteItem, Item, itemWrapperStyle, dragItemHidden,
+      highPerformanceDragPreview, dragPreview } = this.props;
+    const isDragging = (selectedItemsDragging && selectedItems.indexOf(index) !== -1) || dragging;
+    /* isDragging 代表实际可拖拽组件是否处于被拖拽状态, dragging是其本身的SourceCollect传递的是否被拖拽的属性,
+    selectedItems.indexOf(index) !== -1 由组件所在DropArea传递进来表示判断当前组件是否是其所在DropArea下被多选组件中的一个，
+    selectedItemsDragging也由所在DropArea传递进来表示判断是否被多选组件中的任一一个触发拖拽。
+    */
+    if (!data && !sourceItem) return null;
+    const group = [];
+    let width, height;
+    if (!dropPreview) { // 此处是由DropArea items渲染出来的链接了可DropSource和DropTarget的实际组件
+      width = data.width ? (isOver && sourceItem && !fix ? newItemProps.width : data.width) : 'fit-content';
+      height = data.height ? (isOver && sourceItem && !fix ? newItemProps.height : data.height) : 'fit-content';
+      group.push(
+        connectDragSource(connectDropTarget(
+          <div key="draggableComponent" style={{ ...itemWrapperStyle, display: dragItemHidden && isDragging && !fix ? 'none' : '', width, height }}>
+            {(!isOver || fix) &&
+              <Item
+                data={data} // eslint-disable-line
+                inFixArea={fix} selected={data.selected} dragging={isDragging} itemInAreaDragging={selectedItemsDragging}
+                selectItem={() => onSelect(index)} deleteItem={() => deleteItem([index])} 
+                setItem={(newItemData) => setItem(index, newItemData)}
+                AreaId={dragSourceAreaId}
+              />
+            }
+            {isOver && sourceItem && !fix &&
+              <Item
+                data={sourceItem.data[sourceItem.data.length - 1]}
+                dropPreview inFixArea={fix} selected={data.selected} 
+                itemInAreaDragging={selectedItemsDragging}
+                AreaId={dragSourceAreaId}
+              />
+            }
+          </div>,
+        )),
+      );
+    }
+    if (!fix) {
+      if (sourceItem && (dropPreview || (isOver && !isDragging))) { // 此处渲染PreView组件
+        width = (newItemProps && newItemProps.width) || 'fit-content';
+        height = (newItemProps && newItemProps.height) || 'fit-content';
+        for (let i = sourceItem.data.length - (dropPreview ? 1 : 2); i >= 0; i -= 1) {
+          group.push(
+            <div key={`preViewComponent${i}`} style={{ ...itemWrapperStyle, width, height }}>
+              <Item data={sourceItem.data[i]} dropPreview />
+            </div>,
+          );
+        }
+      }
+      if (data && isOver && !isDragging) { // 此处渲染over后占位组件
+        width = (data && data.width) || 'fit-content';
+        height = (data && data.height) || 'fit-content';
+        group.push(
+          <div key="placeholderComponent" style={{ ...itemWrapperStyle, width, height }}>
+            <Item data={data} placeholder />
+          </div>,
+        );
+      }
+    }
+    return group;
+  }
+}
+
+export default flow(
+  DragSource('SmartDnd', SourceSpec, SourceCollect),
+  DropTarget('SmartDnd', TargetSpec, TargetCollect),
+)(DraggableComponent);

@@ -1,0 +1,130 @@
+import  { withHandlers, withState, lifecycle, pipe } from '../../rehook';
+import uniqueId from 'lodash/uniqueId';
+import produce from 'immer';
+
+const initialData = {
+  title: '未命名表单',
+  sections: [
+    {
+      id: 'secition1',
+      totalScore: 0,
+      items: [
+        {
+          id: 'item1',
+          type: 'SectionTitle',
+          title: '未命名',
+          declaraction: null,
+        },
+        {
+          id: 'item2',
+          type: 'Radio',
+          title: 'radio1',
+          score: 0,
+          isRequired: true,
+          declaraction: 'aaaa',
+          inputValue: null,
+          options: [{ title: '单选1', id: 'option1' }, { title: '单选2', id: 'option2' }, { title: '单选3', id: 'option3'}],
+          layout: 1,
+        },
+        {
+          id: 'item3',
+          type: 'Checkbox',
+          title: 'checkbox1',
+          score: 0,
+          isRequired: false,
+          declaraction: null,
+          inputValue: null,
+          options: [{ title: '多选1', id: 'option1' }, { title: '多选2', id: 'option2' }, { title: '多选3', id: 'option3'}],
+          layout: 2,
+        },
+        {
+          id: 'item4',
+          type: 'Paragraph',
+          score: 0,
+          isRequired: true,
+          title: 'paragrap1',
+          declaraction: 'ccc',
+          inputValue: null,
+        },
+        {
+          id: 'item5',
+          type: 'Time',
+          score: 0,
+          isRequired: true,
+          title: '选择时间',
+          declaraction: '选择时间：',
+          timeType: 'startEndDate', //,date,time,dateTime 
+          inputValue: null,
+        },
+      ],
+    },
+  ],
+};
+
+const initPage = pipe(
+  withState('data', 'updateData', ownProps => ownProps.data || initialData),
+  withState('mode', 'setMode', ownProps => ownProps.mode || 'edit'),
+  withState('selectedItem', 'setSelectedItem', ownProps => ownProps.data.sections[0].items[0]),
+  withHandlers({
+    setData: ({ data, updateData }) => (prop, newPropData) => {
+      updateData(produce(data, draftData => {
+        draftData[prop] = newPropData
+      }));
+    },
+    setSectionData: ({ data, updateData }) => (sectionIndex, prop, newPropData) => {
+      updateData(produce(data, draftData => {
+        draftData.sections[sectionIndex][prop] = newPropData;
+      }));
+    },
+    setItemData: ({ data, updateData }) => (sectionIndex, itemIndex, prop, newPropData) => {
+      updateData(produce(data, draftData => {
+        draftData.sections[sectionIndex].items[itemIndex][prop] = newPropData;
+      }));
+    },
+    reorderItems: ({ data, updateData }) => (sectionIndex, startItemIndex, endItemIndex) => {
+      updateData(produce(data, draftData => {
+        const [removed] = draftData.sections[sectionIndex].items.splice(startItemIndex, 1);
+        draftData.sections[sectionIndex].items.splice(endItemIndex, 0, removed);
+      }));
+    },
+    findSelectedItem: ({ data, selectedItem }) => () => {
+      for (let i = 0, len = data.sections.length; i < len; i += 1) {
+        for (let j = 0, length = data.sections[i].items.length; j < length; j += 1) {
+          if (data.sections[i].items[j].id === selectedItem.id) {
+            return [i, j];
+          }
+        }
+      }
+      return [null, null]
+    }
+  }),
+  withHandlers({  
+    addItem: ({ data, findSelectedItem, setSelectedItem, updateData }) => () => {
+      const [targetSectionIndex, selectedItemIndex] = findSelectedItem();
+      const newItem = {
+        id: uniqueId(),
+        type: 'Radio',
+        title: 'new Question',
+        score: 0,
+        isRequired: false,
+        declaraction: null,
+        inputValue: null,
+        options: [{ title: 'new Option1', id: uniqueId() }],
+        layout: 1,
+      };
+      updateData(produce(data, draftData => {
+        draftData.sections[targetSectionIndex].items.splice(selectedItemIndex + 1, 0, newItem);
+      }));
+      setSelectedItem(newItem);
+    },
+    deleteItem: ({ data, findSelectedItem, setSelectedItem, updateData }) => () => {
+      const [targetSectionIndex, selectedItemIndex] = findSelectedItem();
+      updateData(produce(data, draftData => {
+        draftData.sections[targetSectionIndex].items.splice(selectedItemIndex, 1);
+      }));
+      setSelectedItem(data.sections[targetSectionIndex].items[0]);
+    },
+  })
+);
+
+export default { initPage };

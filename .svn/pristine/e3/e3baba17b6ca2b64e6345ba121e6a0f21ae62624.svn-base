@@ -1,0 +1,39 @@
+import React, { memo } from 'react';
+import { Tabs, Icon } from 'antd';
+import History from './History/';
+import Oneitem from './Oneitem/';
+import styles from './index.less';
+import data from './History/menuData';
+
+
+const tabPanes = [''];
+//  <TabPane tab="Tab 1" key="1"><Home /></TabPane>
+const TabPane = Tabs.TabPane;
+
+const addTabPanes = (value) => {
+  tabPanes.push(value);
+}
+
+// const renderPaneContent = (tabPane) => {
+//     if (tabPane === '历史记录') return <History />;
+//   return null;
+// }
+// console.log(data.length);
+const ControlBoard = props => {
+  return (
+    <div className={`${styles.wrapper} ${data.length > 3 ? styles.wrapperWidth : styles.wrapperWidthFit}`}>
+      <Tabs tabPosition='left'>
+        {tabPanes.map((tabPane, index) =>
+          <TabPane tab={tabPane} key={index} >
+            <p className={styles.leftHead}>历史记录</p>
+            <History />
+            {/* {renderPaneContent(tabPane)} */}
+          </TabPane>
+        )}
+      </Tabs>
+      <div className={styles.footer}><Icon type='up' className={styles.footIcon} />&nbsp;关闭</div>
+    </div>
+  );
+}
+
+export default memo(ControlBoard);

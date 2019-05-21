@@ -1,0 +1,28 @@
+.wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  & > .content {
+    position: absolute;
+    top: 30px;
+    bottom: 0px;
+    width: 100%;
+    overflow: auto;
+  }
+}
+.nav {
+  width: 100%;
+  float: left;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  height: 30px;
+  & li {
+    display: inline;
+    margin-right: 5px;
+    padding: 5px;
+  }
+}

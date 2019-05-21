@@ -1,0 +1,23 @@
+import React, { memo } from 'react';
+import { Button } from 'antd';
+import styles from './Item.less';
+
+const Item = props => {
+  const { data, isExpand } = props;
+
+  return (
+    <div className={styles.wrapper} >
+    <div className={styles.label} >{data.label}</div>
+    {data.children && data.children.length > 0 &&
+      <Button
+        className={`${styles.expandButton} treeView-expand`}
+        shape='circle'
+        size='small'
+        icon={isExpand ? 'up' : 'down'}
+      />
+    }
+    </div>
+  );
+}
+
+export default memo(Item);

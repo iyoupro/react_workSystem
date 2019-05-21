@@ -1,0 +1,11 @@
+const getElementByClass = (clsName, parentEl) =>{
+    if (!parentEl) parentEl = document;
+    const childEl = parentEl.getElementsByTagName('*');
+    const arr = [];
+    for(let i in childEl) {
+        if(childEl[i].className === clsName) arr.push(childEl[i])
+    }
+    return arr;
+}
+
+export { getElementByClass };

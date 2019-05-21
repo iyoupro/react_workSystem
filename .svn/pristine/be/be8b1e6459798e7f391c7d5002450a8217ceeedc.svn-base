@@ -1,0 +1,13 @@
+import React, { memo, useState } from 'react';
+import uniqueId from 'lodash/uniqueId';
+import styles from './Item.less';
+
+const Item = memo(props => {
+  const { data } = props;
+  console.log(data);
+  return (
+    <div></div>
+  );
+});
+
+export default Item;

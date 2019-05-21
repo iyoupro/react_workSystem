@@ -1,0 +1,48 @@
+import React, { Component } from 'react';
+// import brace from 'brace';
+import AceEditor from 'react-ace';
+
+import 'brace/mode/mysql';
+import 'brace/snippets/mysql';
+import 'brace/theme/github';
+import 'brace/ext/language_tools';
+
+
+class AceEditorTest extends Component {
+
+  componentDidMount() {
+    // langTools.addCompleter({
+    //   getCompletions: function (editor, session, pos, prefix, callback) {
+    //     console.log(editor, session, pos, prefix, callback);
+    //     if (prefix.length === 0) { callback(null, []); return }
+    //     callback(null, [{
+    //       name: 'dd', //显示的名称，‘奖金’
+    //       value: '111', //插入的值，‘100’
+    //       score: 1000, //分数，越大的排在越上面
+    //       meta: 'asddsf' //描述，‘我的常量’
+    //     }]);
+    //   }
+    // });
+  }
+
+  render() {
+    return (<AceEditor
+      ref="aceEditor"
+      mode="mysql"
+      theme="github"
+      onChange={(newValue) => {
+        console.log('change', newValue);
+      }}
+     
+      enableLiveAutocompletion
+      enableSnippets
+      name="AceEditor1"
+    // editorProps={{ $blockScrolling: true }}
+    />);
+  }
+}
+
+
+
+
+export default AceEditorTest;

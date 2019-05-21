@@ -1,0 +1,81 @@
+import React, { Component } from 'react';
+import { Radio, Button } from 'antd';
+import QueueAnim from 'rc-queue-anim';
+import styles from './QueryGroup.less';
+import QueryRule from './QueryRule';
+
+const RadioButton = Radio.Button;
+const RadioGroup = Radio.Group;
+const ButtonGroup = Button.Group;
+
+export default class QueryGroup extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { tree: props.tree };
+    this.queryConditions = {
+      type: props.head ? 'AND' : 'OR',
+      conditions: [],
+    };
+    for (let i = 0; i < props.tree.length; i += 1) {
+      this.queryConditions.conditions.push(null);
+    }
+  }
+
+  onConditionChange = (event) => {
+    this.queryConditions.type = event.target.value;
+  }
+
+  onRuleChange = (index, queryCondition) => {
+    this.queryConditions.conditions[index] = queryCondition;
+    if (this.props.onRuleChange && !this.queryCondition) this.props.onRuleChange(this.props.index, this.queryConditions);
+  }
+
+  addNode = (index, componentType) => {
+    const { tree } = this.state;
+    tree.splice(index < 0 ? 0 : index, 0, { componentType, key: `${new Date()}${index}` });
+    this.setState({ tree });
+    this.queryConditions.conditions.splice(index < 0 ? 0 : index, 0, null);
+  }
+
+  deleteNode = (index) => {
+    const { tree } = this.state;
+    tree.splice(index, 1);
+    this.setState({ tree });
+    this.queryConditions.conditions.splice(index, 1);
+  }
+
+  render() {
+    const { head, deleteThis, first, last } = this.props;
+    const { tree } = this.state;
+    return (
+      <div className={`${styles.groupWrapper} ${head && styles.head} ${first && styles.first} ${last && styles.last}`}>
+        {
+          <div className={styles.operatorWrapper}>
+            <RadioGroup style={{ width: '100px', height: '26px', display: 'flex', marginLeft: '0.6%', marginTop:'0.4%', zIndex: 2 }} onChange={this.onConditionChange} defaultValue={head ? 'AND' : 'OR'}>
+              <RadioButton className={`${styles.button} ${styles.leftButton}`} value="AND" disabled={!head ? true : tree.length < 2}>AND</RadioButton>
+              <RadioButton className={`${styles.button} ${styles.leftButton}`} value="OR" disabled={!head ? false : tree.length < 2}>OR</RadioButton>
+            </RadioGroup>
+            <ButtonGroup style={{ marginRight: '1.1%', marginTop: '0.4%' }}>
+              <Button className={`${styles.button} ${styles.rightButton}`} icon="plus" onClick={() => this.addNode(tree.length, 'rule')}>Add rule</Button>
+              <Button className={`${styles.button} ${styles.rightButton}`} disabled={!head} icon="plus-circle" onClick={() => this.addNode(tree.length, 'group')}>Add group</Button>
+              {!head && <Button className={`${styles.button} ${styles.deleteButton}`} icon="delete" onClick={deleteThis} />}
+            </ButtonGroup>
+          </div>
+        }
+        <QueueAnim>
+          {
+            tree && tree.length > 0 && tree.map((node, index) => {
+              if (node.componentType === 'rule') {
+                return <QueryRule key={node.key} index={index} first={index === 0} last={index === tree.length - 1} deleteThis={() => this.deleteNode(index)} onRuleChange={this.onRuleChange} />;
+              }
+              if (node.componentType === 'group') {
+                return <QueryGroup tree={[]} key={node.key} first={index === 0} last={index === tree.length - 1} index={index} deleteThis={() => this.deleteNode(index)} onRuleChange={this.onRuleChange} />;
+              }
+              return null;
+            })
+          }
+        </QueueAnim>
+      </div>
+    );
+  }
+}

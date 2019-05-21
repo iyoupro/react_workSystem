@@ -1,0 +1,29 @@
+import React, { memo } from 'react';
+import uniqueId from 'lodash/uniqueId';
+import Item from './Item';
+import styles from './Section.less';
+
+const Section = memo(props => {
+  const { data, mode, selectedItem, updateData } = props;
+  const setData = (prop, newPropData) => {
+    data[prop] = newPropData;
+    updateData();
+  };
+
+  return (
+    <ol className={styles.wrapper}>
+      {data.items && data.items.map(item => 
+        <Item
+          key={item.id}
+          data={item}
+          mode={mode}
+          selected={selectedItem === item}
+          updateData={updateData}
+          />
+        )
+      }
+    </ol>
+  );
+});
+
+export default Section;

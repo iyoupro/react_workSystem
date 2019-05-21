@@ -1,0 +1,44 @@
+
+//  .list {
+//   margin-left:0;
+//   transition: all 0.5s;
+//  }
+
+// .listItem{
+//   padding-left: 40px;
+// }
+
+// .evaluateItem{
+//   margin-bottom: 24px;
+// }
+
+// .isMove {
+//   margin-left:20.83333333%;
+//   transition: all 0.5s;
+// }
+// .listItem{
+//   padding-left: 24px;
+// }
+
+.list {
+  margin-bottom: 20px;
+}
+
+.evaluateItem{
+  padding-bottom: 6px;
+  padding-left: 24px;
+  &:last-child{
+    margin-bottom: 18px;
+  }
+}
+
+.evaluateItemEdit{
+  padding-bottom: 6px;
+  padding-left: 24px;
+  &:hover {
+    background: #e9e9e9; 
+  }
+  &:last-child{
+    margin-bottom: 18px;
+  }
+}

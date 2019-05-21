@@ -1,0 +1,41 @@
+.wrapper {
+  &.vertical {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+  };
+  &.horizontal {
+  };
+  width: 100%;
+  min-height: 100%;
+  padding: 24px 0;
+  background: yellowgreen;
+  user-select: none;
+  & .list {
+    background: white;
+    border: 1px solid black;
+    &.vertical {
+      width: 400px;
+      & > .item {
+        width: 80%;
+        height: 100px;
+        margin: 12px 0;
+      };
+    };
+    &.horizontal {
+      width: 95%;
+      height: 120px;
+      margin: 0 auto 36px auto;
+      overflow-X: auto;
+      & > .item {
+        width: 200px;
+        height: 80%;
+        margin: 0 12px;
+      };
+    };
+    & > .item {
+      background: #e6f7ff;
+      box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.4), 1px 1px 2px 0px rgba(0, 0, 0, 0.4);
+    };
+  };
+};

@@ -1,0 +1,26 @@
+import React, { memo } from 'react';
+import uniqueId from 'lodash/uniqueId';
+import Item from './Item';
+import styles from './Section.less';
+
+import { pipe } from '../../rehook/';
+import { withSetData } from './handler';
+
+const Section = ({ data, mode, selectedItem, setData, ...props }) => {
+  return (
+    <ol className={styles.wrapper}>
+      {data.items && data.items.map(item => 
+        <Item
+          key={item.id}
+          data={item}
+          mode={mode}
+          selected={selectedItem === item}
+          {...props}
+          />
+        )
+      }
+    </ol>
+  );
+};
+
+export default pipe(withSetData, Section);

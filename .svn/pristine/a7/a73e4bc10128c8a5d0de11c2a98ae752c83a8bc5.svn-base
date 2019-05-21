@@ -1,0 +1,24 @@
+import React, { Component } from 'react';
+import styles from './index.less'
+import QueryGroup from './QueryGroup';
+
+export default class Tree extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      tree: {},
+    }
+  }
+
+  onRuleChange = (_, queryConditions) => {
+    console.log(queryConditions);
+  }
+
+  render() {
+    return (
+      <div className={styles.wrapper} >
+        <QueryGroup head tree={[]} onRuleChange={this.onRuleChange} />
+      </div>
+    );
+  }
+}

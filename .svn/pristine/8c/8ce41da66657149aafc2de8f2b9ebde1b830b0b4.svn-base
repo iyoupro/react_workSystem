@@ -1,0 +1,25 @@
+.treeNodeWrapper {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  position: relative;
+  width: fit-content;
+  height: fit-content;
+  & > .expandAnimationStart {
+    transition: all 0.75s ease;
+    background: red ;
+  }
+  & > .expandAnimationEnd {
+    transition: all 0.75s ease;
+    background: '';
+  }
+  & > .line {
+    content: '';
+    display: block;
+    position: absolute;
+    background: black;
+  };
+  & > .childrenWrapper {
+    display: flex;
+  };
+}

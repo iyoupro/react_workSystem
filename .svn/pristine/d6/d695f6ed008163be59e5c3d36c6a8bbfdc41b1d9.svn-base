@@ -1,0 +1,7 @@
+/** @format */
+.wrapper {
+  width: 100%;
+  .line {
+    display: flex;
+  }
+}

@@ -1,0 +1,13 @@
+import React, { memo, useState, useRef } from 'react';
+
+import styles from './index.less';
+
+const Gantt = props => {
+
+  return (
+    <div className={styles.gantt}>
+    </div>
+  )
+};
+
+export default memo(Gantt);

@@ -1,0 +1,48 @@
+import React, { memo } from 'react'; 
+import uniqueId from 'lodash/uniqueId';
+import { Radio } from 'antd';
+import Input from '../components/Input';
+
+import styles from './Radio.less';
+
+const RadioGroup = Radio.Group;
+
+const MyRadio = memo(({ data, mode, selected, setData, ...props}) => {
+  const { options } = data;
+  const onTitleChange = (event, targetId) => {
+    options.map(option => { if(option.id === targetId) option.title = event.target.value });
+    setData('options', options);
+  }
+
+  const onAddRadio = () => {
+    options.push({ title: 'newItem', id: uniqueId() })
+    setData('options', options);
+  }
+
+  return (
+    <RadioGroup name="radiogroup" className={styles.wrapper}>
+      {options && options.map(option => 
+      <div>
+        <Radio key={option.id} className={styles.line} value={option.id} disabled={mode !== 'write'} >       
+          <Input 
+            // inputClassName={styles.declaraction} 
+            // underlineClassName={styles.underLine}
+            // underlineClassName={styles.focusUnderLine}
+            autoSize
+            showUnderline
+            placeholder="选项1"
+            value={option.title}
+            onChange={event => onTitleChange(event, option.id)} />  
+        </Radio>
+      </div> )}
+      {mode === 'edit' && 
+        <Radio disabled value={'AddGroup'}> 
+          <span className={styles.radioAdd} onClick={onAddRadio}>添加选项  </span>
+        </Radio>
+      }
+    </RadioGroup>
+
+  );
+});
+
+export default MyRadio;

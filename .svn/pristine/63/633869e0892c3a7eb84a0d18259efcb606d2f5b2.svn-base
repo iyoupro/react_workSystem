@@ -1,0 +1,64 @@
+import React, { memo } from 'react';
+import { Select, Icon, Switch, Collapse } from 'antd';
+import Checkbox from './itemContent/Checkbox';
+import Radio from './itemContent/Radio';
+import Time from './itemContent/Time';
+import Input from './components/Input';
+import styles from './Item.less';
+import { pipe } from '../../rehook/';
+import { withSetData } from './handler';
+
+const Option = Select.Option;
+
+const types = {
+  Paragraph: { name: '段落', extraContent: null },
+  Radio: { name: '单选', extraContent: Radio },
+  Checkbox: { name: '多选', extraContent: Checkbox },
+  Time: { name: '日期', extraContent: Time }
+};
+
+const Item = ({ data, mode, setData, isSelected, setSelectedItem, copyItem, deleteItem,...props }) => {
+  const { title, declaraction, type, inputValue } = data;
+  const ExtraContent = types[type] && types[type].extraContent;
+  return (
+    <li className={`${styles.wrapper} ${isSelected ? styles.isSelected : ''}`} onClick={() => setSelectedItem(data)} >
+      <Input 
+        inputWrapperClassName={styles.title} 
+        inputClassName={styles.titleInput} 
+        underlineClassName={styles.underLine}
+        underlineClassName={styles.focusUnderLine}
+        autoSize={false}
+        showUnderline={isSelected}
+        value={title}
+        onChange={event => setData('title', event.target.value)} />
+      {type !== 'SectionTitle' &&
+        <Select className={styles.typeSelect} value={type} onSelect={value => setData('type', value)}>
+          {Object.keys(types) && Object.keys(types).map(itemType => <Option key={itemType} value={itemType}>{types[itemType].name}</Option>)}
+        </Select>  
+      }
+      {declaraction &&   
+        <Input 
+          inputWrapperClassName={styles.declaraction} 
+          inputClassName={styles.declaractionInput} 
+          underlineClassName={styles.underLine}
+          underlineClassName={styles.focusUnderLine}
+          autoSize={false}
+          showUnderline={isSelected}
+          value={declaraction}
+          onChange={event => setData('declaraction', event.target.value)} />      
+      }
+      {ExtraContent && <ExtraContent data={data} mode={mode} setData={setData} {...props} />}
+      <hr className={styles.horizontalLine} />
+      {type !== 'SectionTitle' && 
+        <div className={styles.footer}>
+          <Icon className={styles.footerItem} type="copy"/>
+          <Icon className={styles.footerItem} type="delete" onClick={deleteItem}/>
+          必填：<Switch className={styles.footerItem} checkedChildren="是" unCheckedChildren="否" defaultChecked />
+          说明显示：<Switch className={styles.footerItem} checkedChildren="是" unCheckedChildren="否" defaultChecked />
+        </div>
+      }
+    </li>
+  );
+};
+
+export default pipe(withSetData, Item);

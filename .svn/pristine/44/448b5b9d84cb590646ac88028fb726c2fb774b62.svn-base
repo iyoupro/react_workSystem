@@ -1,0 +1,96 @@
+/** @format */
+import React from 'react';
+import { Router, Route, Switch, Link } from 'dva/router';
+import { IntlProvider } from 'react-intl';
+import zh from '../locales/zh.json';
+import IndexPage from './routes/IndexPage';
+import StepChart from './routes/StepChartPage';
+import FormDesignPage from './routes/FormDesignPage';
+import OrganizationChart from './routes/OrganizationChartPage';
+import QueryBuild from './routes/QueryBuilderPage';
+import FuncConfig from './components/dataflow/FunctionConfig';
+import TablePage from './routes/TablePage';
+import FormsPage from './routes/FormPage';
+import TinyEditorPage from './routes/TinyEditorPage';
+import SortablePage from './routes/SortablePage';
+import CustomSortList from './routes/CustomSortList';
+import ControlBoardPage from './routes/ControlBoardPage';
+import GridLayoutPage from './routes/GridLayoutPage';
+
+import styles from './router.less';
+
+function RouterConfig({ history }) {
+  return (
+    <IntlProvider locale="en" messages={zh}>
+      <Router history={history}>
+        <div className={styles.wrapper}>
+          <div className={styles.nav}>
+            <li>
+              <Link to="/">home</Link>
+            </li>
+            <li>
+              <Link to="/stepChart">stepChart</Link>
+            </li>
+            <li>
+              <Link to="/formDesign">FormDesignPage</Link>
+            </li>
+            <li>
+              <Link to="/organizationChart">organizationChart</Link>
+            </li>
+            <li>
+              <Link to="/queryBuild">queryBuild</Link>
+            </li>
+            <li>
+              <Link to="/func">funcConfig</Link>
+            </li>
+            <li>
+              <Link to="/tablePage">TablePage</Link>
+            </li>
+            <li>
+              <Link to="/tinyEditor">TinyEditorPage</Link>
+            </li>
+            <li>
+              <Link to="/formsPage">FormsPage</Link>
+            </li>
+            <li>
+              <Link to="/sortablePage">SortablePage</Link>
+            </li>
+            <li>
+              <Link to="/customSortList">CustomSortList</Link>
+            </li>            
+            <li>
+              <Link to="/controlBoardPage">ControlBoardPage</Link>
+            </li>
+            <li>
+              <Link to="/gridLayoutPage">GridLayoutPage</Link>
+            </li>
+          </div>
+          <div className={styles.content}>
+            <Switch>
+              <Route path="/" exact component={IndexPage} />
+              <Route path="/stepChart" exact component={StepChart} />
+              <Route path="/formDesign" exact component={FormDesignPage} />
+              <Route path="/organizationChart" exact component={OrganizationChart} />
+              <Route path="/queryBuild" exact component={QueryBuild} />
+              <Route path="/func" exact component={FuncConfig} />
+              <Route path="/tablePage" exact component={TablePage} />
+              <Route path="/tinyEditor" exact component={TinyEditorPage} />
+              <Route path="/formsPage" exact component={FormsPage} />
+              <Route path="/sortablePage" exact component={SortablePage} />
+              <Route path="/customSortList" exact component={CustomSortList} />
+              <Route path="/controlBoardPage" exact component={ControlBoardPage} />
+              <Route path="/gridLayoutPage" exact component={GridLayoutPage} />
+              <Route 
+                component={() => {
+                  return <div>没有找到呢</div>;
+                }}
+              />
+            </Switch>
+          </div>
+        </div>
+      </Router>
+    </IntlProvider>
+  );
+}
+
+export default RouterConfig;

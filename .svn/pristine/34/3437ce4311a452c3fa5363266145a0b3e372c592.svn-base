@@ -1,0 +1,116 @@
+/** @format */
+
+import React, { memo, useRef } from 'react';
+import PropTypes from 'prop-types';
+import { addNewNode, addNewBranchNode, deleteNode, deleteBranch } from './utils/';
+import nodeShapes from './nodeShapes';
+import { render } from './render';
+import styles from './index.less';
+
+const FlowChart = memo(props => {
+  const { className, style, uniderection, extraNodeShapes } = props;
+  const chartInfo = { chartWrapper: useRef(null), chartView: useRef(null), isMount: useRef(null) };
+  console.log('render', props.chartData);
+  render(props, chartInfo);
+  return (
+    <div
+      ref={chartInfo.chartWrapper}
+      className={`${className} ${styles.chartWrapper}`}
+      style={{ ...style, overflow: uniderection ? 'auto' : '' }}
+    >
+      <svg ref={chartInfo.chartView} className={styles.chartView}>
+        <defs>
+          {
+            <filter id="nodeShadow" x="-50%" y="-50%" width="200%" height="200%">
+              <feOffset result="offOut" in="SourceGraphic" dx="2" dy="2" />
+              {/* <feFlood flood-color="rgba(0,0,0,0.5)"/> */}
+              <feColorMatrix
+                result="matrixOut"
+                in="offOut"
+                type="matrix"
+                values="0.2 0 0 0 0 0 0.2 0 0 0 0 0 0.2 0 0 0 0 0 1 0"
+              />
+              <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="4" />
+              <feBlend in="SourceGraphic" in2="blurOut" mode="normal" />
+            </filter>
+          }
+          {props.nodeShapes.map(shaple => shaple)}
+          {extraNodeShapes && extraNodeShapes.map(shaple => shaple)}
+        </defs>
+        <g className="group">
+          <g className="lineGroup" />
+          <g className="nodeGroup" />
+        </g>
+      </svg>
+    </div>
+  );
+});
+
+FlowChart.defaultProps = {
+  nodeShapes,
+  colDistance: 1,
+  rowDistance: 1,
+  showShadow: true,
+  shapeInfo: {
+    line: {
+      width: 1,
+      color: 'black',
+    },
+    headNode: {
+      nodeShape: 'ellipse',
+      fillColor: '#fcffe6',
+      textColor: 'black',
+      strokeColor: 'gray',
+      popupFillColor: 'white',
+      popupTextColor: 'black',
+      selectedFillColor: '#1890ff',
+      selectedTextColor: 'white',
+      selectedStrokeColor: 'gray',
+    },
+    tailNode: {
+      nodeShape: 'ellipse',
+      fillColor: '#fcffe6',
+      textColor: 'black',
+      strokeColor: 'gray',
+      popupFillColor: 'white',
+      popupTextColor: 'black',
+      selectedFillColor: '#1890ff',
+      selectedTextColor: 'white',
+      selectedStrokeColor: 'gray',
+    },
+    normalNode: {
+      nodeShape: 'rectangle',
+      fillColor: 'white',
+      textColor: 'black',
+      strokeColor: 'gray',
+      popupFillColor: 'white',
+      popupTextColor: 'black',
+      selectedFillColor: '#1890ff',
+      selectedTextColor: 'white',
+      selectedStrokeColor: 'gray',
+    },
+    branchNode: {
+      nodeShape: 'rectangle',
+      fillColor: '#eee',
+      textColor: 'black',
+      strokeColor: 'gray',
+      popupFillColor: 'white',
+      popupTextColor: 'black',
+      selectedFillColor: '#1890ff',
+      selectedTextColor: 'white',
+      selectedStrokeColor: 'gray',
+    },
+  },
+};
+
+FlowChart.propTypes = {
+  nodeSize: PropTypes.number.isRequired,
+  colDistance: PropTypes.number,
+  rowDistance: PropTypes.number,
+  showShadow: PropTypes.bool,
+  uniderection: PropTypes.bool.isRequired,
+  extraNodeShapes: PropTypes.array,
+  shapeInfo: PropTypes.object,
+};
+
+export { FlowChart, addNewNode, deleteNode };

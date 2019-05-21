@@ -1,0 +1,94 @@
+/** @format */
+
+import React, { useState } from 'react';
+import Section from './Section';
+import uniqueId from 'lodash/uniqueId';
+import styles from './index.less';
+
+const setSection = (sectionId, newSectionData, data, setData) => {
+  for (let i = 0; i < data.sections.length; i += 1) {
+    if (data.sections[i].id === sectionId) {
+      data.sections[i] = newSectionData;
+      setData(data);
+      return;
+    }
+  }
+};
+
+const FormsPage = props => {
+  const [data, setData] = useState(props.data);
+  const [mode, setMode] = useState(props.mode);
+  const [selectedItem, setSelectedItem] = useState(null);
+
+  return (
+    <div className={styles.wrapper}>
+      {data.title}
+      {data.sections.map(section => (
+        <Section
+          key={section.id}
+          mode={mode}
+          section={section}
+          selectedItem={selectedItem}
+          setSection={newSectionData => setSection(section.id, newSectionData, data, setData)}
+        />
+      ))}
+    </div>
+  );
+};
+
+const initialData = {
+  title: '未命名表单',
+  sections: [
+    {
+      id: 'secition1',
+      title: '未命名小节',
+      totalScore: 0,
+      items: [
+        {
+          id: 'item1',
+          type: 'sectionTitle',
+          title: '未命名标题',
+          introduce: null,
+        },
+        {
+          id: 'item2',
+          type: 'radio',
+          title: 'radio1',
+          score: 0,
+          isRequired: true,
+          introduce: 'aaaa',
+          inputValue: null,
+          options: ['选项1', '选项2', '选项3'],
+          layout: 2,
+        },
+        {
+          id: 'item3',
+          type: 'checkbox',
+          title: 'checkbox1',
+          score: 0,
+          isRequired: false,
+          introduce: null,
+          inputValue: null,
+          options: ['选项1', '选项2'],
+          layout: 2,
+        },
+        {
+          id: 'item4',
+          type: 'paragraph',
+          score: 0,
+          isRequired: true,
+          title: 'paragrap1',
+          introduce: 'ccc',
+          inputValue: null,
+        },
+      ],
+    },
+  ],
+};
+
+FormsPage.defaultProps = {
+  mode: 'edit',
+  data: initialData,
+};
+
+export default FormsPage;

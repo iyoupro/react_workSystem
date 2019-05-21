@@ -1,0 +1,9 @@
+.wrapper {
+  width: 60%;
+  min-height: 600px;
+  margin-top: 44px;
+  height: fit-content;
+  background: red;
+  list-style: none;
+  padding-inline-start: 0;
+};

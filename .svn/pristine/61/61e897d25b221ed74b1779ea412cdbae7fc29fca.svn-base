@@ -1,0 +1,35 @@
+import React, { memo } from 'react';
+import { Radio, Row, Col } from 'antd';
+import Input from '../components/Input';
+import styles from './Radio.less';
+// console.log(styles.line);
+const RadioGroup = Radio.Group;
+
+const MyRadio = memo(props => {
+  const { options } = props;
+  const radioStyle = {
+    display: 'block',
+    height: '30px',
+    lineHeight: '30px',
+  };
+  return (
+    <RadioGroup className={styles.wrapper}>
+      <Row >
+        <Col span={16} className={styles.line} >
+          <Radio style={radioStyle} value={1} />
+          <Input 
+              inputClassName={styles.declaraction} 
+              underlineClassName={styles.underLine}
+              underlineClassName={styles.focusUnderLine}
+              autoSize
+              showUnderline
+              // value={declaraction}
+              placeholder="单选题选项1"
+              onChange={event => setRadio('declaraction', event.target.value)} />
+        </Col>
+      </Row>
+    </RadioGroup>
+  );
+});
+
+export default MyRadio;

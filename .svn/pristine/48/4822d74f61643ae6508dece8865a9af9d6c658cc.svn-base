@@ -1,0 +1,51 @@
+import React, { Component } from 'react';
+// import brace from 'brace';
+import AceEditor from 'react-ace';
+
+import 'brace/mode/mysql';
+// import 'brace/snippets/mysql';
+import 'brace/theme/github';
+import 'brace/ext/language_tools';
+
+
+class AceEditorTest extends Component {
+
+  componentDidMount() {
+    const langTools = ace.acequire('ace/ext/language_tools');
+    langTools.addCompleter({
+      getCompletions(editor, session, pos, prefix, callback) {       
+        if (prefix.length === 0) { callback(null, []); return }
+        callback(null, [{
+          caption: '基本工资', //显示的名称，‘奖金’         
+          value: 'jbgz', //插入的值，‘100’
+          score: 1000, //分数，越大的排在越上面
+          meta: '项目' //描述，‘我的常量’
+        }, {
+          caption: '奖金', //显示的名称，‘奖金’
+          value: 'jj', //插入的值，‘100’         
+          score: 1000, //分数，越大的排在越上面
+          meta: '项目' //描述，‘我的常量’        
+        }
+        ]);
+      },
+    });
+  }
+
+  render() {
+    return (<AceEditor
+      ref={ref => this.aceEditor = ref}
+      mode="mysql"
+      theme="github"
+      onChange={(newValue) => {
+        console.log('change', newValue);
+      }}
+      enableLiveAutocompletion
+
+      name="AceEditor1"
+    // editorProps={{ $blockScrolling: true }}
+    />);
+  }
+}
+
+
+export default AceEditorTest;

@@ -1,0 +1,116 @@
+import React, { Component } from 'react';
+// import PropTypes from 'prop-types';
+import { DropTarget } from 'react-dnd';
+import { findDOMNode } from 'react-dom';
+import itemTypes from './itemTypes';
+import DraggableComponent from './DraggableComponent';
+
+
+const spec = {
+  canDrop(props, monitor) {
+    return monitor.isOver() && monitor.isOver({ shallow: true });
+  },
+  drop(props, monitor, component) {
+    const sourceItem = monitor.getItem();
+    const dropItSelf = findDOMNode(component) === findDOMNode(sourceItem.DOM).parentNode;
+    if (!sourceItem.fix && !dropItSelf) sourceItem.remove();
+    // console.log(sourceItem);
+    if (!props.fix && !dropItSelf) {
+      component.addItem(sourceItem.data);
+      component.cancelSelect();
+    }
+  },
+};
+
+function collect(connect, monitor) {
+  return {
+    connectDropTarget: connect.dropTarget(),
+    isOver: monitor.isOver() && monitor.isOver({ shallow: true }),
+    dragSourceInfo: monitor.getItem(),
+  };
+}
+
+class DropArea extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { selectedItems: [], items: this.props.items || [], itemsDragging: false };
+  }
+
+  onSelect = (index) => {
+    const { items, selectedItems } = this.state;
+    if (!items[index].selected) {
+      items[index].selected = true;
+      selectedItems.push(index);
+    } else {
+      items[index].selected = false;
+      selectedItems.splice(selectedItems.indexOf(index), 1);
+    }
+    // console.log(selectedItems)
+    this.setState({ items, selectedItems });
+  }
+
+  setItemsDragging = (bool) => {
+    this.setState({ itemsDragging: bool });
+  }
+
+  addItem = (newItems, index = this.state.items.length) => {
+    const { items } = this.state;
+    for (let i = 0, length = newItems.length; i < length; i += 1) {
+      items.splice(index, 0, { ...newItems[i] });
+    }
+    this.setState({ items });
+    // console.log(`Area${this.props.id} addItem:`, items);
+  }
+
+  deleteItem = (itemIndexs) => {
+    const { items } = this.state;
+    for (let i = 0, length = itemIndexs.length; i < length; i += 1) {
+      items[itemIndexs[i]] = [];
+    }
+    for (let i = items.length - 1; i >= 0; i -= 1) {
+      if (JSON.stringify(items[i]) === '[]') items.splice(i, 1);
+    }
+    this.setState({ items });
+    // console.log(`Area${this.props.id} deleteItem:`, items);
+  }
+
+  cancelSelect = (event) => {
+    if (!event || event.target.getAttribute('class') === 'DropArea') {
+      const { items, selectedItems } = this.state;
+      for (let i = 0, length = items.length; i < length; i += 1) {
+        items[i].selected = false;
+      }
+      selectedItems.splice(0, selectedItems.length);
+      this.setState({ items, selectedItems });
+      // console.log(`Area${this.props.id} cancelSelect`, selectedItems);
+    }
+  }
+
+  render() {
+    const { connectDropTarget, fix, direction, AreaId, isOver, dragSourceInfo } = this.props;
+    const { items, selectedItems, itemsDragging } = this.state;
+    const flexDirection = direction === 'row' || direction === 'column' ? direction : 'row';
+    return connectDropTarget(
+      <div
+        className="DropArea" onClick={this.cancelSelect}
+        style={{ ...this.props.style, overflow: 'auto', display: 'flex', flexDirection, flexWrap: 'wrap', alignContent: 'flex-start' }}
+      >
+        {items && items.map((data, index) =>
+          <DraggableComponent
+            key={index} index={index} data={data} fix={fix} sourceAreaId={AreaId} items={items}
+            isOverDropArea={isOver} itemsDragging={itemsDragging}
+            cancelSelect={this.cancelSelect.bind(this)}
+            setItemsDragging={this.setItemsDragging.bind(this)} onSelect={this.onSelect.bind(this)}
+            deleteItem={this.deleteItem} addItem={this.addItem} selectedItems={selectedItems}
+          />)
+        }
+        {!fix && isOver && dragSourceInfo && dragSourceInfo.sourceAreaId !== AreaId &&
+          <DraggableComponent preView fix={false} dragSourceInfo={dragSourceInfo} />
+        }
+        {this.props.children}
+      </div>,
+    );
+  }
+}
+
+export default DropTarget(itemTypes.CARD, spec, collect)(DropArea);

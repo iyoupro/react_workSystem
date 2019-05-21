@@ -1,0 +1,83 @@
+import React, { Component } from 'react';
+import { Button, Select } from 'antd';
+import styles from './QueryRule.less';
+
+const Option = Select.Option;
+
+export default class QueryRule extends Component {
+  constructor(props) {
+    super(props);
+    this.queryCondition = { name: '', op: '', value: ['', ''], or: '' };
+  }
+
+  handleInputValue1Change = (value) => {
+    const { index, onRuleChange } = this.props;
+    this.queryCondition.value[0] = value;
+    if (onRuleChange && this.queryCondition.op !== '' && this.queryCondition.value[0] !== '' && this.queryCondition.value[1] !== '') {
+      onRuleChange(index, this.queryCondition);
+    }
+  }
+
+  handleOperatorChange = (value) => {
+    const { index, onRuleChange } = this.props;
+    this.queryCondition.op = value;
+    if (onRuleChange && this.queryCondition.op !== '' && this.queryCondition.value[0] !== '' && this.queryCondition.value[1] !== '') {
+      onRuleChange(index, this.queryCondition);
+    }
+  }
+
+  handleInputValue2Change = (value) => {
+    const { index, onRuleChange } = this.props;
+    this.queryCondition.value[1] = value;
+    if (onRuleChange && this.queryCondition.op !== '' && this.queryCondition.value[0] !== '' && this.queryCondition.value[1] !== '') {
+      onRuleChange(index, this.queryCondition);
+    }
+}
+
+  render() {
+    const { deleteThis, notLast } = this.props;
+    return (
+      <div className={`${styles.ruleWrapper} ${notLast ? styles.notLast : ''}`}>
+        <Select
+          showSearch
+          style={{ width: 200 }}
+          placeholder="Select a person"
+          optionFilterProp="children"
+          onChange={this.handleInputValue1Change}
+          filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
+        >
+          <Option value="a">a</Option>
+          <Option value="b">b</Option>
+          <Option value="c">c</Option>
+        </Select>
+        <Select
+          key="inputValue1"
+          showSearch
+          style={{ width: 200, marginLeft: '5%' }}
+          placeholder="Select a person"
+          optionFilterProp="children"
+          onChange={this.handleOperatorChange}
+          filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
+        >
+          <Option value="+">+</Option>
+          <Option value="-">-</Option>
+          <Option value="*">*</Option>
+          <Option value="/">/</Option>
+        </Select>
+        <Select
+          showSearch
+          style={{ width: 200, marginLeft: '5%' }}
+          placeholder="Select a person"
+          optionFilterProp="children"
+          onChange={this.handleInputValue2Change}
+          filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
+        >
+          <Option value="1">1</Option>
+          <Option value="2">2</Option>
+          <Option value="3">3</Option>
+        </Select>
+        <span className={styles.deleteIcon}><Button className={styles.button} shape="circle" icon="delete" onClick={deleteThis} /></span>
+      </div>
+    );
+  }
+}

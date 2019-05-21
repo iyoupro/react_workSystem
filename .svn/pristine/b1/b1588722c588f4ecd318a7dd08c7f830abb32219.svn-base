@@ -1,0 +1,97 @@
+import React, { memo, useEffect, useRef } from 'react';
+import { Table } from 'antd';
+// import LazyLoadTr from './LazyLoad';
+import LazyLoad, { forceCheck } from 'react-lazyload';
+import styles from './customTable.less';
+// import { getElementByClass } from './utils';
+import cloneDeep from 'lodash/cloneDeep';
+import CustomTr from './CustomTr';
+
+const getComponent = (lazyload, rowHeight) => {
+  // console.log(lazyload, rowHeight)
+  return {
+    table: props => <table {...props}></table>,
+    header: {
+      wrapper: props => <thead {...props}></thead>,
+      row: props => <tr {...props} /> ,
+      cell: props => <th style={{ padding: 0 }} {...props}></th>,
+    },
+    body: {
+      wrapper: props => <tbody {...props}></tbody>,
+      row: props => !lazyload ? <tr {...props} /> 
+        : <LazyLoad overflow once height={rowHeight} offset={3 * rowHeight} throttle={200} placeholder={<tr><td>loading...</td></tr>}><CustomTr {...props} /></LazyLoad>,
+      cell: props => <td style={{ height: rowHeight, padding: 0 }}  {...props}></td>,
+    }
+  }
+}
+
+const getWidth = (prop, widthMap, calcPlaceholder) => {
+  let maxLength = 0, propLength = 0;
+  if (widthMap[prop]) {
+    calcPlaceholder.innerHTML = widthMap[prop];
+    propLength = calcPlaceholder.offsetWidth;
+    if (maxLength < propLength) maxLength = propLength;
+  }
+  calcPlaceholder.innerHTML = prop;
+  propLength = calcPlaceholder.offsetWidth;
+  if (maxLength < propLength) maxLength = propLength;
+  return maxLength + 24;
+}
+
+const pageChange = () => {
+  forceCheck();
+}
+
+const calcWidth = (dataSource, columns, pagination, leftFixItem, rightFixItem, colWidth, tableInfo) => {
+  console.time('CalcWidth:')
+  const usedColumns = cloneDeep(columns);
+  const usedDataSource = dataSource;
+  for (let i = 0; i < leftFixItem; i += 1) usedColumns[i].fixed = 'left';
+  for (let i = usedColumns.length - 1, length = usedColumns.length - 1 - rightFixItem; i > length; i -= 1) usedColumns[i].fixed = 'right';
+
+  if (colWidth.type === 'auto') {
+    const widthMap = { };
+    for (let i = 0, length = usedDataSource.length; i < length; i += 1) {
+      for (let prop in usedDataSource[i]) {
+        if (prop !== null) {
+          if (!widthMap[prop] || (typeof usedDataSource[i][prop] === 'number' && 
+            usedDataSource[i][prop] > widthMap[prop]) || (typeof usedDataSource[i][prop] === 'string' && 
+              usedDataSource[i][prop].length > widthMap[prop].length))
+            widthMap[prop] = usedDataSource[i][prop];
+        }
+      }
+    }
+    for (let i = 0, length = usedColumns.length; i < usedColumns.length; i += 1) {
+      usedColumns[i].width = getWidth(usedColumns[i].title, widthMap, tableInfo.calcPlaceholder.current);
+      tableInfo.scroll.x += usedColumns[i].width;
+    }
+  } else if (colWidth.type === 'fast') {
+
+  } else if (colWidth.type === 'numbers') {
+      for (let i = 0, length = usedColumns.length; i < usedColumns.length; i += 1) {
+      usedColumns[i].width = colWidth.widths[usedColumns[i].title] || colWidth.default;
+      tableInfo.scroll.x += usedColumns[i].width;
+    }
+  }
+  console.timeEnd('CalcWidth:')
+  return [usedDataSource, usedColumns, tableInfo.scroll];
+}
+
+const DrTable = memo(({ className, pagination, dataSource, columns, leftFixItem, rightFixItem, lazyload, colWidth, rowHeight, tableHeight, ...props }) => {
+  const tableInfo = { calcPlaceholder: useRef(null), scroll: { x: 0, y: tableHeight }}
+  let usedDataSource = null, usedColumns = null;
+  let components;
+  if (dataSource && columns) {
+    [usedDataSource, usedColumns, scroll] = calcWidth(dataSource, columns, pagination, leftFixItem, rightFixItem, colWidth, tableInfo);
+    components = getComponent(lazyload, rowHeight)
+  }
+  return [<div key="calcPlaceholder" className={styles.calcPlaceholder} ref={tableInfo.calcPlaceholder}/>, dataSource && columns && <Table key="table" className={`${className} ${styles.drTable}`} dataSource={usedDataSource} columns={usedColumns} components={components} pagination={{...pagination, onChange: pageChange }} scroll={scroll} {...props} />];
+});
+
+DrTable.defaultProps = {
+  leftFixItem: 0,
+  rightFixItem: 0,
+  lazyload: true,
+}
+
+export default DrTable;

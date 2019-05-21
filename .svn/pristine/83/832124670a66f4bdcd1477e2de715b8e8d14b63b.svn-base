@@ -1,0 +1,10 @@
+.wrapper{
+  width: 100%;
+  .line{
+    display:flex;
+    .radio{
+      min-width: 88px;
+    }
+
+  }
+}

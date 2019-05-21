@@ -1,0 +1,71 @@
+/** @format */
+
+import React, { Component } from 'react';
+import { compose } from 'recompose';
+import withState from './chartState';
+import withHandleRender from './handleRender';
+import { nodeOperationProps, nodeUpdatePos, nodeOperationHandles } from './handleNodeOperation';
+import withShaples from './shaples';
+import styles from './index.less';
+import Modal from './Modal';
+
+class NodeChart extends Component {
+  render() {
+    return (
+      <div
+        ref={this.props.getChartWrapper()}
+        className={`${styles.chartWrapper} ${this.props.className}`}
+        style={{ ...this.props.style, overflow: this.props.mode === 'stepChart' ? 'auto' : '' }}
+      >
+        <svg
+          ref={this.props.getChartView()}
+          className={styles.chartView}
+          style={{ width: '99%', height: '99%' }}
+        >
+          <defs>
+            {
+              <filter id="nodeShadow" x="-50%" y="-50%" width="200%" height="200%">
+                <feOffset result="offOut" in="SourceGraphic" dx="2" dy="2" />
+                {/* <feFlood flood-color="rgba(0,0,0,0.5)"/> */}
+                <feColorMatrix
+                  result="matrixOut"
+                  in="offOut"
+                  type="matrix"
+                  values="0.2 0 0 0 0 0 0.2 0 0 0 0 0 0.2 0 0 0 0 0 1 0"
+                />
+                <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="4" />
+                <feBlend in="SourceGraphic" in2="blurOut" mode="normal" />
+              </filter>
+            }
+            {this.props.nodeShaples.map(shaple => shaple)}
+          </defs>
+          <g className="group">
+            <g className="lineGroup" />
+            <g className="nodeGroup" />
+          </g>
+        </svg>
+        {this.props.modalState === 'show' && (
+          <Modal
+            mode={this.props.mode}
+            Popup={this.props.Popup}
+            updateModalState={this.props.updateModalState}
+            selectedNode={this.props.selectedNode}
+            setNodeData={this.props.setNodeData}
+            createNewNode={this.props.createNewNode}
+            createNewBranch={this.props.createNewBranch}
+            deleteNode={this.props.deleteNode}
+          />
+        )}
+      </div>
+    );
+  }
+}
+
+export default compose(
+  withState,
+  withShaples,
+  nodeOperationProps,
+  nodeUpdatePos,
+  withHandleRender,
+  nodeOperationHandles,
+)(NodeChart);

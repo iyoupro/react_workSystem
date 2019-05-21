@@ -1,0 +1,76 @@
+/** @format */
+import React, { Component } from 'react';
+import styles from './StepChartPage.css';
+import uniqueId from 'lodash/uniqueId';
+import { FlowChart, addNewNode, deleteNode } from '../components/FlowChart/';
+
+class StepChartPage extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      chartData: [
+        {
+          no: '0',
+          name: '开始',
+          previous: [],
+          next: ['2'],
+        },
+        {
+          no: '1',
+          name: '结束',
+          previous: ['2'],
+          next: [],
+        },
+        {
+          no: '2',
+          name: 'b1',
+          previous: ['0'],
+          next: ['1'],
+        },
+      ],
+    };
+    this.no = 3;
+    this.selectedNode = null;
+  }
+
+  handleAdd = () => {
+    const { chartData } = this.state;
+    const newNode = {
+      no: this.no++ + '',
+      name: uniqueId(),
+    }
+    addNewNode(chartData, this.selectedNode, newNode);
+    this.setState({ chartData });
+  }
+
+  handleDelete = () => {
+    const { chartData } = this.state;
+    deleteNode(chartData, chartData[2]);
+    this.setState({ chartData });
+  }
+
+  render() {
+    return [
+      <button key="0" onClick={this.handleAdd}>add</button>,
+      <button key="1" onClick={this.handleDelete}>delete</button>,
+      <FlowChart
+        key="2"
+        className={styles.chart}
+        chartData={this.state.chartData}
+        showShadow
+        nodeSize={40}
+        textPos={40}
+        uniderection
+        response={true}
+        colDistance={0.2}
+        rowDistance={0.5}
+        onClickAdd={this.handleAdd}
+        onClickDelete={this.handleDelete}
+        onSelect={selectedNode=> this.selectedNode = selectedNode}
+       
+      />,
+    ];
+  }
+}
+
+export default StepChartPage;

@@ -1,0 +1,45 @@
+/** @format */
+
+import React from 'react';
+import SortList from '../components/sortlist/SortList';
+
+const items = [
+  {
+    name: 'name',
+    title: '姓名',
+  },
+  {
+    name: 'dept',
+    title: '部门',
+  },
+  {
+    name: 'sex',
+    title: '性别',
+  },
+  {
+    name: 'age',
+    title: '年龄',
+  },
+  {
+    name: 'jobNo',
+    title: '工号',
+  },
+];
+
+const fixed = [];
+
+const SortListPage = () => {
+  return (
+    <div style={{ width: 300, height: 100, padding: 10 }}>
+      <SortList
+        items={items}
+        fixed={fixed}
+        onChange={({ sort, order }) => {
+          console.log(sort, order);
+        }}
+      />
+    </div>
+  );
+};
+
+export default SortListPage;

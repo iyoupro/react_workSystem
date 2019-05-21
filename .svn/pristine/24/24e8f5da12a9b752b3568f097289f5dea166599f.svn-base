@@ -1,0 +1,15 @@
+.panelRightWrapper {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: 62.5%;
+  height: 100%;
+  border-left: 0.75px solid #e5e5e5;
+  & > .spin {
+    z-index: 1;
+    position: absolute;
+    top: 72px;
+    left: 50%;
+    transform: translateX(-50%);
+  };
+}

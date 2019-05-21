@@ -1,0 +1,37 @@
+import React, { memo, useState, useRef } from 'react';
+import PropTypes from 'prop-types';
+import { Input, Icon } from 'antd';
+import styles from './index.less';
+
+const DrInput = props => {
+  const input = useRef(null)
+  const { value, defaultValue, onChange, showEmptyButton, emptyButtonClassName, ...otherProps } = props;
+
+  const emptyInput = () => {
+    input.current.focus();
+    if (onChange) onChange({ target: { value: '' } });
+  }
+
+  return (
+    <Input
+      ref={input}
+      suffix={showEmptyButton ? value ? <Icon className={`${styles.emptyButton} ${emptyButtonClassName || ''}`} type="close-circle" onClick={emptyInput} /> : undefined : undefined}
+      value={value}
+      onChange={onChange}
+      {...otherProps}
+    />
+  );
+}
+
+DrInput.defaultProps = {
+  showEmptyButton: true,
+};
+
+DrInput.PropTypes = {
+  value: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+  showEmptyButton: PropTypes.bool.isRequired,
+  emptyButtonClassName: PropTypes.string,
+};
+
+export default memo(DrInput);

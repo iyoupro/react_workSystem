@@ -1,0 +1,60 @@
+import React, { Component } from 'react';
+import { DragLayer } from 'react-dnd';
+import PropTypes from 'prop-types';
+
+function getItemStyles(props) {
+  const { currentOffset, item } = props;
+  if (!currentOffset) {
+    return {
+      display: 'none',
+    };
+  }
+  const { x, y } = currentOffset;
+  const transform = `translate(calc(${x}px - 50%), calc(${y}px - 175%))`;
+  const { a, b} = props.Ic;
+  // console.log(props, a, b);
+  return {
+    transform,
+    WebkitTransform: transform,
+    pointerEvents: 'none',
+    position: 'fixed',
+    zIndex: 100,
+    background: 'red'
+
+  };
+}
+
+@DragLayer(monitor => ({
+  item: monitor.getItem(),
+  currentOffset: monitor.getClientOffset(),
+  isDragging: monitor.isDragging(),
+  Ic: monitor.getInitialClientOffset(),
+}))
+export default class CustomDragLayer extends Component {
+  static propTypes = {
+    item: PropTypes.object,
+    currentOffset: PropTypes.shape({
+      x: PropTypes.number.isRequired,
+      y: PropTypes.number.isRequired
+    }),
+    Ic: PropTypes.shape({
+      x: PropTypes.number.isRequired,
+      y: PropTypes.number.isRequired
+    }),
+    isDragging: PropTypes.bool.isRequired
+  };
+
+  render() {
+    const { isDragging, dragPreViewElement, currentOffset } = this.props;
+    if (!isDragging) {
+      return null;
+    }
+
+    return (
+      <div style={getItemStyles(this.props)}>
+        {dragPreViewElement && <dragPreViewElement />}
+        {!dragPreViewElement && <div style={{ height: '99px', width: '99px', background: 'transparent', borderRadius: '50%', border: '2px solid #000' }} />}
+      </div>
+    );
+  }
+}

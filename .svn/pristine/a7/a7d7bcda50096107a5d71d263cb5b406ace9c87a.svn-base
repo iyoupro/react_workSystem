@@ -1,0 +1,53 @@
+import React, { memo } from 'react'; 
+import uniqueId from 'lodash/uniqueId';
+import { Radio, Checkbox, Icon } from 'antd';
+import Input from '../components/Input';
+
+import styles from './Choose.less';
+
+
+const MyRadio = memo(({ data, mode, isSelected, setData, ...props}) => {
+  const { options, layout, type } = data;
+  const Choose = type === 'Radio' ? Radio : Checkbox;
+  const Group = Choose.Group;
+
+  const onTitleChange = (event, targetId) => {
+    options.map(option => { if(option.id === targetId) option.title = event.target.value });
+    setData('options', options);
+  }
+
+  const onAddRadio = () => {
+    options.push({ title: 'newItem', id: uniqueId() })
+    setData('options', options);
+  }
+
+  const onDeleteRadio = (targetRadioId) => {
+    setData('options', options.filter(option => option.id !== targetRadioId));
+  }
+
+  return (
+    <Group name="radiogroup" className={styles.wrapper}>
+      {options && options.map(option => 
+        <Choose key={option.id} className={`${styles.radioLine} ${isSelected ? styles.selected : ''}`} style={{ width: `${100 / layout - 2}%` }} value={option.id} disabled={mode !== 'write'}>
+          <Input 
+            // inputClassName={styles.declaraction} 
+            // underlineClassName={styles.underLine}
+            // underlineClassName={styles.focusUnderLine}
+            autoSize
+            showUnderline={isSelected}
+            placeholder="Please input option title"
+            value={option.title}
+            onChange={event => onTitleChange(event, option.id)} />  
+            {isSelected && <Icon className={styles.closeIcon} type='close' onClick={() => onDeleteRadio(option.id)}/>}         
+        </Choose>)}
+      {mode === 'edit' && 
+        <Choose disabled value={'AddGroup'}> 
+          <span className={styles.radioAdd} onClick={onAddRadio}>添加选项  </span>
+        </Choose>
+      }
+    </Group>
+
+  );
+});
+
+export default MyRadio;

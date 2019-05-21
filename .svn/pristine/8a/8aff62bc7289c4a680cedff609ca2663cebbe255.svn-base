@@ -1,0 +1,62 @@
+import React, { Component } from 'react';
+import { DropWrapper, DropArea } from '../components/CustomSort';
+import FormItem from '../components/FormItem/';
+import SortListItem from '../components/SortListItem/';
+import styles from './CustomSortList.less';
+
+const items = [
+  {
+    name:"1",
+    title:"姓名",
+  },
+  {
+    name:"1",
+    title:"部门",
+  },
+  {
+    name:"1",
+    title:"性别",
+  },
+  {
+    name:"1",
+    title:"年龄",
+  },
+  {
+    name:"1",
+    title:"工号",
+  }
+]
+class CustomSortList extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { newItemWidth: 1 };
+  }
+
+  setNewItemWidth = (newItemWidth) => {
+    this.setState({ newItemWidth });
+  }
+
+  render() {
+    return (
+      <DropWrapper style={{ width: '15%', height: '800px', background: '#fff', fontSize: '16px', border:'1px solid gray'}}>
+        <DropArea
+          AreaId="1" fix={false} direction="column" defaultItemSize={{ width: 1, height: 10 }}
+          newItemSize={{ width: this.state.newItemWidth, height: 9   }}
+          style={{ width: '99.5%', height: '30%', background: '#fff',  padding:'5% 3%',paddingTop:'0',}}
+          Item={SortListItem} itemStyle={{ marginTop: '2%', }}
+        />
+        <span> 固定项目拖到上方:</span>
+        <hr style={{color:'red',height:'1px',width:'95%',margin:'4 4'}} />
+        <DropArea
+          AreaId="2" fix={false} defaultItems={items} direction="column" defaultItemSize={{ width: 1, height: 17 }}
+          newItemSize={{ width: this.state.newItemWidth, height: 17   }}
+          style={{ width: '100%', height: '64%', background: '#fff', justifyContent: 'start',padding:'5% 3%',paddingTop:'0'}}
+          Item={SortListItem} itemStyle={{ marginTop: '3%', }}
+        />
+
+      </DropWrapper>
+    );
+  }
+}
+
+export default CustomSortList;

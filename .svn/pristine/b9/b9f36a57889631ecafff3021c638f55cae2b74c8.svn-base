@@ -1,0 +1,23 @@
+import React, { memo, useRef, useEffect } from 'react';
+import { findDOMNode } from 'react-dom';
+import { Input } from 'antd';
+import styles from './Input.less';
+
+const BeautifulInput = memo(({ inputClassName, underlineClassName, autoSize, ...props }) => {
+  const underline = useRef(null);
+  const wrapper = useRef(null);
+  const widthCal = useRef(null);
+  const onFcus = () => underline.current.classList.add(styles.focus);
+  const onBlur = () => underline.current.classList.remove(styles.focus);
+  useEffect(() => { if(autoSize) wrapper.current.style['width'] = `${widthCal.current.clientWidth * 1.125}px` });
+
+  return (
+    <div ref={wrapper} className={`${inputClassName} ${styles.wrapper}`}>
+      <Input className={`${inputClassName} ${styles.input}`} {...props} onFocus={onFcus} onBlur={onBlur} />
+      <hr ref={underline} className={`${underlineClassName} ${styles.underline}`} />
+      <span ref={widthCal} className={styles.widthCal}>{props.value}</span>
+    </div>
+  );
+});
+
+export default BeautifulInput;

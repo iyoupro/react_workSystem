@@ -1,0 +1,35 @@
+.topBox {
+  width: 100%;
+  height: 100%;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
+  transition: all 0.3s ease;
+}
+.topBox .aaa {
+  display: none;
+  margin-left: 5px;
+}
+.topBox:hover {
+  background: #e8e8e8;
+}
+.topBox:hover .aaa {
+  display: block;
+}
+.topBox.dragging {
+  opacity: 0.3;
+}
+.topBox.selected {
+  background: #096dd9;
+}
+.topBox.preView {
+  background: #d9f7be;
+  border: 1px dashed black;
+}
+.topBox.draggedOverSelf {
+  background: #ff7875;
+}
+.topBox.placeholder {
+  background: #5cdbd3;
+}

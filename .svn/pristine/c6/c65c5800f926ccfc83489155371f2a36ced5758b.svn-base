@@ -1,0 +1,67 @@
+/** @format */
+
+import React, { useRef } from 'react';
+import { Affix, Button, Icon, BackTop, Tooltip } from 'antd';
+import Section from './Section';
+import Input from './components/Input';
+import styles from './index.less';
+
+import { pipe } from '../../rehook/';
+import { initPage, withSetData } from './handler';
+
+
+
+
+const FormsPage = ({ data, setData, setSectionData, mode, setMode, addItem, ...props }) => {
+  const { title, sections } = data;
+  const pageInfo = { deleteTimer: null, header: useRef(null) };
+
+  return (
+    <div className={styles.wrapper} >
+      <div ref={pageInfo.header} className={styles.header} >
+        <Button size='small' onClick={value => setMode('edit')}>编辑模式</Button>
+        <Button size='small' onClick={value => setMode('write')}>答题模式</Button>
+        <Button size='small' onClick={value => setMode('evaluate')}>评分模式</Button>
+        
+        <Input
+          inputWrapperClassName={styles.title}
+          inputClassName={styles.titleInput} 
+          focusUnderlineClassName={styles.titleFocusUnderline} 
+          placeholder="请输入表单标题"
+          value={title}
+          autoSize
+          showUnderline={false}
+          onChange={event => setData('title', event.target.value)} 
+        />
+      </div>
+      <div className={styles.content}>
+        {sections && sections.map((section, sectionIndex) => (
+          <Section
+            key={section.id}
+            sectionIndex={sectionIndex}
+            data={section}
+            setData={(prop, newPropData) => setSectionData(index, prop, newPropData)}
+            mode={mode}
+            pageInfo={pageInfo}
+            {...props}
+          />
+        ))}
+      </div>
+      {mode === 'edit' &&
+        <div className={styles.affix}>
+          <Tooltip placement="right" title={'新增项'}>
+            <Button shape="circle" icon="plus" onClick={addItem}/>
+          </Tooltip>
+          <Tooltip placement="right" title={'新增块'}>
+            <Button shape="circle" icon="block" />
+          </Tooltip>
+        </div>
+      }
+      <Tooltip placement="top" title={'回到顶部'}>
+        <Button className={styles.toTop} size="large" shape="circle" icon="to-top" onClick={() => pageInfo.header.current.scrollIntoView({ behavior: 'smooth' })} />
+      </Tooltip>
+    </div>
+  );
+};
+
+export default pipe(initPage, FormsPage);

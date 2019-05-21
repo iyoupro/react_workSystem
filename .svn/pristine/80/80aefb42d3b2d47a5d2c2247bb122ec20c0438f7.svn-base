@@ -1,0 +1,53 @@
+/** @format */
+
+import React, { memo, useState } from 'react';
+import styles from './index.less';
+
+const handleMouseDown = (row, col) => {
+  setSelect(true);
+  console.log(row, col);
+};
+
+const Table = memo(props => {
+  const [lyout, setLyout] = useState([
+    [
+      { width: '240px', height: '60px' },
+      { width: '180px', height: '60px' },
+      { width: '180px', height: '60px' },
+    ],
+    [
+      { width: '280px', height: '60px' },
+      { width: '180px', height: '60px' },
+      { width: '180px', height: '60px' },
+    ],
+    [
+      { width: '180px', height: '60px' },
+      { width: '180px', height: '60px' },
+      { width: '180px', height: '60px' },
+    ],
+  ]);
+  const [select, setSelect] = useState(false);
+  return (
+    <div className={styles.wrapper}>
+      <table className={styles.table}>
+        <tbody>
+          {lyout.map((tr, row) => (
+            <tr key={row}>
+              {tr.map((td, col) => (
+                <td
+                  key={col}
+                  style={{ width: td.width, height: td.height }}
+                  row={row}
+                  col={col}
+                  onMouseDown={() => handleMouseDown(row, col, setSelect)}
+                />
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+});
+
+export default Table;

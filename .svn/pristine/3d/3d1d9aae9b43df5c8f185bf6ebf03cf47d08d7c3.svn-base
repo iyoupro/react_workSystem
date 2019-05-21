@@ -1,0 +1,30 @@
+import React, { memo, useEffect, useRef, useState } from 'react';
+import styles from './customTable.less';
+
+const onChange = (changes, setInView) => {
+  for (const element of changes) {
+    if (element.intersectionRatio > 0 && element.intersectionRatio <= 1) {
+      setInView(true);
+    }
+  }  
+}
+
+const LazyLoadTr = memo(props => {
+  const tr = useRef(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const observer = new IntersectionObserver(changes => onChange(changes, setInView), {});
+
+    observer.observe(tr.current)
+    return () => {
+      observer.unobserve(tr.current);
+    }
+  })
+  if (inView)
+    return (
+      <tr {...props} className={styles.bodyRow} ref={tr} />
+    );
+  return <tr ref={tr}>&nbps;</tr>
+});
+
+export default LazyLoadTr;

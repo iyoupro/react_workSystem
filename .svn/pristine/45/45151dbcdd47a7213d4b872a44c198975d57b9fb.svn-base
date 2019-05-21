@@ -1,0 +1,87 @@
+import React, { memo, useState } from 'react';
+import { findDOMNode } from 'react-dom';
+import { DropTarget, DragSource } from 'react-dnd';
+import flow from 'lodash/flow';
+import isEqual from 'lodash/isEqual';
+
+const TargetSpec = {
+  canDrop(props, monitor) {
+    return monitor.isOver() && monitor.isOver({ shallow: true });
+  },
+  hover(props, monitor, component) { // inSameArea, hover Item over another Item to swap
+    if (!component || props.itemFasten) return;
+    const draggedItem = monitor.getItem();
+    if (props.areaId !== draggedItem.areaId || props.index === draggedItem.index) return;
+    props.swapItem(draggedItem.index, props.index);
+    monitor.getItem().index = props.index
+    // const hoverItemBoundingRect = findDOMNode(component).getBoundingClientRect();
+    // const hoverMiddleY = (hoverItemBoundingRect.bottom - hoverItemBoundingRect.top) / 2
+    // const clientOffset = monitor.getClientOffset()
+    // const hoverClientY = clientOffset.y - hoverItemBoundingRect.top
+    // if (draggedItemIndex < hoverItemIndex && hoverClientY < hoverMiddleY) return;
+    // if (draggedItemIndex > hoverItemIndex && hoverClientY > hoverMiddleY) return;
+  },
+  drop(props, monitor, component) {
+    const draggedItem = monitor.getItem();
+    if (props.itemFasten || props.areaId === draggedItem.areaId) return; // DropArea不响应来自自身的拖拽Item
+    props.addItem(draggedItem.data, props.index); 
+  }
+};
+
+function TargetCollect(connect, monitor) { // Collect中return的对象将作为props传递给当前DraggableComponent组件
+  return {
+    connectDropTarget: connect.dropTarget(),
+    hoverDraggedItem: monitor.isOver() && monitor.isOver({ shallow: true }) && monitor.getItem(), // 将拖拽对象信息作为组件的props
+  };
+}
+
+const SourceSpec = {
+  beginDrag(props, monitor, component){
+    // 返回需要注入的属性
+    const { data, index, areaId } = props;
+    return {
+      data: data,
+      index: index,
+      areaId: areaId,
+    }
+  },
+}
+
+function SourceCollect(connect, monitor) { // Collect中return的对象将作为props传递给当前DraggableComponent组件
+  return {
+    connectDragSource: connect.dragSource(),
+    connectDragPreview: connect.dragPreview(),
+    isDragging: monitor.isDragging(), // 判断当前DraggableComponent是否处于被拖拽状态
+  };
+}
+
+const DragItem = props => {
+  const { connectDragSource, connectDropTarget, ItemRender, data, index, areaId, itemFasten, hoverDraggedItem,
+    isPreview, isDragging, ...otherProps
+  } = props;
+
+  const connectDrag = connectDragSource && connectDropTarget ? flow(connectDragSource, connectDropTarget) : (node) => node;
+
+  return [
+    <ItemRender
+      key='item'
+      connectDrag={connectDrag}
+      data={hoverDraggedItem ? hoverDraggedItem.data : data}
+      isDragging={isDragging}
+      isPreview={hoverDraggedItem ? true : isPreview}
+      {...otherProps} 
+    />,
+    hoverDraggedItem && hoverDraggedItem.areaId !== areaId && !itemFasten ? 
+      <ItemRender
+        key='preview'
+        connectDrag={node => node}
+        data={data}
+        isPlaced
+      /> : null,
+  ]
+};
+
+export default flow(
+  DragSource('FLEX_DND', SourceSpec, SourceCollect),
+  DropTarget('FLEX_DND', TargetSpec, TargetCollect),
+)(memo(DragItem));

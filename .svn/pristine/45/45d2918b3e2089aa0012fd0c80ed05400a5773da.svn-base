@@ -1,0 +1,6 @@
+.wrapper {
+  width: 100%;
+  min-height: 1200px;
+  height: fit-content;
+  background: yellowgreen;
+}

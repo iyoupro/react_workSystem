@@ -1,0 +1,16 @@
+import React, { memo } from 'react';
+import { DatePicker } from 'antd';
+import styles from './Time.less';
+
+const Time = memo(props => {
+  const { options } = props;
+  return (
+    <div>
+      <span>请选择时间：&nbsp;</span>
+      <DatePicker  />
+    </div>
+    
+  );
+});
+
+export default Time;

@@ -1,0 +1,4 @@
+const itemTypes = {
+  CARD: 'card',
+};
+export { itemTypes };

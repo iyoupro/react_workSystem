@@ -1,0 +1,57 @@
+import React, { memo, useState } from 'react';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import uniqueId from 'lodash/uniqueId';
+import cloneDeep from 'lodash/cloneDeep';
+
+const SortableList = props => {
+  const { className, style, listId, value, defaultValue, onChange, ItemRender, ...otherProps } = props;
+  const [innerValue, setValue] = useState(defaultValue || []) // 非受控模式渲染用值
+  const usedValue = value || innerValue; // 受控和非受控使用不同值渲染Item
+  
+  const reorderList = (startItemIndex, endItemIndex) => {
+    const newValue = value ? cloneDeep(usedValue) : usedValue; // 非受控不用深拷贝
+    const [removed] = newValue.splice(startItemIndex, 1);
+    newValue.splice(endItemIndex, 0, removed);
+    if (!value) setValue(newValue);
+    if (onChange) onChange(newValue);
+  };
+
+  const onDragEnd = result => {
+    const { source, destination } = result;
+    // console.log(result);
+    if(!destination) return;
+    reorderList(result.source.index, result.destination.index)
+  }
+
+  return (
+    <DragDropContext onDragEnd={onDragEnd}>
+      <Droppable droppableId={listId} >
+        {(provided, snapshot) => (
+          <div
+            ref={provided.innerRef}
+            className={className}
+          >
+            {usedValue && usedValue.map((itemData, index) => 
+              <Draggable key={itemData.key} draggableId={itemData.key} index={index} >
+                {(provided, snapshot) => (
+                  <ItemRender
+                    connectDragRef={provided.innerRef}
+                    connectDrag={provided.draggableProps}
+                    connectDragHandle={provided.dragHandleProps}
+                    data={itemData}
+                    index={index}
+                    isDragging={snapshot.isDragging}
+                    {...otherProps}
+                  />
+                )}
+              </Draggable>
+              )}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
+    </DragDropContext>    
+  );
+};
+
+export default memo(SortableList);

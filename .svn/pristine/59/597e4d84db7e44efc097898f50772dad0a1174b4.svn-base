@@ -1,0 +1,32 @@
+import React, { memo } from 'react';
+import { DatePicker, TimePicker, Radio } from 'antd';
+// import produce from 'immer';
+// import uniqueId from 'lodash/uniqueId';
+import styles from './Time.less';
+
+const { MonthPicker, RangePicker, WeekPicker } = DatePicker;
+
+const Time = memo(({ data, mode, isSelected, setData, ...props}) => {
+  const { timeType, inputValue } = data;
+  
+  return (
+    <div className={styles.wrapper}>
+      {mode === 'edit' && 
+        <Radio.Group size='small'  value={timeType} onChange={e => setData('timeType', e.target.value)}>
+          <Radio.Button value={'startEndDate'}>开始/结束日期</Radio.Button>
+          <Radio.Button value={'dateTime'}>日期/时间</Radio.Button>
+          <Radio.Button value={'date'}>日期</Radio.Button>
+          <Radio.Button value={'time'}>时间</Radio.Button>
+      </Radio.Group>
+      }
+      <p>请选择时间：&nbsp;</p>
+      { timeType === 'startEndDate' &&  <RangePicker disabled={mode === 'evaluate'} value={inputValue} onChange={event => setData('inputValue', event.target.value)}/>}
+      { timeType === 'dateTime' &&  <DatePicker showTime format="YYYY-MM-DD HH:mm" disabled={mode === 'evaluate'} value={inputValue} onChange={event => setData('inputValue', event.target.value)}/>}
+      { timeType === 'date' &&  <DatePicker  disabled={mode === 'evaluate'} value={inputValue} onChange={event => setData('inputValue', event.target.value)}/>}
+      { timeType === 'time' &&  <TimePicker  format={ 'HH:mm'} disabled={mode === 'evaluate'} value={inputValue} onChange={event => setData('inputValue', event.target.value)}/>} 
+    </div>
+    
+  );
+});
+
+export default Time;

@@ -1,0 +1,127 @@
+.wrapper {
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: fit-content;
+  transition: all 1s ease;
+  position: relative;
+  &.show {
+    margin-top: 128px;
+  }
+  &.head {
+    margin: auto;
+    margin-top: 15px;
+  }
+}
+
+.item {
+  // border:1px solid red;
+  overflow:hidden;
+  border-radius:6px;
+  visibility: hidden;
+  width: 0px;
+  height: 0px;
+  color: transparent;
+  background: transparent;
+  transition: all 1s ease;
+  position: relative;
+  &.show {
+    visibility: visible;
+    color: white;
+    background: white;
+    width: 164px;
+    height: 132px;
+    margin-right: 25px;
+    & .icon {
+      color: red;
+    }
+  }
+  & .icon {
+    font-size: 24px;
+    position: absolute;
+    margin: auto;
+    color: transparent;
+    font-size: 20px;
+    left: 50%;
+    bottom: 0%;
+    transform: translate(-50%, 0);
+    transition: font-size 0.2s ease;
+    &:hover {
+      font-size: 24px;
+      cursor: pointer;
+      color: red;
+    }
+  }
+  .department{
+    margin:0px auto;
+    border-top-left-radius:6px;
+    border-top-right-radius:6px;
+    width: 164px;
+    height: 32px;
+    background-color:#40a9ff;
+    transition:background-color  1s;
+    -moz-transition:background-color 1s; /* Firefox 4 */
+    -webkit-transition:background-color 1s; /* Safari and Chrome */
+    -o-transition:background-color 1s; /* Opera */
+    color:white;
+    text-align:center;
+    &:hover{
+      background-color: #69c0ff;
+    }
+  }
+  .info{
+    margin:0 auto;
+    border:1px solid #40a9ff;
+    border-bottom-left-radius:6px;
+    border-bottom-right-radius:6px;
+    width: 164px;
+    height: 100px;
+    background:white;
+    color:black;
+    text-align:center;
+    transition:border  1s, height  1.2s;
+    -moz-transition:border 1s, height  1.2s; /* Firefox 4 */
+    -webkit-transition:border 1s, height  1.2s; /* Safari and Chrome */
+    -o-transition:border 1s, height  1.2s; /* Opera */
+    &:hover{
+      border:1px solid #ffec3d;
+      height: 68px;
+      border-bottom-left-radius:0px;
+      border-bottom-right-radius:0px;
+    }
+  }
+  .popup{
+    background-color:#8c8c8c;
+    border-bottom-left-radius:6px;
+    margin-top:0px;
+    border-bottom-right-radius:6px;
+    transition:margin-top  1.2s;
+    display:flex;
+    justify-content:space-between;
+    padding: 5px 12px;
+    &:hover{
+      background-color:#8c8c8c;
+      margin-top:-32px;
+    }
+    .plus{
+      color:white;
+      font-size:22px;
+      &:hover{
+        cursor:pointer;
+      }
+    }
+  }
+  .hiddened{
+    margin-top: 0px;
+  }
+}
+
+.childWrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: fit-content;
+  height: fit-content;
+}

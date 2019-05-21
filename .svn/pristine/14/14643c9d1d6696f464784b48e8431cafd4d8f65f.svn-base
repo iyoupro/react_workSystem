@@ -1,0 +1,133 @@
+/** @format */
+
+import { useEffect } from 'react';
+import cloneDeep from 'lodash/cloneDeep';
+import * as d3 from 'd3';
+import { getHeadNode, getTailNode, getPreviousNodes, getNextNodes, buildBrother } from './utils';
+
+const calcNodePos = (props, chartInfo) => {
+  const { chartData, uniderection } = props;
+  const { chartWidth, nodeWidth, chartView } = chartInfo;
+  const rowDistance = (1 + props.rowDistance) * nodeWidth;
+  const colDistance = (1 + props.colDistance) * nodeWidth;
+  const headNode = getHeadNode(chartData);
+  const tailNode = getTailNode(chartData);
+  /* 节点的位置为其父节点的位置parentNode.posX + rowDistance * 父节点的偏移量parentNode.offset * 该节点的偏移位置offsetPos。*/
+  (function reverseTraversalNodes(node, offset) {
+    // 倒序遍历节点求得每个节点的偏移量offset和偏移位置offsetPos
+    node.posY = 0;
+    let nextNodeOffset;
+    if (node.next.length > 1) {
+      if (node.offset && node.offset < offset) node.offset = offset;
+      if (!node.offset) node.offset = offset === 0 ? 1 : offset;
+      nextNodeOffset = node.offset * node.next.length;
+    } else {
+      node.offset = 0;
+      nextNodeOffset = offset;
+    }
+    if (node.previous.length > 1) nextNodeOffset = 0;
+    /* 倒序遍历节点，给出当前节点相对于父节的偏移位置offsetPos。
+    如父节点有四个子节点0, 1, 2, 3 子节点的偏移位置offsetPos分别应该为 -2, -1, 1, 2。*/
+    if (node.previous.length >= 1) {
+      const parentNodes = getPreviousNodes(chartData, node);
+      const indexInParentNode = parentNodes[0].next.indexOf(node.no);
+      const childNumber = parentNodes[0].next.length;
+      node.offsetPos = indexInParentNode - parseInt(childNumber / 2);
+      if (childNumber % 2 === 0 && indexInParentNode >= parseInt(childNumber / 2))
+        node.offsetPos += 1;
+      if (node.brother.length % 2 === 1) node.offsetPos += node.offsetPos > 0 ? -0.5 : 0.5;
+      for (let i = 0, length = parentNodes.length; i < length; i += 1)
+        reverseTraversalNodes(parentNodes[i], nextNodeOffset);
+    } else {
+      // 若为首节点结束遍历
+      node.offsetPos = 0;
+    }
+  })(tailNode, 0);
+  (function traversalNodes(node, posY) {
+    if (!node.posY || node.posY < posY) node.posY = posY;
+    if (node === headNode || node === tailNode) {
+      node.posX = (chartWidth - nodeWidth) / 2;
+    } else {
+      let parentNodesX = 0;
+      const parentNodes = getPreviousNodes(chartData, node);
+      for (let i = 0, length = parentNodes.length; i < length; i += 1) {
+        parentNodesX += parentNodes[i].posX;
+      }
+      parentNodesX /= parentNodes.length;
+      node.posX = parentNodesX;
+      if (parentNodes.length === 1) {
+        node.posX += parentNodes[0].offset * node.offsetPos * rowDistance;
+      }
+    }
+    if (node.next.length >= 1) {
+      const childNodes = getNextNodes(chartData, node);
+      for (let i = 0, length = childNodes.length; i < length; i++)
+        traversalNodes(childNodes[i], posY + colDistance);
+    }
+  })(headNode, 10);
+  if (uniderection) chartView.style.height = tailNode.posY + nodeWidth;
+};
+
+const renderNode = (props, chartInfo, renderType) => {
+  const { chartData, uniderection, shapeInfo, showShadow, textPos } = props;
+  const { chartWidth, nodeWidth, chartView, isMount } = chartInfo;
+  const nodeGroup = d3.select(chartView).select('.nodeGroup');
+  const lineGroup = d3.select(chartView).select('.lineGroup');
+  const lines = lineGroup.selectAll('path').data(chartData, d => d.no);
+  let nodes = nodeGroup.selectAll('g').data(chartData, d => d.no);
+  if (renderType === 'append') nodes = nodes.enter().append('g');
+  if (renderType === 'exit') nodes = nodes.exit();
+  const nodeShape = renderType === 'append' ? nodes.append('use') : nodes.select('use');
+  const nodeText =
+    renderType === 'append' ? nodes.append('foreignObject') : nodes.select('foreignObject');
+  nodes
+    .attr('class', data => `node-${data.no}`)
+    .transition('transform')
+    .duration(renderType === 'update' ? 500 : 0)
+    .attr('transform', data => `translate(${data.posX},${data.posY})`);
+  nodeShape
+    .attr('xlink:href', data => `#${shapeInfo[data.nodeType].nodeShape}`)
+    .attr('fill', data => shapeInfo[data.nodeType].fillColor)
+    .attr('stroke', data => shapeInfo[data.nodeType].strokeColor)
+    .attr('width', `${nodeWidth}`)
+    .attr('height', `${nodeWidth}`)
+    .attr('transform', 'scale(0, 0)')
+    .transition('transform')
+    .duration(renderType === 'update' ? 0 : 500)
+    .attr('transform', 'scale(1, 1)');
+  showShadow && nodeShape.attr('filter', `url(#nodeShadow)`);
+  nodeText
+    .text(data => data.name)
+    .attr('class', 'nodeText')
+    .attr('width', `${(nodeWidth * 3) / 4}`)
+    .attr('height', `${nodeWidth * (1 - textPos / 100)}`)
+    .attr('x', `${nodeWidth / 8}`)
+    .attr('y', `${(nodeWidth * textPos) / 100}`)
+    .style('overflow', 'hidden')
+    .style('white-space', 'nowrap')
+    .style('text-overflow', 'ellipsis')
+    .style('text-align', 'center')
+    .style('color', data => shapeInfo[data.nodeType].textColor)
+    .style('transform', 'scale(0, 0)')
+    .transition('transform')
+    .duration(renderType === 'update' ? 0 : 500)
+    .style('transform', 'scale(1, 1)');
+};
+
+const render = (props, chartInfo) => {
+  useEffect(() => {
+    const usedProps = cloneDeep(props);
+    const { nodeSize } = usedProps;
+    chartInfo.chartWrapper = chartInfo.chartWrapper.current;
+    chartInfo.chartView = chartInfo.chartView.current;
+    chartInfo.chartWidth = chartInfo.chartWrapper.clientWidth;
+    chartInfo.nodeWidth = (chartInfo.chartWidth * nodeSize) / 100;
+    buildBrother(usedProps.chartData);
+    calcNodePos(usedProps, chartInfo);
+    renderNode(usedProps, chartInfo, 'update'); // 请勿改动调用顺序
+    renderNode(usedProps, chartInfo, 'append');
+    renderNode(usedProps, chartInfo, 'exit');
+  });
+};
+
+export default { render };

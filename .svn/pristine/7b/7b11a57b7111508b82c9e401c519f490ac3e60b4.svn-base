@@ -1,0 +1,51 @@
+import React, { memo, useState, useRef } from 'react';
+import { Spin } from 'antd';
+import Head from './Head';
+import List from './List';
+import Input from './Input';
+import Setting from './Setting';
+import styles from './index.less';
+
+const PanelRight = props => {
+  const { userData, curChatData, groupsData, timeNow, showSetting, setShowSetting, 
+    chatListRef, measureCache, messageInputRef, inputedValues, onChange } = props;
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [showInviteNewMember, setShowInviteNewMember] = useState(false);
+  const groupIdInput = useRef(null);
+
+  return (
+    <div className={styles.panelRightWrapper}>
+      <Head
+        curChatData={curChatData}
+        showSetting={showSetting}
+        groupIdInput={groupIdInput}
+        setShowSetting={setShowSetting}
+        onChange={onChange}
+      />
+      <Spin className={styles.spin} spinning={loadingMore} delay={50} />
+      <List
+        chatListRef={chatListRef}
+        measureCache={measureCache}
+        userData={userData}
+        curChatData={curChatData}
+        timeNow={timeNow}
+        onChange={onChange}
+      />
+      {curChatData &&
+        <Input curChatData={curChatData} messageInputRef={messageInputRef} inputedValues={inputedValues} />
+      }
+      {curChatData && showSetting &&
+        <Setting
+          userData={userData}
+          curChatData={curChatData}
+          groupsData={groupsData}
+          groupIdInput={groupIdInput}
+          showInviteNewMember={showInviteNewMember}
+          setShowInviteNewMember={setShowInviteNewMember}
+        />
+      }
+    </div>
+  );
+};
+
+export default memo(PanelRight);

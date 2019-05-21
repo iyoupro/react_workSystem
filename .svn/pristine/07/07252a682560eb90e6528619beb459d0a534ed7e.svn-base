@@ -1,0 +1,45 @@
+import * as React from 'react';
+import { Switch } from 'antd';
+import { DragSource, DropTarget } from 'react-dnd';
+import flow from 'lodash/flow';
+import className from 'classnames';
+import { sortSource, sortTarget, SORT_TYPE } from './lib';
+
+import styles from './SortItem.less';
+
+class SortItem extends React.Component {
+  render() {
+    const {
+      text,
+      index,
+      isDragging,
+      connectDragSource,
+      connectDropTarget,
+      isOverCurrent,
+    } = this.props;
+    const opacity = isDragging ? 0.5 : 1;
+    return (
+      connectDragSource &&
+      connectDropTarget &&
+      connectDropTarget(
+        <div style={{ opacity }} className={className(styles.item, { [styles.hovered]: isOverCurrent })}>
+          {connectDragSource(<div style={{ cursor: 'move' }}> {`${index + 1}.${text}`}</div>)}
+          <Switch checkedChildren="显示" unCheckedChildren="隐藏" defaultChecked />
+        </div>,
+      )
+    );
+  }
+}
+
+export default flow(DropTarget(SORT_TYPE, sortTarget, (connect, monitor) => ({
+  connectDropTarget: connect.dropTarget(),
+  isOverCurrent: monitor.isOver({ shallow: true }),
+})), DragSource(
+  SORT_TYPE,
+  sortSource,
+  (connect, monitor) => ({
+    connectDragSource: connect.dragSource(),
+    isDragging: monitor.isDragging(),
+  }),
+))(SortItem);
+

@@ -1,0 +1,170 @@
+import { withHandlers, compose } from 'recompose';
+import * as d3 from 'd3';
+
+const searchId = (data ,id) => {
+  for (let i = 0, length = data.length;i < length;i++)
+    if (data[i].id === id)
+      return i;
+  return -1;
+}
+
+const searchNode = ({ chartData }) => (nodeId) => {
+  for (let i = 0, length = chartData.length;i < length;i++)
+    if(chartData[i].id === nodeId)
+      return i;
+  return -1;
+}
+
+const createNewNode = ({ chartData, updateChartData, nodeSerialNumber, updateNodeSerialNumber, searchNode }) => (selectedNode) => {
+  // console.log(`create node${selectedNode.id}`,chartData[searchNode(selectedNode.children[0].id)].depth, selectedNode.depth)
+  if (chartData[searchNode(selectedNode.children[0].id)].depth - selectedNode.depth === 1) {
+    for(let i = 0; i < chartData.length;i++) 
+      if (chartData[i].depth > selectedNode.depth)
+        chartData[i].depth++;
+  }
+  const newNode = {
+    id: nodeSerialNumber + '',
+    data: `I'm Node ${nodeSerialNumber}`,
+    parent: [{
+      id: selectedNode.id
+    }],
+    children: selectedNode.children.slice(),
+    brother: [],
+    depth: selectedNode.depth + 1,
+    shapeInfo: selectedNode.shapeInfo
+  }
+  let childNode = chartData[searchNode(selectedNode.children[0].id)];
+  childNode.parent.push({id: nodeSerialNumber + ''});
+  childNode.parent.splice(searchId(childNode.parent, selectedNode.id), 1);
+  selectedNode.children.push({id: nodeSerialNumber + ''});
+  selectedNode.children.splice(searchId(selectedNode.children, selectedNode.children[0].id), 1)
+  chartData.push(newNode);
+  updateNodeSerialNumber(nodeSerialNumber + 1);
+  return newNode;
+}
+
+const createNewBranch = ({ chartData, updateChartData, nodeSerialNumber, updateNodeSerialNumber, searchNode }) => (selectedNode) => {
+  if (chartData[searchNode(selectedNode.children[0].id)].depth - selectedNode.depth === 1)
+    for(let i = 0; i < chartData.length;i++) 
+      if (chartData[i].depth > selectedNode.depth)
+        chartData[i].depth++;  
+  let tempChildren = selectedNode.children.slice();
+  let tempParent = chartData[searchNode(selectedNode.children[0].id)].parent.slice();
+  tempParent.splice(searchId(tempParent, selectedNode.id), 1);
+  chartData[searchNode(selectedNode.children[0].id)].parent = [];
+  chartData[searchNode(selectedNode.id)].children = [];
+  for (let i = 0;i < 2;i++) {
+    const newNode = {
+      id: nodeSerialNumber + '',
+      data: `I'm Node ${nodeSerialNumber}`,
+      parent: [{
+        id: selectedNode.id
+      }],
+      children: tempChildren.slice(),
+      depth: selectedNode.depth + 1,
+      shapeInfo: selectedNode.shapeInfo
+    }
+    chartData[searchNode(tempChildren[0].id)].parent.push({id: nodeSerialNumber + ''});
+    chartData[searchNode(selectedNode.id)].children.push({id: nodeSerialNumber + ''});
+    chartData.push(newNode);
+    nodeSerialNumber++;
+  }
+    chartData[searchNode(tempChildren[0].id)].parent.push(...tempParent);
+
+  chartData[chartData.length - 1].brother = [{ id: chartData[chartData.length - 2].id }];
+  chartData[chartData.length - 2].brother = [{ id: chartData[chartData.length - 1].id }];
+  updateChartData(chartData);
+  updateNodeSerialNumber(nodeSerialNumber);
+}
+
+const deleteNode = ({ chartData, updateChartData, searchNode, nodeSize, mode }) => (selectedNode) => {
+  const chartWidth = document.getElementById('chartWrapper').clientWidth;
+  const nodeWidth = chartWidth * (nodeSize || 8) / 100;
+  let parentNode = chartData[searchNode(selectedNode.parent[0].id)];
+  parentNode.children.splice(searchId(parentNode.children, selectedNode.id), 1);
+  selectedNode.brother.length === 0 && parentNode.children.push(...selectedNode.children);
+
+  for (let i = 0, length = selectedNode.children.length;i < length;i++) {
+    let childNode = chartData[searchNode(selectedNode.children[i].id)];
+    childNode.parent.splice(searchId(childNode.parent, selectedNode.id), 1);
+    selectedNode.brother.length === 0 && childNode.parent.push(...selectedNode.parent)
+  }
+
+  for (let i = 0, length = selectedNode.brother.length;i < length;i++) {
+    let brotherNode = chartData[searchNode(selectedNode.brother[i].id)];
+    brotherNode.brother.splice(searchId(brotherNode.brother, selectedNode.id), 1);
+  }
+
+  if (chartData.filter(node => node.depth === selectedNode.depth).length === 1) {
+    for (let i = 0, length = chartData.length;i < length;i++)
+      if (chartData[i].depth > selectedNode.depth)
+        chartData[i].depth--;
+  }
+  
+  chartData.splice(searchNode(selectedNode.id), 1);
+  updateChartData(chartData);
+  return selectedNode;
+}
+
+const flowChartUpdatePos = ({ chartData, updateChartData, searchNode, nodeSize, chartWidth, updateChartWidth }) => () => {
+  const chartWrapperWidth = document.getElementById('chartWrapper').clientWidth;
+  const nodeWidth = chartWrapperWidth * (nodeSize || 8) / 100;
+
+  let nodesInDepth = [], offsetMultiple = [];
+  for (let i = 0, length = chartData[1].depth;i <= length;i ++)
+    nodesInDepth.push(chartData.filter(node => node.depth === i));
+  for (let i = 1, length = nodesInDepth.length - 1;i < length;i++) {
+    offsetMultiple.push(1);
+    for (let j = 0, len = nodesInDepth[i].length;j < len;j++)
+      if (nodesInDepth[i][j].brother.length >= 1 && i > 1) {
+        // if (i > 2 && offsetMultiple[i - 3] === 1) 
+          offsetMultiple[i - 2] *= 2;
+        // else {
+        for (let k = i - 3;k >= 0;k--) 
+          if (offsetMultiple[k] > 1)
+            offsetMultiple[k] *= 2;
+          else 
+            break;
+        // }
+        break;
+      };
+  }
+  offsetMultiple.length === 0 && offsetMultiple.push(1);
+  // console.log('multiple', offsetMultiple, offsetMultiple)
+  chartWidth = chartWrapperWidth + (Math.max(...offsetMultiple) - 1) * 2 * nodeWidth;
+  // console.log('cw', chartWidth, chartWrapperWidth)
+  const traversalNodes = (node) => {
+    // console.log(`node${node.id}`, node)
+    node.posY = node.depth * nodeWidth * 1.75;
+    if (node.id === chartData[0].id || node.id === chartData[1].id)
+      node.posX = (chartWidth || chartWrapperWidth - nodeWidth) / 2;
+    else if (node.parent.length === 2) {
+      let totalPosX = 0;
+      for (let i = 0, length = node.parent.length;i < length;i++) 
+        totalPosX += chartData[searchNode(node.parent[i].id)].posX;
+      node.posX = totalPosX / node.parent.length;
+    } else if (node.parent.length > 2) {
+      node.posX = (chartWidth || chartWrapperWidth - nodeWidth) / 2;
+    } else if (node.brother.length === 0) {
+      node.posX = chartData[searchNode(node.parent[0].id)].posX;
+      // console.log('nnnnnnnnnnn', node);
+    } else {
+      const offset = offsetMultiple[node.depth - 1] * nodeWidth * 0.75 * (searchNode(node.id) % 2 === 1 ? 1 : -1);
+      node.posX = chartData[searchNode(node.parent[0].id)].posX + offset;
+      // console.log(`node${node.id}, depth:`, node.depth, offsetMultiple[node.depth - 1])
+    }
+
+    if (node.children.length >= 1) {
+      for(let i = 0; i < node.children.length;i++)
+        traversalNodes(chartData[searchNode(node.children[i].id)]);
+    }
+  }
+  traversalNodes(chartData[0]);
+  // console.log(nodesInDepth);
+  updateChartWidth(chartWidth);
+}
+
+const nodeOperationProps = withHandlers({ searchNode });
+const nodeOperationHandles = withHandlers({ createNewNode, createNewBranch, deleteNode, flowChartUpdatePos });
+
+export default compose(nodeOperationProps, nodeOperationHandles);

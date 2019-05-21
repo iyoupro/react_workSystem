@@ -1,0 +1,93 @@
+import React, { useState } from 'react';
+import Section from './components/Section';
+import uniqueId from 'lodash/uniqueId';
+import styles from './index.less';
+
+const setSection = (sectionId, newSectionData, data, setData) => {
+  for (let i = 0; i < data.sections.length; i += 1) {
+    if (data.sections[i].id === sectionId) {
+      data.sections[i] = newSectionData;
+      setData(data);
+      return;
+    }
+  }
+}
+
+const FormsPage = props => {
+  const [data, setData] = useState(props.data);
+  const [mode, setMode] = useState(props.mode);
+  const [selectedItem, setSelectedItem] = useState(null);
+
+  return (
+    <div className={styles.wrapper}>
+      {data.title}
+      {data.sections.map(section => 
+        <Section
+          key={section.id}
+          mode={mode}
+          section={section}
+          selectedItem={selectedItem}
+          setSection={section => setSection(section.id, newSectionData, data, setData)}/>
+        )
+      }
+    </div>
+  );
+}
+
+const initialData = 
+{// sections]
+  title: '未命名表单',
+  sections: [{ // items -- 必存在items[0], type等于sectionTitle，不可删，唯一。
+    id: 'secition1', // uniqueId(),
+    title: '未命名小节',
+    totalScore: 0,
+    items: [{ 
+      id: 'item1', // uniqueId(),
+      type: "sectionTitle", // "sectionTitle"小节标题, "radio"单选, "checkbox"多选, "paragraph"段落, "declaraction"说明
+      title: "未命名标题", // item's title.Item第一行，必有。只有edit模式可以编辑
+      // score: 0, // type不为sectionTitle时存在这个字段，mode为evaluate可对write模式下返回的输入data的每一项item进行评分。
+      // isRequired: false // type不为sectionTitle时存在这个字段, 选择是否是必填项，默认否。只有edit模式可以编辑
+      introduce: null, // item's introduce, Item第二行，可选择显示，如果不为null则显示，默认否。只有edit模式可以编辑
+      // inputValue: null, // type不为sectionTitle时存在这个字段。对于段落来讲，是write模式下输入的字，对于选择来讲，是选择的value或者values数组。只有write模式可以编辑
+      // options: ["选项1", "选项2", "选项3"], type为选择时才有这个字段,表示每个选项的名字。只有edit模式可以编辑
+      // layout: 1, // 默认1。表示一行能占几个options。只有edit模式可以编辑
+    }, {
+      id: 'item2',
+      type: "radio", 
+      title: "radio1", 
+      score: 0,
+      isRequired: true,
+      introduce: 'aaaa',
+      inputValue: null, 
+      options: ["选项1", "选项2", "选项3"],
+      layout: 2,
+    }, {
+      id: 'item3',
+      type: "checkbox", 
+      title: "checkbox1", 
+      score: 0,
+      isRequired: false,
+      introduce: null,
+      inputValue: null, 
+      options: ["选项1", "选项2"],
+      layout: 2,      
+    }, {
+      id: 'item4',
+      type: "paragraph", 
+      score: 0,
+      isRequired: true,
+      title: "paragrap1", 
+      introduce: 'ccc',
+      inputValue: null, 
+      // options: ["选项1", "选项2"],
+      // layout: 1,      
+    }]
+  }], 
+};
+
+FormsPage.defaultProps = {
+  mode: 'edit', // 'edit', 'write', 'evaluate', 'result' 每种模式的输入data是上种模式的输出data
+  data: initialData, 
+}
+
+export default FormsPage;

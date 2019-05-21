@@ -1,0 +1,6 @@
+.wrapper{
+  width: 96%;
+  text-indent: 28px;
+  font-size: 16px;
+  color: black;
+}

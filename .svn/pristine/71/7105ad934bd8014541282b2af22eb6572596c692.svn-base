@@ -1,0 +1,44 @@
+import React, { memo, useState, useRef } from 'react';
+import { CellMeasurerCache } from 'react-virtualized/dist/commonjs/CellMeasurer';
+import PanelLeft from './PanelLeft';
+import PanelRight from './PanelRight';
+import styles from './index.less';
+
+const IM = props => {
+  const { className, loginUserData, chatData, chatUserData, onChange } = props;
+  const [selectedChat, setSelectedChat] = useState(null);
+  const measureCache = useRef(new CellMeasurerCache({ fixedWidth: true, minHeight: 80 }));
+  const inputRef = useRef(null);
+  const chatListRef = useRef(null);
+  const inputValues = useRef({});
+
+  return (
+    <div className={`${styles.wrapper} ${className}`} >
+      <PanelLeft
+        loginUserData={loginUserData}
+        chatUserData={chatUserData}
+        chatData={chatData}
+        selectedChat={selectedChat}
+        setSelectedChat={setSelectedChat}
+        measureCache={measureCache}
+        inputRef={inputRef}
+        inputValues={inputValues}
+        chatListRef={chatListRef}
+        onChange={onChange}
+      />
+      <PanelRight
+        loginUserData={loginUserData}
+        chatUserData={chatUserData}
+        chatData={chatData}
+        selectedChat={selectedChat}
+        measureCache={measureCache}
+        inputRef={inputRef}
+        inputValues={inputValues}
+        chatListRef={chatListRef}
+        onChange={onChange}
+      />
+    </div>
+  );
+};
+
+export default memo(IM);

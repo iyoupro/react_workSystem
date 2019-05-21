@@ -1,0 +1,45 @@
+import React, { memo, useRef, useEffect } from 'react';
+import PropTypes from 'prop-types';
+import { Input } from 'antd';
+import styles from './Input.less';
+
+/**
+ * @description A beautiful Input modify Antd's Input border-style and focus animation, and it's width will fit inputValue va autoSize prop. 
+ * 更改了Antd Input样式和Focus效果，可以根据输入内容自适应宽度的BeautifulInput，其他效果与同Antd Input。
+ * @param {string} inputClassName - customInput-Style. 自定义输入框样式。
+ * @param {string} underlineClassName - customUnderline-Style. 自定义下划线样式。
+ * @param {bool} autoSize - if true, input's width will fit the value in it, and if false, you are supposed to add detail width styles in inputClassName. 
+ * 是否开启高度自适应，如果为否，建议在inputClassName中定义具体width。
+ * @param {object} props - all other props you wanna pass to Antd Input.其他所有传递给Antd Input组件的属性。
+ * @version 0.0.1 2018-11-22
+ * @author SSSensational <sss18201672034@163.com>
+ * @example <BeautifulInput inputClassName={...} underlineClassName={...} autoSize value={...} onChange={...} placeholder="xxx" />
+ */
+const BeautifulInput = memo(({ inputClassName, underlineClassName, autoSize, ...props }) => {
+  const underline = useRef(null);
+  const wrapper = useRef(null);
+  const widthCal = useRef(null);
+  const onFcus = () => underline.current.classList.add(styles.focus);
+  const onBlur = () => underline.current.classList.remove(styles.focus);
+  useEffect(() => { if(autoSize) wrapper.current.style['width'] = `${widthCal.current.clientWidth * 1.125}px` }); // width*1.125 not width*1 to avoid input's tremble
+
+  return (
+    <div ref={wrapper} className={`${inputClassName} ${styles.wrapper}`}>
+      <Input className={`${inputClassName} ${styles.input}`} {...props} onFocus={onFcus} onBlur={onBlur} />
+      <hr ref={underline} className={`${underlineClassName} ${styles.underline}`} />
+      {autoSize && <span ref={widthCal} className={styles.widthCal}>{props.value}</span>}
+    </div>
+  );
+});
+
+BeautifulInput.PropTypes = {
+  inputClassName: PropTypes.string,
+  underlineClassName: PropTypes.string,
+  autoSize: PropTypes.bool,
+};
+
+BeautifulInput.defaultProps = {
+  autoSize: true,
+};
+
+export default BeautifulInput;

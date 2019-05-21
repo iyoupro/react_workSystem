@@ -1,0 +1,41 @@
+import React, { useState } from 'react';
+import { Slider, Select } from 'antd';
+import TreeView from '../components/TreeView/'
+import styles from './OrganizationChartPage.less';
+import data from './OrganizationChartPageData';
+import Item from '../components/TreeView/Item';
+
+const Option = Select.Option;
+
+const OrganizaitonChartPage = props => {
+  const [zoom, setZoom] = useState(100);
+  const [direction, setDirection] = useState('vertical');
+  const [mode, setMode] = useState('detail');
+
+  return (
+    <div className={styles.wrapper} >
+      <div className={styles.panel} >
+        <Slider className={styles.zoomSlider} value={zoom} onChange={value => setZoom(value)} min={50} max={200} ipFormatter={(value) => `${value}%`} />
+        <Select className={styles.select} value={direction} onChange={value => setDirection(value)} >
+          <Option value="vertical">水平</Option>
+          <Option value="horizontal">竖直</Option>
+        </Select>
+        <Select className={styles.select} value={mode} onChange={value => setMode(value)} >
+          <Option value="detail">详情</Option>
+          <Option value="simple">缩略</Option>
+        </Select>
+      </div>
+      <TreeView
+        data={[data]}
+        direction={direction} // vertical, horizontal
+        treeNodeSize={[164, 128]} // width, height
+        distance={[100, 60, 40]}// toParent, toBrother, rootNodeToBox
+        renderNode={Item}
+        zoom={zoom}
+        mode={mode}
+      />
+    </div>
+  );
+}
+
+export default OrganizaitonChartPage;

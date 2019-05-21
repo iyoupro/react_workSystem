@@ -1,0 +1,44 @@
+import React from 'react';
+import { compose, withState, mapProps } from 'recompose';
+import { withRouter } from 'react-router-dom';
+import { Row, Col } from 'antd';
+import { parseLocationSearchValue } from '../lib/withRouterParsers';
+import EvalLibrary from './EvalLibrary';
+import EvalTplDetail from './EvalTplDetail';
+
+// 连接 tpldetail 和libary 方法
+const pageHoc = compose(
+  withRouter,
+  withState('changeQuestion', 'setChangeQuestion'),
+  mapProps(({ location, ...rest }) => {
+    return {
+      location,
+      mode: parseLocationSearchValue(location, 'mode') || 'edit',
+      ...rest
+    };
+  })
+);
+
+const EvalTplDetailPage = (props) => {
+  const { location, setChangeQuestion, changeQuestion, ...rest } = props;
+  const isEdit = props.mode === 'edit' || !props.mode;
+  const renderRightContent = () => {
+    return <EvalLibrary setChangeQuestion={setChangeQuestion} modul={parseLocationSearchValue(location, 'modul')} />;
+  };
+  const renderMainContent = () => {
+    return <EvalTplDetail changeQuestion={changeQuestion} {...rest} />;
+  };
+  return (
+    <div>
+      <Row>
+        <Col span={16}>
+          {renderMainContent()}
+        </Col>
+        <Col span={8}>
+        {renderRightContent()}
+        </Col>
+      </Row>
+    </div>);
+};
+
+export default pageHoc(EvalTplDetailPage);

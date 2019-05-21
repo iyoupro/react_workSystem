@@ -1,0 +1,78 @@
+/** @format */
+
+/**
+ * @param {array} chartData - 包含了完整节点信息的一维数组，即通过Props属性传递的chartData
+ * @author SSSensational [<sss18201672034@163.com>]
+ */
+const getHeadNode = chartData => {
+  let headNode = null;
+  try {
+    for (let i = 0, length = chartData.length; i < length; i += 1) {
+      if (!chartData[i].previous || !Array.isArray(chartData[i].previous)) throw `Error previous property in chartData[${i}]`;
+      if (chartData[i].previous.length === 0) {
+        headNode = chartData[i];
+        break;
+      }
+    }
+    if (headNode === null) throw "Can't find head node in chartData";
+  } catch (err) {
+    window.alert(err);
+  }
+  return headNode;
+};
+
+const getTailNode = chartData => {
+  let tailNode = null;
+  try {
+    for (let i = 0, length = chartData.length; i < length; i += 1) {
+      if (!chartData[i].next || !Array.isArray(chartData[i].next)) throw `Error next property in chartData[${i}]`;
+      if (chartData[i].next.length === 0) {
+        tailNode = chartData[i];
+        break;
+      }
+    }
+    if (tailNode === null) throw "Can't find head node in chartData";
+  } catch (err) {
+    window.alert(err);
+  }
+  return tailNode;
+};
+
+const getNode = (chartData, no) => {
+  let node = null;
+  try {
+    for (let i = 0; i < chartData.length; i += 1) {
+      if (chartData[i].no === no) {
+        node = chartData[i];
+        break;
+      }
+    }
+    if (node === null) throw `Can't find node${no} in chartData`;
+  } catch (err) {
+    window.alert(err);
+  }
+  return node;
+};
+
+const buildBrother = chartData => {
+  return chartData;
+};
+
+const AddNewNode = (chartData, pre, node) => {};
+
+const AddNewBranchNode = (chartData, pre, nodes) => {};
+
+const DeleteNode = (chartData, node) => {};
+
+const DeleteBranch = (chartData, node) => {};
+
+export default {
+  getNode,
+  getHeadNode,
+  getTailNode,
+  buildBrother,
+  AddNewNode,
+  AddNewBranchNode,
+  DeleteNode,
+  DeleteBranch,
+};

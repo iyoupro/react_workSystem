@@ -1,0 +1,25 @@
+import React, { memo, useState, useRef, useEffect } from 'react';
+import GridLayout from 'react-grid-layout';
+import { ReactUtil } from '../../utils';
+import styles from './index.less';
+
+
+const EasyGridLayout = props => {
+  const wrapper = useRef(null)
+  const [width, setWidth] = useState(0);
+  ReactUtil.init(() => setWidth(wrapper.current.clientWidth));
+  console.log('render');
+
+  const { className, cols, rowHeight, lyout } = props;
+  return (
+    <div ref={wrapper} className={`${className} ${styles.wrapper}`}>
+      <GridLayout className='react-grid-layout' cols={12} rowHeight={30} width={width} >
+        <div key="a">a</div>
+        <div key="b">b</div>
+        <div key="c">c</div>
+      </GridLayout>
+    </div>
+  )
+}
+
+export default memo(EasyGridLayout);

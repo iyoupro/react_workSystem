@@ -1,0 +1,48 @@
+/** @format */
+
+import { withState, withProps, compose } from 'recompose';
+import cloneDeep from 'lodash/cloneDeep';
+import chartData from './chartData.json';
+
+const initialChartData = chartData;
+const initialSelectedNode = null;
+const initialNodeSerialNumber = 2;
+const initalModalState = 'close';
+
+export default compose(
+  withState(
+    'chartData',
+    'updateChartData',
+    ownProps =>
+      ownProps.initialChartData
+        ? cloneDeep(ownProps.initialChartData)
+        : cloneDeep(initialChartData),
+  ),
+  withState('selectedNode', 'updateSelectedNode', initialSelectedNode),
+  withState('nodeSerialNumber', 'updateNodeSerialNumber', initialNodeSerialNumber),
+  withState('modalState', 'updateModalState', initalModalState),
+  withProps(() => {
+    let chartWrapper = null;
+    let chartView = null;
+    return {
+      getChartWrapper: () => ref => (chartWrapper = ref),
+      getChartView: () => ref => (chartView = ref),
+      getRefs: () => {
+        return { chartWrapper, chartView };
+      },
+    };
+  }),
+  withProps({
+    defaultShapeInfo: {
+      nodeType: 'rectangle',
+      fillColor: '#fcffe6',
+      textColor: 'black',
+      strokeColor: 'gray',
+      popupFillColor: 'white',
+      popupTextColor: 'black',
+      selectedFillColor: '#1890ff',
+      selectedTextColor: 'white',
+      selectedStrokeColor: 'gray',
+    },
+  }),
+);

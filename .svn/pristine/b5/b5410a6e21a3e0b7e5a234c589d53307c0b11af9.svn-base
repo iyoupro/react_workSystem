@@ -1,0 +1,27 @@
+import React, { Component } from 'react';
+import styles from './OrganizationChartPage.less';
+import OrganizaitonChart from '../components/OrganizationChart/';
+import ItemNode from '../components/OrganizationChart/ItemShape';
+import items from './OrganizationChartPageData.json';
+
+class OrganizaitonChartPage extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { };
+  }
+  render() {
+    return (
+      <div className={styles.wrapper}>
+        <OrganizaitonChart
+          items={items}
+          ItemNode={ItemNode}
+          itemMarginAround="25px"
+          itemMarginTop="128px"
+          firstItemMarginTop="5%"
+        />
+      </div>
+    );
+  }
+}
+
+export default OrganizaitonChartPage;

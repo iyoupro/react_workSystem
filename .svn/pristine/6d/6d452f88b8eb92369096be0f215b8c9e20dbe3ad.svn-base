@@ -1,0 +1,108 @@
+import React from 'react';
+import { Radio, Button } from 'antd';
+import QueueAnim from 'rc-queue-anim';
+import update from 'immutability-helper';
+import { compose, withPropsOnChange, withHandlers, withState, flattenProp } from 'recompose';
+import uniqueId from 'lodash/uniqueId';
+import findIndex from 'lodash/findIndex';
+import styles from './QueryGroup.less';
+import QueryRule from './QueryRule';
+
+const RadioButton = Radio.Button;
+const RadioGroup = Radio.Group;
+const ButtonGroup = Button.Group;
+
+const genKey = (value, group) => {
+  if (value && value.key) {
+    return value.key;
+  }
+  if (group) {
+    return uniqueId('group_');
+  }
+  return uniqueId('condition_');
+};
+
+const enhance = compose(
+  withState('state', 'setState', ({ value }) => {
+    const value2 = value || {};
+    return {
+      group: value2.group,
+      key: genKey(value2, value2.group),
+      type: value2.type || 'AND',
+      conditions: value2.conditions || [],
+    };
+  }),
+  flattenProp('state'),
+  withPropsOnChange(
+    ['value'],
+    ({ value, state, setState }) => {
+      const value2 = value || {};
+      setState({
+        ...state,
+        group: value2.group,
+        key: genKey(value2, value2.group),
+        type: value2.type || 'AND',
+        conditions: value2.conditions || [],
+      });
+    },
+  ),
+  withHandlers(() => {
+    return {
+      onTypeChange: ({ state, setState }) => (value) => {
+        setState({ ...state, type: value });
+      },
+      onAddGroup: ({ state, setState, conditions }) => () => {
+        setState({ ...state, conditions: update(conditions, { $push: [{ type: 'OR', group: true, key: uniqueId('group_'), conditions: [] }] }) });
+      },
+      onAddCondition: ({ state, setState, conditions }) => () => {
+        setState({ ...state, conditions: update(conditions, { $push: [{ type: 'AND', group: false, condition: {} }] }) });
+      },
+      onRemoveGroup: ({ state, setState, conditions }) => (key) => {
+        const index = findIndex(conditions, (condition) => {
+          return condition.key === key;
+        });
+        if (index !== -1) {
+          setState({ ...state, conditions: update(conditions, { $splice: [index, 1] }) });
+        }
+      },
+      onRemoveCondition: ({ state, setState, conditions }) => (index) => {
+        setState({ ...state, conditions: update(conditions, { $splice: [index, 1] }) });
+      },
+    };
+  }),
+);
+
+
+const QueryGroup = (props) => {
+  const { root, first, last, type, key, conditions } = props;
+  const { onTypeChange, onAddGroup, onAddCondition, onRemoveGroup, onRemoveCondition } = props;
+  return (
+    <div className={`${styles.groupWrapper} ${root && styles.head} ${first && styles.first} ${last && styles.last}`}>
+      {
+        <div className={styles.operatorWrapper}>
+          <RadioGroup style={{ zIndex: 2 }} onChange={onTypeChange} value={type}>
+            <RadioButton className={`${styles.button} ${styles.leftButton}`} value="AND" disabled={!root ? true : conditions.length < 2}>AND</RadioButton>
+            <RadioButton className={`${styles.button} ${styles.leftButton}`} value="OR" disabled={!root ? false : conditions.length < 2}>OR</RadioButton>
+          </RadioGroup>
+          <ButtonGroup>
+            <Button className={`${styles.button} ${styles.rightButton}`} icon="plus" onClick={onAddCondition}>Add rule</Button>
+            <Button className={`${styles.button} ${styles.rightButton}`} disabled={!root} icon="plus-circle" onClick={onAddGroup}>Add group</Button>
+            {!root && <Button className={`${styles.button} ${styles.deleteButton}`} icon="delete" onClick={() => { onRemoveGroup(key); }} />}
+          </ButtonGroup>
+        </div>
+      }
+      <QueueAnim>
+        {
+          conditions && conditions.map((condition, index) => {
+            if (condition.group) {
+              return <QueryGroup key={condition.key} value={condition} first={index === 0} last={index === conditions.length - 1} index={index} deleteThis={() => onRemoveGroup(key)} onRuleChange={this.onRuleChange} />;
+            }
+            return <QueryRule key={condition.key} value={condition} index={index} first={index === 0} last={index === conditions.length - 1} deleteThis={() => onRemoveCondition(index)} onRuleChange={this.onRuleChange} />;
+          })
+        }
+      </QueueAnim>
+    </div>
+  );
+};
+
+export default enhance(QueryGroup);

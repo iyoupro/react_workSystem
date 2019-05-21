@@ -1,0 +1,18 @@
+import React, { memo } from 'react';
+import { Radio, Row, Col } from 'antd';
+import Input from '../components/Input';
+
+import styles from './Radio.less';
+// console.log(styles.line);
+const RadioGroup = Radio.Group;
+
+const MyRadio = memo(({ data, mode, selected, setData, ...props}) => {
+  const { options } = data;
+  return (
+    <RadioGroup name="radiogroup" >
+      {options && options.map(option => <Radio key={option.id} value={option.id} disabled={mode !== 'write'} >{option.title}</Radio>)}
+    </RadioGroup>
+  );
+});
+
+export default MyRadio;

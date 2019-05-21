@@ -1,0 +1,46 @@
+.wrapper{
+  width: 100%;
+  display: flex;
+  padding-bottom: 12px;
+  flex-wrap: wrap;
+  & .chooseLine{
+    padding: 4px 0;
+    display: flex;
+    position: relative;
+    margin-left: 0px;
+    width: 100%;
+    &:hover {
+      &.selected {
+        background: #f5f5f5;
+      }
+      & .closeIcon {
+        opacity: 1;
+      }
+    }
+    & .closeIcon {
+      transition: all 0.3s ease;
+      cursor: pointer;
+      font-size: 16px;
+      line-height: 32px;
+      width: 32px;
+      position: absolute;
+      top: 0px;
+      right: 20px;
+      opacity: 0;
+      &:hover {
+        color: black;
+        transform: scale(1.1);
+      }
+    }
+  };
+  & .chooseAdd{
+    margin-right: 20px;    
+    &:hover{
+      // outline: dashed;
+      cursor: pointer;
+      color: gray;
+      border-bottom:1px dashed #000;
+    };
+  }
+
+} 

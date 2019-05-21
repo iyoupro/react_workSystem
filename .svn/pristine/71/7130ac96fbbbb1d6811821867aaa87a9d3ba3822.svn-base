@@ -1,0 +1,6 @@
+#chartWrapper {
+  background: #fafafa;
+  box-shadow: 1px 1px 10px 1px #555;
+  border-radius: 5px;
+  overflow: auto;
+}

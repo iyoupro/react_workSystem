@@ -1,0 +1,34 @@
+.wrapper {
+  width: calc(50% - 10px);
+  height: 50px;
+  background: grey;
+  margin: 10px;
+  padding: 10px;
+  border: 1px solid black;
+  &.notFix {
+    width: calc(50% - 5px);
+    height: 50px;
+    background: #91d5ff;
+    display: flex;
+    align-items: center;
+    margin: 10px;
+    padding: 10px;
+    border: 1px solid black;
+    &.dropPreView {
+      background: #d9f7be;
+      border: 1px dashed #1890ff;
+      opacity: 1 !important;
+    }
+    &.hover{
+      background: red;
+    }
+  }
+  &.drag{
+    opacity: 0.3;
+  }
+  &.selected {
+    border: 1px solid red;
+    background: yellow;
+  }
+  transition: all 0.5s ease;
+}

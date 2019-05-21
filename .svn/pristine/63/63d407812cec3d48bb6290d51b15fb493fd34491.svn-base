@@ -1,0 +1,253 @@
+/** @format */
+
+import { withHandlers, compose } from 'recompose';
+
+const searchId = (data, id) => {
+  for (let i = 0, length = data.length; i < length; i++) if (data[i].id === id) return i;
+  return -1;
+};
+
+const searchNode = ({ chartData }) => nodeId => {
+  for (let i = 0, length = chartData.length; i < length; i++)
+    if (chartData[i].id === nodeId) return i;
+  return -1;
+};
+
+const setNodeData = ({ chartData }) => (node, data) => {
+  for (let prop in data) chartData[searchId(chartData, node.id)].data[prop] = data[prop];
+  return chartData;
+};
+
+// 新增节点
+const createNewNode = ({ chartData, nodeSerialNumber, updateNodeSerialNumber, searchNode }) => (
+  selectedNode,
+  data,
+) => {
+  const newNode = {
+    id: `${nodeSerialNumber}`,
+    data,
+    parent: [
+      {
+        id: selectedNode.id,
+      },
+    ],
+    children: selectedNode.children.slice(),
+    brother: [],
+    shapeInfo: {
+      nodeType: 'rectangle',
+      fillColor: 'white',
+      textColor: 'black',
+      strokeColor: 'gray',
+      popupFillColor: 'white',
+      popupTextColor: 'black',
+      selectedFillColor: '#1890ff',
+      selectedTextColor: 'white',
+      selectedStrokeColor: 'gray',
+    },
+  };
+  for (let i = 0, length = selectedNode.children.length; i < length; i += 1) {
+    const childNode = chartData[searchNode(selectedNode.children[i].id)];
+    childNode.parent.push({ id: `${nodeSerialNumber}` });
+    childNode.parent.splice(searchId(childNode.parent, selectedNode.id), 1);
+  }
+  selectedNode.children.splice(0, selectedNode.children.length);
+  selectedNode.children.push({ id: `${nodeSerialNumber}` });
+  chartData.push(newNode);
+  updateNodeSerialNumber(nodeSerialNumber + 1);
+  return [chartData, newNode];
+};
+
+// 新增分支
+const createNewBranch = ({ chartData, nodeSerialNumber, updateNodeSerialNumber, searchNode }) => (
+  selectedNode,
+  newBranch,
+) => {
+  const tempChildren = selectedNode.children.slice();
+  const childNode = chartData[searchNode(selectedNode.children[0].id)];
+  childNode.parent.splice(searchId(childNode.parent, selectedNode.id), 1);
+  chartData[searchNode(selectedNode.id)].children = [];
+  const oldSerialNumber = nodeSerialNumber;
+  for (let i = 0; i < newBranch.length; i += 1) {
+    const newNode = {
+      id: `${nodeSerialNumber}`,
+      data: newBranch[i].data,
+      condition: newBranch[i].condition,
+      parent: [
+        {
+          id: `${selectedNode.id}`,
+        },
+      ],
+      children: tempChildren.slice(),
+      brother: [],
+      shapeInfo: {
+        nodeType: 'rectangle',
+        fillColor: '#eee',
+        textColor: 'black',
+        strokeColor: 'gray',
+        popupFillColor: 'white',
+        popupTextColor: 'black',
+        selectedFillColor: '#1890ff',
+        selectedTextColor: 'white',
+        selectedStrokeColor: 'gray',
+      },
+    };
+    for (let j = 0; j < newBranch.length; j += 1) {
+      if (oldSerialNumber + j !== nodeSerialNumber)
+        newNode.brother.push({ id: `${oldSerialNumber + j}` });
+    }
+    childNode.parent.push({ id: `${nodeSerialNumber}` });
+    chartData[searchNode(selectedNode.id)].children.push({ id: `${nodeSerialNumber}` });
+    chartData.push(newNode);
+    nodeSerialNumber += 1;
+  }
+  updateNodeSerialNumber(nodeSerialNumber);
+  return chartData;
+};
+
+const deleteNode = ({ chartData, searchNode }) => (selectedNode, deleteType) => {
+  if (deleteType === 'deleteNode') {
+    for (let i = 0, parentLength = selectedNode.parent.length; i < parentLength; i += 1) {
+      const parentNode = chartData[searchNode(selectedNode.parent[i].id)];
+      parentNode.children.splice(searchId(parentNode.children, selectedNode.id), 1);
+      for (let j = 0, childrenLength = selectedNode.children.length; j < childrenLength; j += 1) {
+        parentNode.children.push({ id: selectedNode.children[j].id });
+      }
+    }
+    for (let i = 0, childrenLength = selectedNode.children.length; i < childrenLength; i += 1) {
+      const childNode = chartData[searchNode(selectedNode.children[i].id)];
+      childNode.parent.splice(searchId(childNode.parent, selectedNode.id), 1);
+      for (let j = 0, parentLength = selectedNode.parent.length; j < parentLength; j += 1) {
+        childNode.parent.push({ id: selectedNode.parent[j].id });
+      }
+    }
+    chartData.splice(searchNode(selectedNode.id), 1);
+  } else {
+    let goalNode;
+    const deleteNodeId = [],
+      goalNodePath = [];
+    for (let i = 0, length = selectedNode.children.length; i < length; i += 1) {
+      goalNodePath.push(i);
+    }
+    const traversalToFindGoalNode = (node, path) => {
+      if (path !== undefined) {
+        if (!node.path) node.path = [];
+        if (node.path.indexOf(path) === -1) node.path.push(path);
+      }
+      for (let i = 0; i < node.children.length; i += 1) {
+        traversalToFindGoalNode(
+          chartData[searchNode(node.children[i].id)],
+          node.id === selectedNode.id ? i : path,
+        );
+      }
+    };
+    traversalToFindGoalNode(selectedNode);
+    const traversalToDeleteNodes = node => {
+      if (node) {
+        if (node.parent.length > 1 && JSON.stringify(node.path) === JSON.stringify(goalNodePath)) {
+          goalNode = node;
+        } else {
+          for (let i = 0; i < node.children.length; i += 1) {
+            traversalToDeleteNodes(chartData[searchNode(node.children[i].id)]);
+          }
+          if (node.id !== selectedNode.id) {
+            deleteNodeId.push(node.id);
+            chartData.splice(searchNode(node.id), 1);
+          }
+        }
+      }
+    };
+    traversalToDeleteNodes(selectedNode);
+    for (let i = 0, length = deleteNodeId.length; i < length; i += 1) {
+      goalNode.parent = goalNode.parent.filter(node => node.id !== deleteNodeId[i]);
+    }
+    selectedNode.children = [{ id: goalNode.id }];
+    goalNode.parent.push({ id: selectedNode.id });
+    for (let i = 0, length = chartData.length; i < length; i += 1) {
+      chartData[i].path = undefined;
+    }
+  }
+  return chartData;
+};
+
+const flowChartUpdatePos = ({
+  chartData,
+  searchNode,
+  nodeSize,
+  updateChartWidth,
+  getRefs,
+  mode,
+  ...props
+}) => () => {
+  const refs = getRefs();
+  const chartWidth = refs.chartWrapper.clientWidth;
+  const nodeWidth = (chartWidth * (nodeSize || 8)) / 100;
+  const rowDistance = (1 + props.rowDistance) * nodeWidth;
+  const colDistance = (1 + props.colDistance) * nodeWidth;
+  /* 节点的位置为其父节点的位置parentNode.posX + rowDistance * 父节点的偏移量parentNode.offset * 该节点的偏移位置offsetPos。*/
+  const reverseTraversalNodes = (node, offset) => {
+    // 倒序遍历节点求得每个节点的偏移量offset和偏移位置offsetPos
+    node.posY = 0;
+    let nextNodeOffset;
+    if (node.children.length > 1) {
+      if (node.offset && node.offset < offset) node.offset = offset;
+      if (!node.offset) node.offset = offset === 0 ? 1 : offset;
+      nextNodeOffset = node.offset * node.children.length;
+    } else {
+      node.offset = 0;
+      nextNodeOffset = offset;
+    }
+    if (node.parent.length > 1) nextNodeOffset = 0;
+    /* 倒序遍历节点，给出当前节点相对于父节的偏移位置offsetPos。
+    如父节点有四个子节点0, 1, 2, 3 子节点的偏移位置offsetPos分别应该为 -2, -1, 1, 2。*/
+    if (node.parent.length >= 1) {
+      const parentNode = chartData[searchNode(node.parent[0].id)];
+      const indexInParentNode = searchId(parentNode.children, node.id);
+      const childNumber = parentNode.children.length;
+      node.offsetPos = indexInParentNode - parseInt(childNumber / 2);
+      if (childNumber % 2 === 0 && indexInParentNode >= parseInt(childNumber / 2))
+        node.offsetPos += 1;
+      if (node.brother.length % 2 === 1) node.offsetPos += node.offsetPos > 0 ? -0.5 : 0.5;
+      for (let i = 0, length = node.parent.length; i < length; i += 1)
+        reverseTraversalNodes(chartData[searchNode(node.parent[i].id)], nextNodeOffset);
+    } else {
+      // 若为首节点结束遍历
+      node.offsetPos = 0;
+    }
+  };
+  reverseTraversalNodes(chartData[1], 0);
+  const traversalNodes = (node, posY) => {
+    if (!node.posY || node.posY < posY) node.posY = posY;
+    if (node.id === chartData[0].id || node.id === chartData[1].id)
+      node.posX = (chartWidth - nodeWidth) / 2;
+    else {
+      let parentNodesX = 0;
+      for (let i = 0, length = node.parent.length; i < length; i += 1) {
+        parentNodesX += chartData[searchNode(node.parent[i].id)].posX;
+      }
+      parentNodesX /= node.parent.length;
+      node.posX = parentNodesX;
+      if (node.parent.length === 1) {
+        node.posX += chartData[searchNode(node.parent[0].id)].offset * node.offsetPos * rowDistance;
+      }
+    }
+
+    if (node.children.length >= 1) {
+      for (let i = 0; i < node.children.length; i++)
+        traversalNodes(chartData[searchNode(node.children[i].id)], posY + colDistance);
+    }
+  };
+  traversalNodes(chartData[0], 10);
+  if (mode === 'stepChart') refs.chartView.style.height = chartData[1].posY + nodeWidth;
+};
+
+const nodeOperationProps = withHandlers({ searchNode, setNodeData });
+const nodeOperationHandles = withHandlers({
+  createNewNode,
+  createNewBranch,
+  deleteNode,
+  flowChartUpdatePos,
+});
+export default compose(
+  nodeOperationProps,
+  nodeOperationHandles,
+);

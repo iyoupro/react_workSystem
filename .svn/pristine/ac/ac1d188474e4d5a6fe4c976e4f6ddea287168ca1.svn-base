@@ -1,0 +1,22 @@
+import React from 'react';
+import Edit from './Edit'
+import { Switch, Icon } from 'antd';
+import styles from './index.less';
+
+class SortListItem extends React.Component{
+  render() {
+    const { data, selectItem, setItem, deleteItem, inFixArea, AreaId, dragging, otherItemDragging, preView, selected, placeholder } = this.props;
+    return (// ()=> setItem({ title: 'xx', name: 'xx' })
+      <div 
+        onMouseUp={event=> event.nativeEvent.target.localName !== 'span' && selectItem()}
+        className={`${styles.topBox} ${dragging ? styles.dragging : ''} ${placeholder ? styles.placeholder : ''}
+        ${preView ? styles.preView : ''} ${selected ? styles.selected : ''}`}
+    >
+      {inFixArea && data.title}
+      {!inFixArea && data.title}
+      {AreaId === '2' &&  <Switch checkedChildren="显示" unCheckedChildren="隐藏" defaultChecked style={{marginLeft:'58%',zIndex:'5'}}/>}
+      </div>
+    );
+  }
+}
+export default SortListItem;

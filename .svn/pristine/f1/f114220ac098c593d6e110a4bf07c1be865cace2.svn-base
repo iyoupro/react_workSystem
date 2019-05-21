@@ -1,0 +1,47 @@
+import React, { Component } from 'react';
+import { getData } from '../lib/utils';
+
+
+class TablePage extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      data: null,
+      schema:null
+    };
+  }
+
+
+  componentDidMount() {
+     // 获取表信息
+     getData('/api/schema/pers_employee').then(({ error, data }) => {
+      this.setState({ schema:data });
+    });
+    // 分页获取数据
+    getData('/api/class/pers_employee', { page: 2, pageSize: 40 }).then(({ error, data }) => {
+      this.setState({ data });
+    });
+  }
+
+  render() {
+    const { data } = this.state;
+    if (!data) {
+      return null;
+    }
+    const { rows, pagination } = data;
+    return (
+      <div>
+        {
+          rows && rows.map((row) => {
+            return (<span>{row.name}</span>)
+          })
+        }
+        <div>hellow world</div >
+      </div>
+    )
+  }
+}
+
+
+export default TablePage;

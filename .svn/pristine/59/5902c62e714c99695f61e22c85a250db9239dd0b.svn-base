@@ -1,0 +1,42 @@
+import React, { Component } from 'react';
+import { Icon, Menu, Dropdown, } from 'antd';
+import styles from './ItemShape.less';
+
+const add = (
+  <Menu>
+    <Menu.Item key="0">
+      新增同级部门
+    </Menu.Item>
+    <Menu.Item key="1">
+      新增子部门
+    </Menu.Item>
+  </Menu>
+);
+const modify = (
+  <Menu>
+    <Menu.Item  key="2">
+      更名
+    </Menu.Item>
+    <Menu.Item  key="3">
+      划转
+    </Menu.Item>
+    <Menu.Item  key="4">
+      合并
+    </Menu.Item>
+  </Menu>
+);
+class ItemShape extends Component {
+  render() {
+    const { data, show, showChildren, expendChildren } = this.props;
+    return (
+      <div className={`${styles.item} ${show ? styles.show : ''}`} >
+        {data.label}
+        {data.children && show &&
+          <Icon className={styles.icon} type={!showChildren ? "down-circle" : "up-circle"} theme="outlined" onClick={expendChildren} />
+          }
+      </div>
+  );
+  }
+}
+
+export default ItemShape;

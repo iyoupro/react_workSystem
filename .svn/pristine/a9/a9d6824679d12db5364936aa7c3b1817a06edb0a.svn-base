@@ -1,0 +1,77 @@
+/** @format */
+
+import React, { memo, useState, useEffect, useRef } from 'react';
+import { Popconfirm, Tooltip } from 'antd';
+import DrTable from '../components/DrTable'
+import styles from './TablePage.less';
+import { getData } from '../lib/utils';
+
+const getWidth = (prop, info, data) => {
+  let maxLength = 0;
+  for (let i = 0, length = data.length; i < length; i += 1) {
+    info.calWidth.current.innerHTML = data[i][prop] ? data[i][prop].toString() : '';
+    const len = info.calWidth.current.offsetWidth;
+    if (maxLength < len) maxLength = len;
+  }
+  info.calWidth.current.innerHTML = prop.toString();
+  const propLength = info.calWidth.current.offsetWidth; 
+  if (maxLength < propLength) maxLength = propLength;
+  return maxLength + 24;
+}
+
+const init = (props, info) => {
+  const [table, setTable] = useState({ dataSource: null, columns: null, pageSize: 650, schema: null, scrollX: 0 });
+  useEffect(() => {
+    if (!info.isInit.current) {
+      getData('/api/class/pers_employee', { page: 1, pageSize: table.pageSize }).then(({ error, data }) => {
+        console.time('fetch and struct data:')
+        const columns = [];
+        for (let prop in data.rows[0]) {
+          columns.push({ key: prop, title: prop, dataIndex: prop });
+        }
+        data.rows.map(row => (row.key = row.id));
+        table.dataSource = data.rows;
+        table.columns = columns;
+        console.timeEnd('fetch and struct data:')
+        setTable(table);
+      });
+      info.isInit.current = true;
+    }
+  });
+  // if (table.dataSource && table.columns) console.timeEnd('time:')
+  return table;
+};
+
+const handleDelete = (text, key) => {
+  console.log(text, key);
+};
+
+const rowSelection = {
+  onChange: (selectedRowKeys, selectedRows) => {
+    // console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+  },
+};
+
+const TablePage = props => {
+  const info = { isInit: useRef(false), calWidth: useRef(null) };
+  const { dataSource, columns, pageSize, scrollX } = init(props, info);
+  // console.log('render', dataSource, columns);
+  return (
+    <div className={styles.tablePageWrapper}>
+      <DrTable
+        className={styles.table}
+        dataSource={dataSource}
+        columns={columns}
+        pagination={{ pageSize: 40 }}
+        rowSelection={rowSelection}
+        lazyload={false}
+        leftFixItem={2}
+        colWidth={{ type: 'numbers', default: 120, widths: { id: 60, name: 80, action: 70 } }} // type = numbers, false, all, fast
+        rowHeight={60}
+        tableHeight={700}
+      />
+    </div>
+  );
+};
+
+export default TablePage;

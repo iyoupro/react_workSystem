@@ -1,0 +1,7 @@
+.wrapper {
+  display: flex;
+  flex-direction: row;
+  & .slider {
+    margin-top: 10px;
+  }
+}

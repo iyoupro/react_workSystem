@@ -1,0 +1,20 @@
+import React from 'react';
+import { Router, Route, Switch } from 'dva/router';
+import IndexPage from './routes/IndexPage';
+
+function RouterConfig({ history }) {
+  return (
+    <Router history={history}>
+      <Switch>
+        <Route path="/" exact component={IndexPage} />
+        <Route
+          component={() => {
+            return <div>没有找到呢</div>;
+          }}
+        />
+      </Switch>
+    </Router>
+  );
+}
+
+export default RouterConfig;

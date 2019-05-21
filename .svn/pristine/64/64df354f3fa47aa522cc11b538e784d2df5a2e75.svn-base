@@ -1,0 +1,100 @@
+/** @format */
+
+import React, { useState } from 'react';
+import Section from './Section';
+import Input from './components/Input';
+import uniqueId from 'lodash/uniqueId';
+import styles from './index.less';
+
+
+const FormsPage = props => {
+  const [data, reRender] = useState(props.data);
+  const [mode, setMode] = useState(props.mode);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const updateData = () => reRender(data);
+  const setData = (prop, newPropData) => {
+    data[prop] = newPropData;
+    updateData();
+  };
+  
+  return (
+    <div className={styles.wrapper}>
+      <div className={styles.header} >
+        <Input 
+          inputClassName={styles.title} 
+          focusUnderlineClassName={styles.titleFocusUnderline} 
+          placeholder="请输入表单标题"
+          value={data.title}
+          autoSize
+          showUnderline={false}
+          onChange={event => setData('title', event.target.value)} 
+        />
+      </div>
+      {data.sections.map(section => (
+        <Section
+          key={section.id}
+          mode={mode}
+          data={section}
+          selectedItem={selectedItem}
+          updateData={updateData}
+        />
+      ))}
+    </div>
+  );
+};
+
+const initialData = {
+  title: '未命名表单',
+  sections: [
+    {
+      id: 'secition1',
+      totalScore: 0,
+      items: [
+        {
+          id: 'item1',
+          type: 'SectionTitle',
+          title: '未命名标题',
+          declaraction: null,
+        },
+        {
+          id: 'item2',
+          type: 'Radio',
+          title: 'radio1',
+          score: 0,
+          isRequired: true,
+          declaraction: 'aaaa',
+          inputValue: null,
+          options: ['选项1', '选项2', '选项3'],
+          layout: 2,
+        },
+        {
+          id: 'item3',
+          type: 'Checkbox',
+          title: 'checkbox1',
+          score: 0,
+          isRequired: false,
+          declaraction: null,
+          inputValue: null,
+          options: ['选项1', '选项2'],
+          layout: 2,
+        },
+        {
+          id: 'item4',
+          type: 'Paragraph',
+          score: 0,
+          isRequired: true,
+          title: 'paragrap1',
+          declaraction: 'ccc',
+          inputValue: null,
+        },
+      ],
+    },
+  ],
+};
+
+FormsPage.defaultProps = {
+  mode: 'edit',
+  data: initialData,
+};
+
+export default FormsPage;

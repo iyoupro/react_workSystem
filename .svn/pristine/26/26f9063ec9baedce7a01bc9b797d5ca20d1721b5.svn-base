@@ -1,0 +1,87 @@
+import React, { Component } from 'react';
+import { findDOMNode, unmountComponentAtNode } from 'react-dom'
+import { DragSource, DropTarget } from 'react-dnd';
+import { toClass } from 'recompose';
+import flow from 'lodash/flow';
+import styles from './Item1.less'
+import itemTypes from './itemTypes';
+
+const TargetSpec = {
+  canDrop(props, monitor) {
+    return monitor.isOver() && monitor.isOver({shallow: true});
+  },
+  // hover(props, monitor, component){
+  // },
+  drop(props, monitor, component) {
+    const sourceItem = monitor.getItem();
+    const dropItSelf = findDOMNode(component) === findDOMNode(sourceItem.DOM);
+    const sameArea = findDOMNode(component).parentNode === findDOMNode(sourceItem.DOM).parentNode;
+
+    !props.fix && !dropItSelf && !sameArea && props.addItem(sourceItem.data, props.index);
+    !sourceItem.fix && !dropItSelf && !sameArea && sourceItem.remove();
+
+    let indexOffset = 0;
+    for (let i = 0, length = props.selectedItems.length; i < length;i++) {
+      props.selectedItems[i] < props.index && indexOffset++;
+    }
+    !props.fix && !dropItSelf && sameArea && sourceItem.remove();
+    !props.fix && !dropItSelf && sameArea && props.addItem(sourceItem.data, props.index - indexOffset);
+  }
+};
+
+function TargetCollect(connect, monitor) {
+  return {
+    connectDropTarget: connect.dropTarget(),
+    isOver: monitor.isOver(),
+    canDrop: monitor.canDrop()
+  };// }
+
+}
+
+const SourceSpec = {
+  beginDrag(props, monitor, component) {
+    const { fix, data, index, selectedItems, items, deleteItem } = props;
+    if (selectedItems.indexOf(index) !== -1) {
+      let dataArr = [];
+      for (let i = selectedItems.length - 1;i >= 0;i--)
+        dataArr.push({...items[selectedItems[i]], selected: false});
+      return { data: dataArr, remove: () => deleteItem(selectedItems), fix: fix, index: index, DOM: component };
+    }
+    props.cancelSelect();
+    return { data: [data], remove: () => deleteItem([props.index]), fix: fix, index: index, DOM: component };
+  },
+
+  endDrag(props, monitor, component) {
+    // console.log('endDrapg', props.cancelSelect)
+    props.cancelSelect();
+  },
+
+  isDragging(props, monitor) {
+  }
+};
+
+function SourceCollect(connect, monitor) {
+  return {
+    connectDragSource: connect.dragSource(),
+    isDragging: monitor.isDragging()
+  }
+}
+
+const Item1 = ({ ...props }) => {
+  const { connectDragSource, connectDropTarget, data, index, isOver, onSelect } = props;
+
+  const select = (event) => {
+    // console.log('select', index, data, data.selected);
+    onSelect(index);
+  }
+  return connectDragSource(connectDropTarget(
+    <div onClick={select} className={`${styles.wrapper} ${isOver ? styles.hover : '' } ${data.selected ? styles.selected : '' }`} >
+      {data.title}
+    </div>
+  ));
+}
+
+export default flow(
+  DragSource(itemTypes.CARD, SourceSpec, SourceCollect),
+  DropTarget(itemTypes.CARD, TargetSpec, TargetCollect)
+)(toClass(Item1));

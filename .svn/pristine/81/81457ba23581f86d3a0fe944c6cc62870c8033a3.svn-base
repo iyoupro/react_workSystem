@@ -1,0 +1,26 @@
+/** @format */
+import React, { Component } from 'react';
+
+import StepChart from '../components/StepChart';
+
+
+class StepChartPage extends Component {
+
+  render() {
+    return (
+      <div style={{ width: 600 }}>
+        <StepChart
+          onAddStep={(index) => {
+            console.log(index);
+          }}
+          onDeleteStep={(index) => {
+            console.log(index);
+          }}
+          data={[{ id: '1', title: '提取起薪金额', description: '描述信息' }, { id: '2', title: '提取当月入职', description: '描述信息' }]}
+        />
+      </div>
+    );
+  }
+}
+
+export default StepChartPage;

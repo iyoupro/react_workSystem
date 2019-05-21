@@ -1,0 +1,9 @@
+.wrapper {
+  width: 95%;
+  height: 95%;
+  overflow: auto;
+  background: #adff2f;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}

@@ -1,0 +1,67 @@
+<<<<<<< .mine
+import React from "react";
+import styles from "./index.less";
+||||||| .r6166
+import React from 'react';
+import styles from './index.less';
+=======
+import React from 'react';
+import { DatePicker, InputNumber, AutoComplete, Select, Input, Switch ,Icon} from 'antd';
+import styles from './index.less';
+>>>>>>> .r6179
+
+const FormItem = ({ ...props }) => {
+  const {
+    data,
+    selectItem,
+    setItem,
+    deleteItem,
+    AreaId,
+    inFixArea,
+    dragging,
+    preView,
+    selected,
+    placeholder
+  } = props; // eslint-disable-line
+  const Option = Select.Option;
+  const { TextArea } = Input;
+  return (
+    <div
+<<<<<<< .mine
+      onClick={() => selectItem()}
+      className={`${styles.wrapper} ${dragging ? styles.dragging : ""} ${
+        placeholder ? styles.placeholder : ""
+      }
+        ${preView ? styles.preView : ""} ${selected ? styles.selected : ""}`}
+||||||| .r6166
+      onClick={()=> selectItem()}
+      className={`${styles.wrapper} ${dragging ? styles.dragging : ''} ${placeholder ? styles.placeholder : ''}
+        ${preView ? styles.preView : ''} ${selected ? styles.selected : ''}`}
+=======
+      onClick={()=> selectItem()}
+      className={`${styles.wrapper} ${dragging ? styles.dragging : ''} ${placeholder ? styles.placeholder : ''}
+        ${preView ? styles.preView : ''} ${selected ? styles.selected : ''} ${!inFixArea ? styles.notInFix : ''}`}
+>>>>>>> .r6179
+    >
+      <div className={`${data.vertical ? styles.vertical : styles.horizontal}`}>{ data.title }</div>
+      {!inFixArea && data.type === 'datePicker' && <DatePicker disabled   className={styles.clearance} />}  
+      {!inFixArea && data.type === 'selectNum' && <InputNumber disabled min={0} max={10} defaultValue={0}   className={styles.clearance} />}
+      {!inFixArea && data.type === 'input' && <AutoComplete disabled placeholder="输入框"  className={styles.clearance}/>}
+      {!inFixArea && data.type === 'textArea' && <TextArea disabled rows={1}  className={styles.clearance}  />}
+      {!inFixArea && data.type === 'swith' && <Switch disabled  style={{marginLeft: '40px'}} checkedChildren="开" unCheckedChildren="关" defaultChecked />}
+      {!inFixArea && data.type === 'downSelect' && 
+        <Select disabled  className={styles.clearance} defaultValue="lucy">
+          <Option value="jack">Jack</Option>
+          <Option value="lucy">Lucy</Option>
+          <Option value="disabled" disabled>Disabled</Option>
+          <Option value="Yiminghe">yiminghe</Option>
+        </Select>
+      }
+      {!inFixArea && <Icon className={styles.antdIconClose} type='close'  />}
+      
+      {/* <span onClick={()=> setItem({width: 1})}>123</span> */}
+    </div>
+  );
+};
+
+export default FormItem;

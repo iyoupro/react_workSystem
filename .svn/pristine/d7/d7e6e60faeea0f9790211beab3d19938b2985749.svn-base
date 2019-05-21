@@ -1,0 +1,35 @@
+import React, { Component } from 'react';
+// import PropTypes from 'prop-types';
+import { DragDropContext } from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
+import DropArea from './DropArea';
+import DropWrapper from './DropWrapper';
+
+class CustomSort extends Component {
+  render() {
+    const { items } = this.props;
+    return (
+      <DropWrapper style={{ opacity: 1, width: '80%', height: '90%', background: 'green', margin: 'auto', fontSize: '16px', display: 'flex', flexWrap: 'wrap' }}>
+        <DropArea
+          AreaId="1" items={items} fix direction="row"
+          style={{ width: '33%', height: '40%', background: '#feffe6', padding: '10px' }}
+        />
+        <DropArea
+          AreaId="2" fix={false} direction="row"
+          style={{ width: '66%', height: '300px', background: '#a0d911', padding: '10px' }}
+        />
+        <DropArea
+          AreaId="3" fix={false} direction="column"
+          style={{ width: '99%', height: '400px', background: 'white', padding: '10px' }}
+        >
+          <DropArea
+            AreaId="4" fix={false} direction="row"
+            style={{ width: '66%', height: '300px', background: 'blue', padding: '10px' }}
+          />
+        </DropArea>
+      </DropWrapper>
+    );
+  }
+}
+
+export default DragDropContext(HTML5Backend)(CustomSort);

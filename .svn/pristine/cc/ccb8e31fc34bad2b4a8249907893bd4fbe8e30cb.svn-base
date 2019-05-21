@@ -1,0 +1,27 @@
+// @flow
+import React from 'react';
+import styles from './TestQuestionTitle.less';
+
+type Props = {
+  // 标题
+  title: string,
+  // 分值
+  score: number,
+  t: any
+};
+
+const TestQuestionTitle = ({ title, score, intl }: Props) => {
+  return (
+    <div className={styles.title}>
+      <div className={styles.titleContent}>
+        <div className={styles.titleText}>{title}</div>
+        <div className={styles.score}>
+          {score}
+          <span>{intl.formatMessage({ id: 'common.text.score' })}</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default TestQuestionTitle;

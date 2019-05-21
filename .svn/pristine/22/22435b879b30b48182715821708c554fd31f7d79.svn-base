@@ -1,0 +1,145 @@
+import React, { useState } from 'react';
+import { Menu, Icon, Dropdown, Input, Button, Avatar } from 'antd';
+import 'react-virtualized/styles.css';
+import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
+import VirtualizedList from 'react-virtualized/dist/commonjs/List';
+import { CellMeasurer } from 'react-virtualized/dist/commonjs/CellMeasurer';
+import dayjs from 'dayjs';
+import styles from './PanelRight.less';
+
+const handleClickMenu = (event, type, id, onChange) => {
+  if (onChange && event.key === 'inviteNewMember') onChange(event.key, { type: type, id: id })
+};
+
+const handleSendInput = (inputRef, inputValues, type, id, onChange) => {
+  if (onChange) onChange('sendInput', { type: type, id: id, value: inputRef.value });
+  inputRef.value = '';
+  inputValues.current[`${type}-${id}`] = '';
+};
+
+const handleCloseWindow = (onChange) => {
+  if (onChange) onChange('closeWindow')
+};
+
+const getTime = date => {
+  const conditions = { second: 60, minute: 60, hour: 24 };
+  const mapToChinese = { second: '秒', minute: '分钟', hour: '小时' };
+  let diffTime = dayjs(date).format('YYYY年M月D日H:m');
+  Object.entries(conditions).forEach(
+    ([key, value]) =>
+      (diffTime =
+        dayjs(new Date()).diff(date, key) < value
+          ? `${key !== 'second' ? dayjs(new Date()).diff(date, key) : '几'} ${
+              mapToChinese[key]
+            }前`
+          : diffTime),
+  );
+  return diffTime;
+};
+
+const PanelRight = props => {
+  const { loginUserData, chatUserData, chatData, selectedChat, measureCache, inputRef, inputValues, chatListRef, onChange } = props;
+  const [settingGroup, setSettingGroup] = useState(false);
+
+  const menu = (
+    <Menu onClick={e => handleClickMenu(e, selectedChat.type, selectedChat.id, onChange)}>
+      <Menu.Item key="checkGroupDetail">
+        <Icon type="appstore" />
+        查看群组详情
+      </Menu.Item>
+      <Menu.Item key="inviteNewMember">
+        <Icon type="plus" />
+        邀请新成员
+      </Menu.Item>
+    </Menu>
+  );
+
+  const renderChatItem = props => {
+    const { index, key, parent, style } = props;
+    const data = chatData[selectedChat.type][selectedChat.id].data[index];
+
+    return (
+      <CellMeasurer
+        key={`${selectedChat.type}-${selectedChat.id}-${key}`}
+        cache={measureCache.current}
+        parent={parent}
+        rowIndex={index}
+        columnIndex={0}
+      >
+        <div
+          className={`${styles.chartItem} ${
+            data.user === loginUserData.user ? styles.own : styles.others
+          }`}
+          style={style}
+        >
+          <Avatar className={styles.avatar}>
+            {data.user === loginUserData.user ? loginUserData.avatar: chatUserData[data.user].avatar}
+          </Avatar>
+          <div>
+            <div className={styles.text}>
+              <pre>{data.content}</pre>
+            </div>
+            <time className={styles.time}>{getTime(data.date)}</time>
+          </div>
+        </div>
+      </CellMeasurer>
+    );
+  };
+
+  return (
+    <div className={styles.panelRight}>
+      <div className={`${styles.panelRightHeader} ${!selectedChat ? styles.noSelect : ''}`}>
+        {selectedChat && <span>{selectedChat.id}</span>}
+        <div className={styles.iconGroup}>
+          {selectedChat && selectedChat.type !== 'private' && (
+            <Dropdown overlay={menu} placement="bottomCenter" trigger={['click']}>
+              <Icon type="ellipsis" />
+            </Dropdown>
+          )}
+          <Icon type="close" onClick={() => handleCloseWindow(onChange)} />
+        </div>
+      </div>
+      <div className={styles.chartList}>
+        <AutoSizer>
+          {({ width, height }) => {
+            return (
+              <VirtualizedList
+                ref={chatListRef}
+                width={width}
+                height={height} // Object.values(heights).reduce((preHeights, curHeight) => preHeights + curHeight, 0)
+                overscanRowCount={10}
+                rowCount={selectedChat ? chatData[selectedChat.type][selectedChat.id].data.length : 0}
+                rowRenderer={renderChatItem}
+                deferredMeasurementCache={measureCache.current}
+                rowHeight={measureCache.current.rowHeight}
+              />
+            );
+          }}
+        </AutoSizer>
+      </div>
+      {selectedChat && (
+        <div className={styles.inputArea}>
+          <div>
+            <Button
+              type="primary"
+              size="small"
+              onClick={() => handleSendInput(inputRef.current.textAreaRef, inputValues, selectedChat.type, selectedChat.id, onChange)}>
+              发送
+            </Button>
+          </div>
+          <Input.TextArea
+            ref={inputRef}
+            defaultValue=""
+            autosize={{ minRows: 1, maxRows: 12 }}
+            onChange={ e => inputValues.current[`${selectedChat.type}-${selectedChat.id}`] = e.target.value}
+          />
+        </div>
+      )}
+      {!selectedChat && <Icon className={styles.noSelectChatIcon}type="wechat" />}
+      {!selectedChat && <span className={styles.noSelectChatText}>暂时没有消息</span>}
+      {settingGroup && <div></div>}
+    </div>
+  );
+};
+
+export default PanelRight;

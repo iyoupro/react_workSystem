@@ -1,0 +1,69 @@
+import React from 'react';
+import { DraggableCore } from "react-draggable";
+import DragTarget from '../components/drag/DragTarget';
+import SortableArea from '../components/drag/Sortable';
+
+import styles from './DargTest.less';
+
+const items = [{ name: 'name1', text: '字段1' }, { name: 'name2', text: '字段2' }, { name: 'name3', text: '字段3' }];
+
+const DargItem = ({ name, text }) => {
+  return <span draggable className={styles.dragItem} >{text}</span>;
+}
+
+const DraggableItem = ({ name, text }) => {
+  const onDragStart = (e, data) => {
+    console.log(name, data);
+  };
+  const onDrag = (e, data) => {
+    console.log(name, data);
+  };
+  const onDragStop = (e, data) => {
+    console.log(name, data);
+  };
+  return (
+    <DraggableCore
+      onStart={onDragStart}
+      onDrag={onDrag}
+      onStop={onDragStop}
+    >
+      <DargItem draggable name={name} text={text}></DargItem>
+    </DraggableCore>
+  );
+};
+
+
+const DargTest = () => {
+  const onDrop = (e, data) => {
+    console.log(e.nativeEvent.dataTransfer, data);
+  }
+  const list = items.map((item) => {
+    return (<DargItem draggable  {...item} key={item.name}></DargItem>)
+  });
+  return (
+    <div>
+      {
+        items.map((item) => {
+          return (<DraggableItem key={item.name} {...item}></DraggableItem>);
+        })
+      }
+      {
+        items.map((item) => {
+          return (<DargItem key={item.name} {...item}></DargItem>);
+        })
+      }
+      <DragTarget onDrop={onDrop}>
+        <div>拖到我这来的
+       </div>
+      </ DragTarget>
+      <SortableArea components={list} onRecorder={(components) => {
+        console.log(components);
+      }}>
+
+      </SortableArea>
+    </div>
+  );
+};
+
+
+export default DargTest;

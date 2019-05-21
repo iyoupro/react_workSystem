@@ -1,0 +1,41 @@
+[{
+  "id": "0",
+  "data": "I'm Groot aaaaaaaaaaaaaa",
+  "parent": [],
+  "children": [{
+    "id": "1" 
+  }],
+  "brother": [],
+  "posX": 400,
+  "posY": 20,
+  "depth": 0,
+  "shapeInfo": {
+    "nodeType": "circle",
+    "fillColor": "#fcffe6",
+    "textColor": "black",
+    "strokeColor": "",
+    "selectedFillColor": "#1890ff",
+    "selectedTextColor": "white",
+    "selectedStrokeColor": ""
+  }
+},{
+  "id": "1",
+  "data": "WSND NMSL HJYZ",
+  "parent": [{
+    "id": "0" 
+  }],
+  "children": [],
+  "brother": [],
+  "posX": 400,
+  "posY": 400,
+  "depth": 1,
+  "shapeInfo": {
+    "nodeType": "squareness",
+    "fillColor": "#fcffe6",
+    "textColor": "black",
+    "strokeColor": "",
+    "selectedFillColor": "#1890ff",
+    "selectedTextColor": "white",
+    "selectedStrokeColor": ""
+  }
+}]

@@ -1,0 +1,152 @@
+.wrapper {
+  padding: 0 42px;
+  box-sizing: border-box;
+  width: 100%;
+  background: white;
+  display: flex;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
+  transition: transform 0.5s ease, max-height 0.5s ease, opacity 0.5s ease, box-shadow 0.3s ease;
+  transform: scaleY(1);
+  cursor: pointer;
+  &.showItemIndex {
+    padding: 0 54px;
+  };
+  &.sectionTitle {
+    padding: 0 16px;
+  }
+  &.delete {
+    transform: scaleY(0);
+    opacity: 0;
+    max-height: 0 !important;
+  };
+  &.isSelected {
+    cursor: default;
+    box-shadow: 0px 0px 14px 0px rgba(0, 0, 0, 0.4), 2px 2px 9px 0px rgba(0, 0, 0, 0.4);
+    z-index: 2;
+    & > .footer {
+      transform: scaleY(1);
+      opacity: 1;
+      height: 40px;
+      & .deleteIcon, .cloneIcon {
+        display: block;
+      }
+    }
+  };
+  & > .required {
+    position: absolute;
+    top: 22px;
+    left: 36px;      
+    font-size: 24px;
+    color: red;
+    &.notShowItemIndex {
+      left: 24px;      
+    }
+  };
+  & > .itemIndex {
+    position: absolute;
+    top: 25px;
+    left: 20px;
+    font-size: 24px;
+  };
+  & > .itemIndexSwitchWrapper {
+    display: flex;
+    align-items: center;
+    position: absolute;
+    top: 24px;
+    right: 52px;
+    font-size: 16px;
+    &.notShowSectionDeleteButton {
+      right: 20px;
+    }
+    & > .itemIndexSwitch {
+      // margin-left: 4px;
+    }
+  }
+  & > .sectionDeleteButton {
+    position: absolute;
+    top: 20px;
+    right: 12px;
+  }
+  & > .typeSelect {
+    position: absolute;
+    width: 100px;
+    height: 36px;
+    right: 60px;
+    top: 30px;
+    &.scoreInput {
+      width: 70px;
+    }
+  };
+  & > .scoreResult {
+    position: absolute;
+    color: #ffc53d;
+    font-size: 24px;
+    top: 30px;
+    right: 47px;
+    height: 30px;
+    line-height: 30px;
+  }
+  & > .title {
+    width: calc(~'96% - 2% - 100px');
+    height: 36px;
+    margin: 24px 0 4px 0;
+    &.notShowDescription {
+      margin: 24px 0 18px 0;
+    }
+    &.titleHead {
+      text-indent: -3px;
+      margin-bottom: 12px;
+    }
+    & .titleInput {
+      bottom: 16%;
+      font-size: 20px;
+      &.titleInputHead {
+        font-size: 24px;
+      }
+    }
+    & .focusUnderline {
+      background: #722ed1;
+    };
+  };
+
+  & > .description {
+    width: 96%;
+    height: 36px;
+    margin-bottom: 8px;
+    & .declaractionInput {
+      font-size: 18px;
+    }
+    & .focusUnderline {
+      background: #722ed1;
+    };
+  };
+  & > .horizontalLine{
+    border: none;
+    margin-left: -4px;
+    margin-top: 12px;
+    height: 1px;
+    width: 99%;
+    background-color: #d9d9d9;
+  };
+  & > .footer {
+    width: 100%;    
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    transition: height 0.15s ease, transform 0.15s ease, opacity 0.3s ease;
+    opacity: 0;
+    height: 0px;
+    transform: scaleY(0);
+    margin-bottom: 24px;
+    & > .footerItem{
+      margin-right: 1.25%;
+      cursor: pointer;
+    }
+    & .deleteIcon, .cloneIcon {
+      display: none;
+    }
+  } 
+}

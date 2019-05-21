@@ -1,0 +1,196 @@
+.QuillWrapper {
+  :global(.quill) {
+    margin: auto; 
+    width: 950px; 
+    height: 300px;
+  }
+  :global(.ql-container.ql-snow) {
+    border-top: none;
+  }
+  :global(.ql-toolbar.ql-snow) {
+    border-bottom: none;
+    width: 950px;
+    margin: auto;
+    background: rgba(153,153,153,0.6);
+  }
+
+  /* 不能改变三个样式的顺序 */
+  :global(.ql-editor .ql-font-SimSun) {
+    font-family: SimSun;
+  };
+  :global(.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="SimSun"]::before) {
+    content: '宋体';
+    font-family: SimSun;
+  }
+  :global(.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="SimSun"]::before) {
+    content: '宋体';
+    font-family: SimSun;
+  }
+  
+  :global(.ql-editor .ql-font-SimHei) {
+    font-family: SimHei;
+  };
+  :global(.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="SimHei"]::before) {
+    content: '黑体';
+  }
+  :global(.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="SimHei"]::before) {
+    content: '黑体';
+    font-family: SimHei;
+  };
+  
+  :global(.ql-editor .ql-font-MicrosoftYaHei) {
+    font-family: Microsoft YaHei;
+  };
+  :global(.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="MicrosoftYaHei"]::before) {
+    content: '微软雅黑';
+  }
+  :global(.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="MicrosoftYaHei"]::before) {
+    content: '微软雅黑';
+    font-family: Microsoft YaHei;
+  };
+  
+  :global(.ql-editor .ql-font-MicrosoftJhengHei) {
+    font-family: Microsoft JhengHei;
+  };
+  :global(.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="MicrosoftJhengHei"]::before) {
+    content: '微软正黑体';
+  }
+  :global(.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="MicrosoftJhengHei"]::before) {
+    content: '微软正黑体';
+    font-family: Microsoft JhengHei;
+  };
+  
+  :global(.ql-editor .ql-font-NSimSun) {
+    font-family: NSimSun;
+  };
+  :global(.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="NSimSun"]::before) {
+    content: '新宋体';
+  }
+  :global(.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="NSimSun"]::before) {
+    content: '新宋体';
+    font-family: NSimSun;
+  };
+  
+  :global(.ql-editor .ql-font-PMingLiU) {
+    font-family: PMingLiU;
+  };
+  :global(.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="PMingLiU"]::before) {
+    content: '新细明体';
+  }
+  :global(.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="PMingLiU"]::before) {
+    content: '新细明体';
+    font-family: PMingLiU;
+  };
+  
+  :global(.ql-editor .ql-font-MingLiU) {
+    font-family: MingLiU;
+  };
+  :global(.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="MingLiU"]::before) {
+    content: '细明体';
+  }
+  :global(.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="MingLiU"]::before) {
+    content: '细明体';
+    font-family: MingLiU;
+  };
+  
+  :global(.ql-editor .ql-font-DFKaiSB) {
+    font-family: DFKai-SB;
+  };
+  :global(.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="DFKaiSB"]::before) {
+    content: '标楷体';
+  }
+  :global(.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="DFKaiSB"]::before) {
+    content: '标楷体';
+    font-family: DFKai-SB;
+  };
+  
+  :global(.ql-editor .ql-font-FangSong) {
+    font-family: FangSong;
+  };
+  :global(.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="FangSong"]::before) {
+    content: '仿宋';
+  }
+  :global(.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="FangSong"]::before) {
+    content: '仿宋';
+    font-family: FangSong;
+  };
+  
+  :global(.ql-editor .ql-font-KaiTi) {
+    font-family: KaiTi;
+  };
+  :global(.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="KaiTi"]::before) {
+    content: '楷体';
+  }
+  :global(.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="KaiTi"]::before) {
+    content: '楷体';
+    font-family: KaiTi;
+  };
+  
+  /* 装了office才会有 */
+  :global(.ql-editor .ql-font-LiSu) {
+    font-family: LiSu;
+  };
+  :global(.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="LiSu"]::before) {
+    content: '隶书';
+  }
+  :global(.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="LiSu"]::before) {
+    content: '隶书';
+    font-family: LiSu;
+  };
+  
+  :global(.ql-editor .ql-font-YouYuan) {
+    font-family: YouYuan;
+  };
+  :global(.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="YouYuan"]::before) {
+    content: '幼圆';
+  }
+  :global(.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="YouYuan"]::before) {
+    content: '幼圆';
+    font-family: LiSu;
+  };
+  
+  /* 不能改变三个样式的顺序 */
+  :global(.ql-editor .ql-size-12px) {
+    font-size: 12px;
+  }
+  :global(.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="12px"]::before) {
+    content: '12px';
+  }
+  :global(.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="12px"]::before) {
+    content: '12px';
+    font-size: 12px;
+  }
+  
+  :global(.ql-editor .ql-size-24px) {
+    font-size: 24px;
+  }
+  :global(.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="24px"]::before) {
+    content: '24px';
+  }
+  :global(.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="24px"]::before) {
+    content: '24px';
+    font-size: 24px;
+  }
+  
+  :global(.ql-editor .ql-size-36px) {
+    font-size: 36px;
+  }
+  :global(.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="36px"]::before) {
+    content: '36px';
+  }
+  :global(.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="36px"]::before) {
+    content: '36px';
+    font-size: 36px;
+  }
+  
+  :global(.ql-editor .ql-size-48px) {
+    font-size: 48px;
+  }
+  :global(.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="48px"]::before) {
+    content: '48px';
+  }
+  :global(.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="48px"]::before) {
+    content: '48px';
+    font-size: 48px;
+  }  
+}

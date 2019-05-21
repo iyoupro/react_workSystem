@@ -1,0 +1,16 @@
+import React, { memo, useState } from 'react';
+import uniqueId from 'lodash/uniqueId';
+import Item from './Item';
+import styles from './Section.less';
+
+const Section = memo(props => {
+  const { items } = props;
+  console.log(items);
+  return (
+    <div>
+      {items && items.map(data => <Item key={data}data={data}/>)}
+    </div>
+  );
+});
+
+export default Section;

@@ -1,0 +1,11 @@
+import React, { memo } from 'react';
+import { Button } from 'antd';
+import styles from './customTable.less';
+import { createPortal } from 'react-dom';
+import { getElementByClass } from './utils';
+
+const CustomTr = memo(props => {
+  return <tr key='tr' {...props} className={styles.customTr}/>;
+});
+
+export default CustomTr;

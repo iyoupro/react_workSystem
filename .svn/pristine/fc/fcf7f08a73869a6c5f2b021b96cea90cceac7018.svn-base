@@ -1,0 +1,30 @@
+import React, { memo } from 'react';
+import { DatePicker, TimePicker, Radio } from 'antd';
+import produce from 'immer';
+// import uniqueId from 'lodash/uniqueId';
+import styles from './Time.less';
+
+const { MonthPicker, RangePicker, WeekPicker } = DatePicker;
+
+const Time = memo(({ data, mode, isSelected, setData, ...props}) => {
+  const { timeType } = data;
+  // console.log(timeType);
+  return (
+    <div className={styles.wrapper}>
+      <Radio.Group size='small'  value={timeType} onChange={e => setData('timeType', e.target.value)}>
+        <Radio.Button value={'startEndDate'}>开始/结束日期</Radio.Button>
+        <Radio.Button value={'dateTime'}>日期/时间</Radio.Button>
+        <Radio.Button value={'date'}>日期</Radio.Button>
+        <Radio.Button value={'time'}>时间</Radio.Button>
+      </Radio.Group>
+      <p>请选择时间：&nbsp;</p>
+      { timeType === 'startEndDate' &&  <RangePicker />}
+      { timeType === 'dateTime' &&  <div><DatePicker /><TimePicker  format={ 'HH:mm'} /></div>}
+      { timeType === 'date' &&  <DatePicker  />}
+      { timeType === 'time' &&  <TimePicker  format={ 'HH:mm'} />} 
+    </div>
+    
+  );
+});
+
+export default Time;

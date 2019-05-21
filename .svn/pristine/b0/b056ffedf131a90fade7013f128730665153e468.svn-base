@@ -1,0 +1,6 @@
+.chart {
+  height: 600px;
+  width: 400px;
+  margin: auto;
+  background: greenyellow;
+}

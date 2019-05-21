@@ -1,0 +1,57 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  height: fit-content;
+  background: grey;
+  justify-content: center;
+  align-items: center;
+  margin: auto;
+  transition: all 1s ease;
+  &.show {
+    margin-top: 128px;
+  }
+}
+
+.item {
+  visibility: hidden;
+  width: 0px;
+  height: 0px;
+  color: transparent;
+  background: transparent;
+  transition: all 1s ease;
+  position: relative;
+  &.show {
+    visibility: visible;
+    color: white;
+    background: blue;
+    width: 250px;
+    height: 125px;
+    margin-right: 25px;
+    & .icon {
+      color: red;
+    }
+  }
+  & .icon {
+    position: absolute;
+    margin: auto;
+    color: transparent;
+    font-size: 24px;
+    left: 50%;
+    bottom: 0%;
+    transform: translate(-50%, 0);
+    transition: font-size 0.2s ease;
+    &:hover {
+      font-size: 26px;
+      cursor: pointer;
+      color: white;
+    }
+  }
+}
+
+.childWrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: fit-content;
+  height: fit-content;
+}

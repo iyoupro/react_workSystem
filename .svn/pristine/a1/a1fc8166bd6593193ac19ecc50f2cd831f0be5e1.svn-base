@@ -1,0 +1,32 @@
+const SORT_TYPE = 'SORT_TYPE';
+
+const sortSource = {
+  beginDrag(props) {
+    return {
+      id: props.id,
+    };
+  },
+};
+
+const sortTarget = {
+  drop(props, monitor, component) {
+    if (!component) {
+      return null;
+    }
+    const item = monitor.getItem();
+    const dragId = item.id;
+    const dropId = props.id;
+    if (dragId === dropId) {
+      return;
+    }
+    props.moveItem(dragId, dropId || 0);
+  },
+};
+
+
+export default {
+  SORT_TYPE,
+  sortSource,
+  sortTarget,
+};
+

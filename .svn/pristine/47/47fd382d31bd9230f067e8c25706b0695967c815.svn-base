@@ -1,0 +1,42 @@
+import React, { Component } from 'react';
+import Item from './item';
+import styles from './index.less';
+
+class OrganizaitonChart extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { showChildren: false, mode: 'detail' };
+  }
+
+  _handleMouseDown = (event) => {
+    document.addEventListener('mouseup', this._handleMouseUp);
+    document.addEventListener('mousemove', this._handleMouseMove);
+  } 
+
+  _handleMouseUp = (event) => {
+    document.removeEventListener('mousemove', this._handleMouseMove);
+    document.removeEventListener('mouseup', this._handleMouseUp);
+  }
+
+  _handleMouseMove = (event) => {
+    this.wrapper.scrollLeft -= event.movementX;
+    this.wrapper.scrollTop -= event.movementY;
+  }
+
+  render() {
+    const { items } = this.props;
+    const { mode } = this.state;
+    return (
+      <div ref={ref => this.wrapper = ref} className={styles.wrapper}
+        style={{ display: 'flex', flexDirection: 'row' }}
+        onMouseDown={this._handleMouseDown} >
+        <div style={{ height: '15px', width: '15px', background: 'red', position: 'absolute', right: '15px', top: '15px', cursor: 'point'}} 
+        onClick={() => this.setState({mode: mode === 'detail'? 'simplify' : 'detail'})} />
+        <Item key={items.key} data={items} show head mode={mode} />
+        <div style={{ background: 'black', width: '100%', height: '100%' }}></div>
+      </div>
+    );
+  }
+}
+
+export default OrganizaitonChart;

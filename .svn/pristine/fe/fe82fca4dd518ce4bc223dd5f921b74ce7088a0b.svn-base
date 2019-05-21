@@ -1,0 +1,54 @@
+.ruleWrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: start;
+  align-items: center;
+  position: relative;
+  width: calc(~"100% - 48px - 12px");
+  height: 50px;
+  background: #fafafa;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  margin: 10px 4px 10px 48px;
+  padding-left: 4px;
+  &:hover {
+    & > .deleteIcon > .button {
+      opacity: 1;
+    }
+  }
+  &::before {
+    content: '';
+    position: absolute;
+    left: -24px;
+    width: 24px;
+    height: calc(~"50% + 12px"); // margin-top + border-width = 12px;
+    top: calc(~"-12px");
+    border: 0 solid #CCC;
+    border-width: 0 0 2px 2px;
+  }
+  &.first::before {
+    height: calc(~"50% + 24px");
+    top: calc(~"-24px");
+  }
+  &:not(.last):after {
+    content: '';
+    position: absolute;
+    left: -24px;
+    width: 24px;
+    height: 50%;
+    top: calc(50%);
+    border: 0 solid #CCC;
+    border-width: 0 0 0 2px;
+  }
+  & > .deleteIcon{
+    position: absolute;
+    right: 8px; 
+    & > .button {
+      transition: opacity 0.6s ease;
+      border: 0px;
+      opacity: 0;
+      background: #fafafa;
+    }  
+  }
+
+}

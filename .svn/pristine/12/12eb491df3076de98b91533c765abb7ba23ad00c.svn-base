@@ -1,0 +1,21 @@
+import React, { Component } from 'react';
+import './NodeChartPage.css';
+import NodeChart from '../components/NodeChart'
+class App extends Component {
+  render() {
+    return (
+      <div className="App">
+        <NodeChart mode="flowChart"
+          nodeSize={15}
+          textPos={40}
+          nodeShadow={true}
+          style={{ 
+            height: "80%", width: "80%", margin: "auto", fontSize: "16px" 
+          }}
+        />
+      </div>
+    );
+  }
+}
+
+export default App;

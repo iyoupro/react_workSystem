@@ -1,0 +1,49 @@
+.ruleWrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: start;
+  align-items: center;
+  position: relative;
+  width: 95%;
+  height: 50px;
+  background: #fafafa;
+  border: 1px solid #d9d9d9;
+  margin: 10px 1% 10px 4%;
+  border-radius: 4px;
+  padding-left: 3%;
+  &:hover {
+    & > .deleteIcon > .button {
+      display: block;
+    }
+  }
+  &::before {
+    content: '';
+    position: absolute;
+    left: -1.5%;
+    width: 1.5%;
+    height: calc(~"50% + 12px"); // margin-top + border-width = 12px;
+    top: calc(~"-12px");
+    border: 0 solid #CCC;
+    border-width: 0 0 2px 2px;
+  }
+  &:not(.last):after {
+    content: '';
+    position: absolute;
+    left: -1.5%;
+    width: 1.5%;
+    height: 50%;
+    top: calc(50%);
+    border: 0 solid #CCC;
+    border-width: 0 0 0 2px;
+  }
+  & > .deleteIcon{
+    position: absolute;
+    right: 0.5%; 
+    & > .button {
+      border:0px;
+      display: none;
+      background: #fafafa;
+    }  
+  }
+
+}

@@ -1,0 +1,43 @@
+const findHeadNode = (chartData) => {
+  for (let i = 0; i < chartData.length; i += 1) {
+    if (chartData[i].pre.length === 0 ) return chartData[i];
+  }
+  return null;
+};
+
+const findTailNode = (chartData) => {
+  for (let i = 0; i < chartData.length; i += 1) {
+    if (chartData[i].next.length === 0 ) return chartData[i];
+  }
+  return null;
+};
+
+const buildBrother = (chartData) => {
+  return chartData;
+};
+
+const AddNewNode = (chartData, pre, node) => {
+
+};
+
+const AddNewBranchNode = (chartData, pre, nodes) => {
+
+};
+
+const DeleteNode = (chartData, node) => {
+
+};
+
+const DeleteBranch = (chartData, node) => {
+
+};
+
+export default {
+  findHeadNode,
+  findTailNode,
+  AddNewNode,
+  AddNewBranchNode,
+  DeleteNode,
+  DeleteBranch,
+};
+

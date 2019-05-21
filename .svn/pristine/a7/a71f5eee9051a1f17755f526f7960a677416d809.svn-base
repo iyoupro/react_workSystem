@@ -1,0 +1,73 @@
+import  { withHandlers, withState, pipe } from '../../rehook';
+
+const initialData = {
+  title: '未命名表单',
+  sections: [
+    {
+      id: 'secition1',
+      totalScore: 0,
+      items: [
+        {
+          id: 'item1',
+          type: 'SectionTitle',
+          title: '未命名标题',
+          declaraction: null,
+        },
+        {
+          id: 'item2',
+          type: 'Radio',
+          title: 'radio1',
+          score: 0,
+          isRequired: true,
+          declaraction: 'aaaa',
+          inputValue: null,
+          options: ['选项1', '选项2', '选项3'],
+          layout: 2,
+        },
+        {
+          id: 'item3',
+          type: 'Checkbox',
+          title: 'checkbox1',
+          score: 0,
+          isRequired: false,
+          declaraction: null,
+          inputValue: null,
+          options: ['选项1', '选项2'],
+          layout: 2,
+        },
+        {
+          id: 'item4',
+          type: 'Paragraph',
+          score: 0,
+          isRequired: true,
+          title: 'paragrap1',
+          declaraction: 'ccc',
+          inputValue: null,
+        },
+        {
+          id: 'item5',
+          type: 'Time',
+          score: 0,
+          isRequired: true,
+          title: '选择时间',
+          declaraction: '请选择时间：',
+          inputValue: null,
+        },
+      ],
+    },
+  ],
+};
+
+const withData = pipe(
+  withState('data', 'reRender', ownProps => ownProps.data || initialData),
+  withState('mode', 'setMode', ownProps => ownProps.mode || 'edit'),
+  withState('selectedItem', 'setSelectedItem', null),
+  withHandlers({ updateData: ({ data, reRender }) => () => reRender(data) })
+);
+
+const setData = ({ data, updateData }) => (prop, newPropData) => {
+  data[prop] = newPropData;
+  updateData();
+}
+
+export default { withData, withSetData: withHandlers({ setData }) };

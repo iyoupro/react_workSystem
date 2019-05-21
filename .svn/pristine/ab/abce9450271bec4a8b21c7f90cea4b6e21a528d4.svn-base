@@ -1,0 +1,13 @@
+import React, { Component } from 'react';
+import styles from './QueryBuilderPage.less';
+import QueryBuild from '../components/QueryBuilder/';
+
+class QueryBuildPage extends Component {
+  render() {
+    return (
+      <QueryBuild />
+    );
+  }
+}
+
+export default QueryBuildPage;

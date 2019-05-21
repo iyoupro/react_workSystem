@@ -1,0 +1,21 @@
+import React, { memo } from 'react';
+import CheckBox from './ItemContent/CheckBox';
+import Radio from './ItemContent/Radio';
+import styles from './Item.less';
+
+const contents = { radio: Radio, checkbox: CheckBox };
+
+const Item = memo(props => {
+  const { data, setItem } = props;
+  const { title, introduce } = data;
+  const ItemContent = contents[data.type];
+  return (
+    <div className={styles.wrapper}>
+    {/* title in this */}
+    {/* introduce in this */}
+    {ItemContent && <ItemContent {...props} />}
+    </div>
+  );
+});
+
+export default Item;

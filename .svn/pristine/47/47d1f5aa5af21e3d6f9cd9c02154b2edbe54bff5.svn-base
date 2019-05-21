@@ -1,0 +1,36 @@
+.wrapper {
+  padding: 4px 20px;
+  width: 100%;
+  min-height:80px;
+  background: white;
+  display: flex;
+  flex-wrap: wrap;
+  & .title {
+    font-size: 16px;
+    width: 80%;
+    height:36px;
+    // border:1px solid red;
+  }
+  & .typeSelect{
+    width: 18%;
+    height: 36px;
+    margin-left: 2%;
+  }
+  & .declaraction {
+    font-size: 16px;
+    width: 100%;
+  }
+  & .underline {
+
+  }
+  & .focusUnderline {
+
+  }
+  .itemLine{
+    border: none;
+    height: 1px;
+    width: 100%;
+    background-color: gray;
+
+  }
+}

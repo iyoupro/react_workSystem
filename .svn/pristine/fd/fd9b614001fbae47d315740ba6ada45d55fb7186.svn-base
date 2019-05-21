@@ -1,0 +1,6 @@
+.wrapper{
+  padding-bottom:6px;
+  & p{
+    margin: 4px 0;
+  }
+}

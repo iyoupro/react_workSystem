@@ -1,0 +1,42 @@
+import React, { memo, useRef, useEffect } from 'react';
+import TreeNode from './TreeNode'
+import styles from './index.less';
+import { RenderInfoContext } from './handle.js';
+
+const TreeView = props => {
+  const wrapper = useRef(null);
+  const handleMouseDown = (event) => {
+    event.preventDefault();
+    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('mousemove', handleMouseMove);
+  } 
+
+  const handleMouseUp = (event) => {
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', handleMouseUp);
+  }
+
+  const handleMouseMove = (event) => {
+    wrapper.current.scrollLeft -= event.movementX;
+    wrapper.current.scrollTop -= event.movementY;
+  }
+
+  const { className, data, direction, treeNodeSize, distance, renderNode, background, zoom, ...otherProps } = props;
+
+  return (
+    <RenderInfoContext.Provider value={{ treeNodeSize, distance, direction, renderNode, background }} >
+      <div
+        ref={wrapper}
+        className={`${className || ''} ${styles.treeViewWrapper}`}
+        style={{ flexDirection: direction === 'vertical' ? 'column' : 'row', zoom: zoom / 100 }}
+        onMouseDown={(event) => handleMouseDown(event, wrapper.current)} 
+      >
+        {data && data.map(node =>
+          <TreeNode key={node.key} data={node} head {...otherProps}/>
+        )}
+      </div>
+    </RenderInfoContext.Provider>
+  );
+}
+
+export default memo(TreeView);

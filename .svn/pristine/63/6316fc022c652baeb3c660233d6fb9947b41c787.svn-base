@@ -1,0 +1,6 @@
+.panelRightWrapper {
+  flex: 1;
+  width: 62.5%;
+  height: 100%;
+  border-left: 0.75px solid #e5e5e5;
+}

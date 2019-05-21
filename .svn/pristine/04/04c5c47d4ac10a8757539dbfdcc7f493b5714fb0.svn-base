@@ -1,0 +1,29 @@
+import React from 'react';
+import styles from './index.less';
+import QueryGroup from './QueryGroup';
+
+const value = {
+  type: 'AND',
+  conditions: [
+    { name: 'name', op: null, value: [] },
+    {
+      type: 'OR',
+      conditions: [{ name: 'status', op: null, value: [] }, { name: 'status', op: null, value: [] }]
+    }
+  ]
+};
+
+const onChange = queryConditions => {
+  console.log(queryConditions);
+};
+
+const QueryBuild = () => {
+  return (
+    <div className={styles.wrapper}>
+      <button onClick={() => console.log(value)}>Button</button>
+      <QueryGroup root value={value} onChange={onChange} />
+    </div>
+  );
+};
+
+export default QueryBuild;

@@ -1,0 +1,77 @@
+import React, { memo, useState } from 'react';
+import { Button } from 'antd';
+import uniqueId from 'lodash/uniqueId';
+import GridLayout from '../components/GridLayout/';
+import styles from './GridLayoutPage.less';
+
+const A = props => {
+  const { title, i, deleteItem } = props;
+  const handleDelete = () => deleteItem(i);
+
+  return (
+    <div style={{ background: '#ccc', border: '1px solid black', height: '100%' }} >
+      {title}
+      <Button shape="circle" icon="minus" onClick={handleDelete} />
+    </div>
+  )
+}
+
+const itemMap = { a: A, b: A, c: A, d: A, e: A, f: A, g: A, h: A, i: A }
+
+const Item = memo(({ value, i, deleteItem }) => {
+  const { type, ...props } = value;
+  const RenderItem = itemMap[type]
+  return (
+    <RenderItem {...props} i={i} deleteItem={deleteItem} />
+  )
+});
+
+const initData = [
+  { value: { type:'a', title: 'nsml' }, i: 'nsml', x: 0, y: 0, w: 1, h: 1, static: true },
+  { value: { type:'b', title: 'wsnd' }, i: 'wsnd', x: 1, y: 0, w: 3, h: 2, minW: 2, maxW: 4},
+  { value: { type:'c', title: 'zmcd' }, i: 'zmcd', x: 4, y: 0, w: 1, h: 2},
+  { value: { type:'d', title: 'dsmzy' }, i: 'dsmzy', x: 2, y: 0, w: 1, h: 2},
+]; // i x y w h minW maxW minH maxH static:bool isDraggable:bool isResizable:bool
+
+const GridLayoutPage = props => {
+  const [data, setData] = useState(initData);
+
+  const addItem = () => {
+    data.push({ value: { type: 'a', title: uniqueId()}, i: uniqueId(), x: 5, y: 4, w: 1, h: 6 });
+    setData(data);
+  }
+
+  const deleteItem = (i) => {
+    data.splice(data.findIndex(item => item.i === i), 1);
+    setData(data);
+  }
+
+  return (
+    <div className={styles.gridLayoutPageWrapper}>
+      <Button shape="circle" icon="plus" onClick={addItem} />
+      <GridLayout
+        className={styles.gridLayout}
+        data={data}
+        autoSize={true} // 容器高度是否自适应
+        cols={12}
+        rowHeight={50} // 行高
+        margin={[10,10]} // 项目间的x、y轴间距
+        containerPadding={[10, 10]} // 容器padding属性
+        verticalCompact={true} // 自否自动靠紧
+        compactType='vertical' // 自动靠紧方向 'vertical' | 'horizontal'
+        isDraggable // 允许项目拖拽
+        isResizable // 允许项目缩放
+        preventCollision={false} // 是否阻止挤开项目
+        onLayoutChange={newLayout => setData(newLayout) }
+        ItemRender={Item}
+        showGrid
+        gridClassName={styles.grid}
+        // customProps
+        deleteItem={deleteItem}
+      />
+        
+    </div>
+  )
+}
+
+export default GridLayoutPage;

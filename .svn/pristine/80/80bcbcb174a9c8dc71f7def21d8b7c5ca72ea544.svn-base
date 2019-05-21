@@ -1,0 +1,87 @@
+import _ from 'lodash';
+import React from 'react';
+import Datasheet from 'react-datasheet';
+import produce from "immer"
+import 'react-datasheet/lib/react-datasheet.css';
+import { withState, withPropsOnChange, pipe, withHandlers } from '../rehook';
+import styles from './SheetPage.less';
+
+const buildData = (value, headers, rowNum) => {
+  const rows = [];
+  if (headers) {
+    const row = [];
+    if (rowNum) {
+      row.push({ value: '', readOnly: true,width:40 })
+    }
+    headers.forEach((h) => {
+      row.push({ value: h.title, readOnly: true, width: h.width || 200 });
+    });
+    rows.push(row);
+  }
+  if (value) {
+    value.forEach((v, index) => {
+      const row = [];
+      if (rowNum) {
+        row.push({ value: index + 1, readOnly: true })
+      }
+      if (headers) {
+        headers.forEach((h) => {
+          row.push({ value: v[h.name], readOnly: false });
+        });
+      } else {
+        _.keys(v).forEach((key) => {
+          row.push({ value: v[key], readOnly: false });
+        });
+      }
+      rows.push(row);
+    });
+  }
+  return rows;
+};
+
+const enhance = pipe(
+  withState('data', 'setData'),
+  withPropsOnChange(['value'], ({ value, headers, rowNum, setData }) => {
+    setData(buildData(value, headers, rowNum));
+  }),
+  withHandlers({
+    onCellsChanged: ({ data, setData }) => (changes) => {
+      const data2 = produce(data, draft => {
+        changes.forEach(({ cell, row, col, value }) => {
+          draft[row][col] = { readOnly: false, value };
+        })
+      });
+      console.log(data2)
+      setData(data2);
+    }
+  })
+);
+
+const SheetTable = ({ data, onCellsChanged, rowNum }) => {
+  return (
+    <Datasheet      
+      data={data}
+      valueRenderer={(cell) => cell.value}
+      rowNum={rowNum}
+      onCellsChanged={onCellsChanged}
+    />
+  );
+}
+
+const SheetTableWrapper = pipe(enhance, SheetTable);
+
+const SheetPage = () => {
+  return (
+    <div className={styles.wrapper}>
+      <SheetTableWrapper
+      rowNum
+      value={[{ field1: 'f1', field2: 'f2' }, { field1: 'f3', field2: 'f4' }]}
+      headers={[{ name: 'field1', title: '字段1' }, { name: 'field2', title: '字段2' }]}
+    />
+    </div>
+
+    
+  );
+}
+
+export default SheetPage;

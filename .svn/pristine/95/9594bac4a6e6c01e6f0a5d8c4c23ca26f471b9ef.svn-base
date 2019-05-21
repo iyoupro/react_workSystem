@@ -1,0 +1,29 @@
+
+.drTable {
+  & :global(.ant-table-fixed-left) {
+    border-right: 1px solid #000;
+    box-shadow: none;
+  }
+  & :global(.ant-checkbox) {
+    transition: none;
+    & span{
+      transition: none;
+      &:after {
+        transition: none;
+      }
+    }
+    & input{
+      transition: none;
+    }
+  }
+  & :global(table) {
+    table-layout: fixed;
+  }
+};
+
+.calcPlaceholder {
+  position: absolute;
+  visibility: hidden;
+  width: fit-content;
+  height: fit-content;
+}

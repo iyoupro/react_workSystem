@@ -1,0 +1,39 @@
+import React, { Component } from 'react';
+import { Slider } from 'antd';
+import styles from './OrganizationChartPage.less';
+import OrganizaitonChart from '../components/OrganizationChart/';
+import ItemNode from '../components/OrganizationChart/ItemShape';
+import items from './OrganizationChartPageData.json';
+
+class OrganizaitonChartPage extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { items, mode: 'detail', direction: 'row', scale: 1 };
+  }
+  render() {
+    const { mode, direction, scale, items } = this.state;
+    return (
+      <div className={styles.wrapper}>
+        <OrganizaitonChart
+          mode={mode}
+          direction={direction}
+          scale={scale}
+          items={items}
+          ItemNode={ItemNode}
+          itemMarginBrother="24px"
+          itemMarginParent="96px"
+        />
+        <div style={{ height: '15px', width: '15px', background: 'black', position: 'fixed', right: '45px', top: '35px', cursor: 'pointer'}}
+          onClick={() => this.setState({mode: mode === 'detail'? 'simplify' : 'detail'})} />
+        <div style={{ height: '15px', width: '15px', background: 'red', position: 'fixed', right: '25px', top: '35px', cursor: 'pointer'}}
+          onClick={() => this.setState({direction: direction === 'row'? 'column' : 'row'})} />
+        <Slider defaultValue={100} max={150} min={50}
+          onAfterChange={value => this.setState({ scale: value / 100 })}
+          style={{ height: '15px', width: '150px', position: 'fixed', right: '80px', top: '22px', cursor: 'pointer'}}
+        />
+      </div>
+    );
+  }
+}
+
+export default OrganizaitonChartPage;

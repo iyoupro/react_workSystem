@@ -1,0 +1,132 @@
+export const menu = [{
+  menuTitle: '计算',
+  module: [{
+    moduleTitle: 'EC2'
+  }, {
+    moduleTitle: 'A'
+  }, {
+    moduleTitle: 'B'
+  }, {
+    moduleTitle: 'C'
+  }, {
+    moduleTitle: 'D'
+  }]
+},
+{
+  menuTitle: '计算',
+  module: [{
+    moduleTitle: 'EC2'
+  }, {
+    moduleTitle: 'A'
+  }, {
+    moduleTitle: 'B'
+  },
+  ]
+},{
+  menuTitle: '计算',
+  module: [{
+    moduleTitle: 'EC2'
+  }, {
+    moduleTitle: 'A'
+  }, {
+    moduleTitle: 'B'
+  }, {
+    moduleTitle: 'C'
+  }]
+},{
+  menuTitle: '计算',
+  module: [{
+    moduleTitle: 'EC2'
+  }, {
+    moduleTitle: 'A'
+  }, {
+    moduleTitle: 'B'
+  }, {
+    moduleTitle: 'C'
+  }]
+},{
+  menuTitle: '计算',
+  module: [{
+    moduleTitle: 'EC2'
+  }, {
+    moduleTitle: 'A'
+  }]
+},{
+  menuTitle: '计算',
+  module: [{
+    moduleTitle: 'EC2'
+  }, {
+    moduleTitle: 'A'
+  }, {
+    moduleTitle: 'B'
+  }]
+},{
+  menuTitle: '计算',
+  module: [{
+    moduleTitle: 'EC2'
+  }, {
+    moduleTitle: 'A'
+  }, {
+    moduleTitle: 'B'
+  }, {
+    moduleTitle: 'C'
+  }, {
+    moduleTitle: 'D'
+  }, {
+    moduleTitle: 'E'
+  }, {
+    moduleTitle: 'F'
+  }]
+},{
+  menuTitle: '计算',
+  module: [{
+    moduleTitle: 'EC2'
+  }, {
+    moduleTitle: 'A'
+  }]
+},{
+  menuTitle: '计算',
+  module: [{
+    moduleTitle: 'EC2'
+  }]
+},{
+  menuTitle: '计算',
+  module: [{
+    moduleTitle: 'EC2'
+  }, {
+    moduleTitle: 'A'
+  }, {
+    moduleTitle: 'B'
+  }]
+},{
+  menuTitle: '计算',
+  module: [{
+    moduleTitle: 'EC2'
+  }]
+},{
+  menuTitle: '计算',
+  module: [{
+    moduleTitle: 'EC2'
+  }, {
+    moduleTitle: 'A'
+  }]
+},{
+  menuTitle: '计算',
+  module: [{
+    moduleTitle: 'EC2'
+  }, {
+    moduleTitle: 'A'
+  }, {
+    moduleTitle: 'B'
+  }]
+},{
+  menuTitle: '计算',
+  module: [{
+    moduleTitle: 'EC2'
+  }, {
+    moduleTitle: 'A'
+  }, {
+    moduleTitle: 'B'
+  }]
+}
+]

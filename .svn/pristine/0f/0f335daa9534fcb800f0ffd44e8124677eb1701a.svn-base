@@ -1,0 +1,90 @@
+import React, { useState, useReducer } from 'react';
+import { Radio, Button } from 'antd';
+import QueueAnim from 'rc-queue-anim';
+import uniqueId from 'lodash/uniqueId';
+import styles from './QueryGroup.less';
+import QueryRule from './QueryRule';
+
+const RadioButton = Radio.Button;
+const RadioGroup = Radio.Group;
+const ButtonGroup = Button.Group;
+
+const conditionReducer = (conditions, action) => {
+  const { type, index, newCondition } = action;
+  const newConditions = conditions;
+  switch (type) {
+    case 'init':
+      for (let i = 0, length = newConditions.length; i < length; i += 1) {
+        if (!newConditions[i].key) newConditions[i].key = uniqueId();
+      }
+      break;
+    case 'addRule':
+      newConditions.splice(index < 0 ? 0 : index, 0, { name: 'status', op: null, value: [], key: uniqueId() });
+      break;
+    case 'addGroup':
+      newConditions.splice(index < 0 ? 0 : index, 0, { type: 'OR', conditions: [], key: uniqueId() });
+      break;
+    case 'deleteCondition':
+      newConditions.splice(index, 1);
+      break;
+    case 'setCondition':
+      newConditions[index] = newCondition;
+      break;
+    default: break;
+  }
+  return conditions;
+};
+
+const onChildGroupChange = (onChange, value) => {
+  onChange(value);
+};
+
+const QueryGroup = (props) => {
+  const { root, value, deleteSelf, onChange } = props;
+  const [conditions, conditionDispatch] = useReducer(conditionReducer, value.conditions, { type: 'init' });
+  const [type, setType] = useState(value.type || (root ? 'AND' : 'OR'));
+  if (onChange) onChange(value);
+
+  return (
+    <div className={`${styles.groupWrapper} ${root ? styles.root : ''}`}>
+      {
+        <div className={styles.operatorWrapper}>
+          <RadioGroup onChange={event => setType(event.target.value)} value={type}>
+            <RadioButton className={`${styles.button} ${styles.leftButton}`} value="AND" disabled={!root ? true : conditions.length < 2}>AND</RadioButton>
+            <RadioButton className={`${styles.button} ${styles.leftButton}`} value="OR" disabled={!root ? false : conditions.length < 2}>OR</RadioButton>
+          </RadioGroup>
+          <ButtonGroup>
+            <Button className={`${styles.button} ${styles.rightButton}`} icon="plus" onClick={() => conditionDispatch({ type: 'addRule', index: conditions.length })}>Add rule</Button>
+            <Button className={`${styles.button} ${styles.rightButton}`} icon="plus-circle" onClick={() => conditionDispatch({ type: 'addGroup', index: conditions.length })}>Add group</Button>
+            {!root && <Button className={`${styles.button} ${styles.deleteButton}`} icon="delete" onClick={deleteSelf} />}
+          </ButtonGroup>
+        </div>
+      }
+      <QueueAnim>
+        {
+          conditions && conditions.map((condition, index) => {
+            if (condition.type) {
+              return (
+                <QueryGroup
+                  onChange={() => onChildGroupChange(onChange, value)}
+                  key={condition.key}
+                  value={condition}
+                  deleteSelf={() => conditionDispatch({ type: 'deleteCondition', index })}
+                />
+              );
+            }
+            return (
+              <QueryRule
+                key={condition.key}
+                condition={condition}
+                deleteSelf={() => conditionDispatch({ type: 'deleteCondition', index })}
+                setCondition={newCondition => conditionDispatch({ type: 'setCondition', index, newCondition })}
+              />);
+          })
+        }
+      </QueueAnim>
+    </div>
+  );
+};
+
+export default QueryGroup;

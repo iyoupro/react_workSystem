@@ -1,0 +1,22 @@
+import React, { Component } from 'react';
+import styles from './NodeChartPage.css';
+import NodeChart from '../components/NodeChart'
+class App extends Component {
+  render() {
+    return (
+      <div className={styles.App} >
+        <NodeChart mode="flowChart"
+          nodeSize={8}
+          textPos={40}
+          nodeShadow={false}   //所有节点是否有阴影
+          style={{ 
+            // 流程的box
+            height: "80%", width: "80%", margin: "auto", fontSize: "14px",boxShadow:"none"
+          }}
+        />
+      </div>
+    );
+  }
+}
+
+export default App;

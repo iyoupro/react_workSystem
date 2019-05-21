@@ -1,0 +1,25 @@
+import React from 'react';
+import { Value } from 'slate';
+import CannerEditor from 'canner-slate-editor';
+import { compose, withState, toClass, withHandlers } from 'recompose';
+
+const enhance = compose(
+  withState('value', 'setValue', {}),
+  withHandlers(() => {
+    return {
+      onChange: ({ setValue }) => (value) => {
+        setValue(value);
+      },
+    };
+  }),
+  toClass,
+);
+
+
+const SlateEditor = ({ value, onChange }) => {
+  return (<div style={{ margin: "20px" }}>
+    <CannerEditor value={value} onChange={onChange} />
+  </div>);
+};
+
+export default enhance(SlateEditor);

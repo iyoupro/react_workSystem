@@ -1,0 +1,299 @@
+import React, { Component } from 'react';
+import { DropTarget } from 'react-dnd';
+import DraggableComponent from './DraggableComponent';
+import DragPreview from './DragPreview';
+
+const onMobile = /Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent);
+
+const TargetSpec = {
+  canDrop(props, monitor) {
+    return monitor.isOver() && monitor.isOver({ shallow: true }); // 判断当前DropArea上是否有拖拽对象，并阻止冒泡比较。
+  }, // props是该DropArea组件的Props, Component是该DropArea组件的ReactDom实例对象(等于ref获取到的对象)，可以调用其方法。
+  drop(props, monitor, component) {
+    // 该函数当该DropArea上有拖拽对象被放下时触发
+    const sourceItem = monitor.getItem(); // 获取拖拽对象由SourceSpec-beginDrag中return的信息
+    sourceItem.pushHistory(sourceItem.items);
+    component.pushHistory(component.state.items);
+    // 判断拖拽对象的父节点是不是当前DropArea，即判断拖拽对象是不是Drop在其所处的DropArea
+    // 如果拖拽对象不是处于属性为fix的DropArea，则从其所在的DropArea中将其移除。
+    if (!sourceItem.fix) {
+      sourceItem.remove();
+      sourceItem.onChange();
+    }
+    if (!props.fix) {
+      // 如果当前DropArea的fix属性为false，则在当前DropArea中添加落下的拖拽对象，设置其宽度为当前DropArea的newItemProps.width属性
+      component.addItem(sourceItem.data);
+      component.onChange();
+      component.cancelSelect(); // 并清空当前DropArea上可能存在的多选selectedItems
+    }
+  },
+};
+
+function TargetCollect(connect, monitor) {
+  // Collect中return的对象将作为props传递给当前DropArea组件
+  return {
+    connectDropTarget: connect.dropTarget(),
+    sourceItem: monitor.getItem(), // 将拖拽对象信息作为组件的props
+    isOver: monitor.isOver() && monitor.isOver({ shallow: true }), // 判断当前DropArea上是否有拖拽对象
+  };
+}
+
+class DropArea extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      items: this.props.defaultItems || [],
+      selectedItems: [], /* 存有被多选的Item于items中的索引信息,
+      该值传递给DropArea下实例化的所有DraggableComponent组件， 用以判断其是否处于被多选状态。*/
+      selectedItemsDragging: false,
+      /* 该值传递给DropArea下实例化的所有DraggableComponent组件，判断是否有任一被多选的拖拽对象触发拖拽。*/
+      selectedItemsOver: false,
+      history: [[]],
+    };
+  }
+
+  componentDidMount() {
+    if (this.props.getRef) this.props.getRef(this);
+    if (this.props.defaultItemProps) this.setAllItem(this.props.defaultItemProps);
+  }
+
+  componentWillUnmount = () => {
+    if (this.timer) clearTimeout(this.timer);
+  }
+  
+
+  onSelect = index => {
+    /* 该方法将传递给DraggableComponent组件，在其Wrapper中onClick触发回调改变当前DropArea下控制其渲染的items和selectedItems状态。
+    单击DraggableComponent组件将其索引index加入移除到当前DropArea下的selectedItems中，改变items[index]中的selected属性。
+    */
+    const { items, selectedItems } = this.state;
+    if (!items[index].selected) {
+      items[index].selected = true;
+      selectedItems.push(index);
+    } else {
+      items[index].selected = false;
+      selectedItems.splice(selectedItems.indexOf(index), 1);
+    }
+    this.setState({ items, selectedItems });
+  };
+
+  cancelSelect = event => { // eslint-disable-line
+    // eslint-disable-line
+    if (!event || (event.target.getAttribute('class') && event.target.getAttribute('class').indexOf('DropArea') !== -1)) {
+      const { items, selectedItems } = this.state;
+      for (let i = 0, length = items.length; i < length; i += 1) {
+        items[i].selected = false;
+      }
+      selectedItems.splice(0, selectedItems.length);
+      this.setState({ items, selectedItems });
+    }
+  };
+
+  setSelectedItemsDragging = bool => {
+    /* 该方法将传递给当前DropArea下所有渲染的DraggableComponent实例对象, 当其处于selectedItems中并触发拖拽时调用，
+    回调改变DropArea中selectedItemsDragging状态，
+    并将selectedItemsDragging状态作为props传递通知给所有渲染的DraggableComponent对象*/
+    if (this.timer) clearTimeout(this.timer);
+    this.timer = setTimeout(() => this.setState({ selectedItemsDragging: bool }), 0);
+  };
+
+  setAllItem = itemProps => {
+    //  改变当前DropArea下所有items中数据的width属性，供由外部组件调用
+    const { items } = this.state;
+    this.pushHistory(items);
+    for (let i = 0, length = items.length; i < length; i += 1) {
+      for (let prop in itemProps) {
+        items[i][prop] = itemProps[prop];
+      }
+    }
+    this.onChange();
+    this.setState({ items });
+  };
+
+  setItem = (index, data) => {
+    const { items } = this.state;
+    this.pushHistory(items);
+    for (let prop in data) {
+      items[index][prop] = data[prop];
+    }
+    this.onChange();
+    this.setState({ items });
+  };
+
+  revoke = () => {
+    const { history } = this.state;
+    if (history.length >= 0) {
+      const items = history[history.length - 1].slice();
+      if (history.length > 1) history.pop();
+      this.setState({ items, history });
+    }
+    return history.length;
+  };
+
+  pushHistory = items => {
+    if (JSON.stringify(items) !== "[]") {
+      const { history } = this.state;
+      let cloneItems = [];
+      for (let i = 0, length = items.length; i < length; i += 1) {
+        items[i].selected = false;
+        cloneItems.push({ ...items[i] });
+      }
+      history.push(cloneItems);
+      this.setState({ history });
+    }
+  };
+
+  addItem = (newItems, index = this.state.items.length) => {
+    /*  addItem方法将传递给当前DropArea下所有实例化的DraggleComponent组件，
+    由其在作为DropTarget的时候在TargetSpec-drop中调用，回调改变当前DropArea下的items,
+    或者由当前DropArea作为DropTarget时候在TargetSpec-drop中直接调用。
+    调用后回调删除当前DropArea下拖拽出的组件。
+    newItems参数是个克隆了被拖拽item信息，并且width等于当前DropArea newItemProps.width属性的一维数组。
+    */
+    const { items } = this.state;
+    for (let i = 0, length = newItems.length; i < length; i += 1) {
+      if (this.props.newItemProps) {
+        for (const prop in this.props.newItemProps) {
+          newItems[i][prop] = this.props.newItemProps[prop];
+        }
+      }
+      items.splice(index < 0 ? 0 : index, 0, { ...newItems[i] });
+    }
+    this.setState({ items });
+  };
+
+  deleteItem = itemIndexs => {
+    /*  deleteItem方法将传递给当前DropArea下所有实例化的DraggleComponent组件，
+    由其作为DropSource触发拖拽时在SourceSpec-beginDrag中return传递给作为DropTarget drop落下的组件，
+    再由drop的组件在Target-Spec中调用，调用后回调删除当前DropArea下拖拽出的组件。
+    itemsIndex参数是个包含了要删除item索引的一维数组。
+    */
+    const { items } = this.state;
+    for (let i = 0, length = itemIndexs.length; i < length; i += 1) {
+      items[itemIndexs[i]] = [];
+    }
+    for (let i = items.length - 1; i >= 0; i -= 1) {
+      if (JSON.stringify(items[i]) === "[]") items.splice(i, 1);
+    }
+    this.cancelSelect();
+    this.setState({ items });
+  };
+
+  onChange = () => { // eslint-disable-line
+    if (this.props.onChange) {
+      const items = this.state.items.slice();
+      const returnItems = [];
+      for (let i = 0, length =  items.length; i < length; i += 1) {
+        delete items[i]['selected'];
+        returnItems.push({...items[i]});
+      }    
+      this.props.onChange(returnItems);
+    }
+  };
+
+  render() {
+    const {
+      connectDropTarget,
+      fix,
+      direction,
+      AreaId,
+      isOver,
+      sourceItem,
+      newItemProps,
+      Item,
+      itemWrapperStyle,
+      dragItemHidden,
+      dragPreview,
+      highPerformanceDragPreview,
+    } = this.props;
+    /* fix 属性判断当前DropArea中的对象是否恒固定，其值将传递给DraggableComponent,
+    最后在DraggableComponent Drop下的DropTarget的drop事件中获取到fix值并做出相应的add,delete操作。
+    sourceItem和 isOver为当前DropArea作为DropTarget从TargetCollect中继承的props，
+    前者代表悬浮于当前DropArea组件上的拖拽对象DropSource从SourceSpec-beginDrag中return的信息，
+    后者代表当前Drop组件上 存在 正在被拖拽的DropSource对象。
+    AreaId属性将传递给DraggableComponent组件，最后传递给其将要落下的DropArea区域，
+    再与那个区域的AreaId对比, 判断被拖拽对象所属的DropArea与其将要落下的DropArea是不是同一个。
+    newItemProps.width代表当前DropArea新增item的宽度占比(100 / newItemProps.width)。
+    */
+    const { items, selectedItems, selectedItemsDragging } = this.state;
+    const flexDirection =
+      direction === 'row' || direction === 'column' ? direction : 'row';
+    return connectDropTarget(
+      <div
+        className={`${this.props.className} DropArea`}
+        onClick={this.cancelSelect}
+        style={{
+          ...this.props.style,
+          overflow: 'auto',
+          display: 'flex',
+          flexDirection,
+          flexWrap: 'wrap',
+          alignContent: 'flex-start'
+        }}
+      >
+        {items &&
+          items.map((data, index) => (
+            /* DraggableComponent组件会根据data渲染链接了可以作为DropSource和DropTarget的可拖拽对象,
+          如果存在sourceItem,即存在拖拽到其所在DropArea之上的被拖拽对象，
+          就会额外渲染这些对象如果落在这个DropArea的预览样式，这些预览样式并不链接DropSource和DropTarget。
+        */
+            <DraggableComponent
+              dragItemHidden
+              key={index}
+              index={index}
+              data={data}
+              fix={fix}
+              dragSourceAreaId={AreaId}
+              items={items}
+              sourceItem={sourceItem}
+              newItemProps={newItemProps}
+              isOverDropArea={isOver}
+              Item={Item}
+              itemWrapperStyle={itemWrapperStyle}
+              dragPreview={dragPreview}
+              highPerformanceDragPreview={highPerformanceDragPreview}
+              onChange={this.onChange.bind(this)}
+              selectedItemsDragging={selectedItemsDragging}
+              deleteItem={this.deleteItem.bind(this)}
+              addItem={this.addItem.bind(this)}
+              pushHistory={this.pushHistory.bind(this)}
+              selectedItems={selectedItems}
+              onSelect={this.onSelect.bind(this)}
+              cancelSelect={this.cancelSelect.bind(this)}
+              setItem={this.setItem.bind(this)}
+              setSelectedItemsDragging={this.setSelectedItemsDragging.bind(this)}
+            />
+          ))}
+        {!fix &&
+          isOver &&
+          sourceItem && (
+            /* 渲染预览的<DraggableComponent>组件。
+        通过传递给<DraggableComponent> preView属性区分渲染的只是临时的预览组件还是链接了可拖拽功能的包含在DropArea items数据里的实际组件。
+        DraggableComponent从sourceItem中获取被拖拽对象的信息并将其预览渲染，
+        渲染出的宽度应等于当前DropArea的newItemProps.width宽度而不是被拖拽组件原本的宽度。
+        只有当前DropArea fix属性为false时候才渲染预览。 */
+            <DraggableComponent
+              Item={Item}
+              itemWrapperStyle={itemWrapperStyle}
+              dropPreview
+              sourceItem={sourceItem}
+              newItemProps={newItemProps}
+            />
+          ) // eslint-disable-line
+        }
+        {this.props.children}
+        {(dragPreview || onMobile) &&
+          <DragPreview onMobile={onMobile} dragPreview={dragPreview} />
+        }
+      </div>,
+    );
+  }
+}
+
+DropArea.defaultProps = {
+  dragItemHidden: false,
+  // defaultItemProps: { width: '50%', height: '10%' },
+  // newItemProps: { width: '50%', height: '10%' }
+};
+
+export default DropTarget('SmartDnd', TargetSpec, TargetCollect)(DropArea);

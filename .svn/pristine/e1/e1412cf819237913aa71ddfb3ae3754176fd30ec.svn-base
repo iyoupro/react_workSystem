@@ -1,0 +1,18 @@
+import React, { memo } from 'react';
+import { Tabs } from 'antd';
+import Home from './Home/';
+import styles from './index.less';
+
+const tabPanes = ['Home', 'B', 'C', 'D', 'E', 'F'];
+//  <TabPane tab="Tab 1" key="1"><Home /></TabPane>
+
+const ControlBoard = props => {
+  return (
+    <Tabs tabPosition={left}>
+      {tabPanes.map(tabPane =>
+      )}
+    </Tabs>
+  );
+}
+
+export default memo(ControlBoard);

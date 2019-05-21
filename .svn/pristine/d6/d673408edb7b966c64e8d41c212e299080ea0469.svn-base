@@ -1,0 +1,43 @@
+import React, { useState } from 'react';
+import Section from './components/Section';
+import uniqueId from 'lodash/uniqueId';
+import styles from './index.less';
+
+const FormsPage = props => {
+  const [formTitle, setFormTitle] = useState('未命名表单');
+  const { mode, sections } = props;
+  // onChange={value => setFormTitle(value)};
+  return (
+    <div className={styles.wrapper}>
+      {formTitle}
+      {sections && sections.map(section => <Section key={section.id} items={section.items}/>)}
+    </div>
+  );
+}
+
+const initialData = 
+[// sections
+  { // items -- 必存在items[0], type等于sectionTitle，不可删，唯一。
+    id: 'secition1', // uniqueId(),
+    title: '未命名小节',
+    totalScore: 0,
+    items: [{ 
+      id: 'item1', // uniqueId(),
+      type: "sectionTitle", // "sectionTitle"小节标题, "radio"单选, "checkbox"多选, "paragraph"段落, "declaraction"说明
+      // score: 0, // type不为sectionTitle时存在这个字段，mode为evaluate可对write模式下返回的输入data的每一项item进行评分。
+      // isRequired: false // type不为sectionTitle时存在这个字段, 选择是否是必填项，默认否。只有edit模式可以编辑
+      title: "未命名标题", // item's title.Item第一行，必有。只有edit模式可以编辑
+      introduce: null, // item's introduce, Item第二行，可选择显示，默认否。只有edit模式可以编辑
+      // inputValue: null, // type不为sectionTitle时存在这个字段。对于段落来讲，是write模式下输入的字，对于选择来讲，是选择的value或者values数组。只有write模式可以编辑
+      // options: ["选项1", "选项2", "选项3"], type为选择时才有这个字段,表示每个选项的名字。只有edit模式可以编辑
+      // layout: 1, // 默认1。表示一行能占几个options。只有edit模式可以编辑
+    }]
+  }, 
+];
+
+FormsPage.defaultProps = {
+  mode: 'edit', // 'edit', 'write', 'evaluate', 'result' 每种模式的输入data是上种模式的输出data
+  sections: initialData, 
+}
+
+export default FormsPage;

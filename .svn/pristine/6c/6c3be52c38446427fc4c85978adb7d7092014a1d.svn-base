@@ -1,0 +1,38 @@
+import React, { Component } from 'react';
+import styles from './index.less';
+import QueryGroup from './QueryGroup';
+
+export default class Tree extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      value: {
+        type: 'AND',
+        conditions: [
+          { name: 'name', op: '=', value: 'daren', group: false },
+          {
+            group: true,
+            type: 'OR',
+            conditions: [
+              { name: 'status', op: '=', value: 2, group: false },
+              { name: 'status', op: '=', value: 3, group: false },
+            ],
+          },
+        ],
+      },
+    };
+  }
+
+  onRuleChange = (_, queryConditions) => {
+    console.log(queryConditions);
+  }
+
+  render() {
+    const { value } = this.state;
+    return (
+      <div className={styles.wrapper} >
+        <QueryGroup root value={value} onRuleChange={this.onRuleChange} />
+      </div>
+    );
+  }
+}

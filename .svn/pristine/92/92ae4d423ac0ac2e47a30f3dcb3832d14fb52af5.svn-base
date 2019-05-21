@@ -1,0 +1,78 @@
+import React, { memo } from 'react';
+import { Icon } from 'antd';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import uniqueId from 'lodash/uniqueId';
+import Item from './Item';
+import styles from './Section.less';
+
+const getTotalScore = (items) => {
+  let totalScore = 0;
+  for (let i = 1, length = items.length; i < length; i += 1) totalScore += items[i].score;
+  return totalScore;
+}
+
+const Section = ({ sectionIndex, setItemData, mode, data, setData, selectedItem, reorderItems, ...props }) => {
+  const { items } = data;
+  const onDragEnd = (result) => {
+    if (!result.destination) return;
+    reorderItems(sectionIndex, result.source.index, result.destination.index);
+  }
+
+  return (
+    <DragDropContext onDragEnd={onDragEnd}>
+      <Droppable droppableId="droppable" >
+        {(provided, snapshot) => (
+          <ol
+            ref={provided.innerRef}
+            className={`${styles.wrapper} ${mode !== 'edit' ? styles.notEdit : ''} ${snapshot.isDraggingOver ? styles.dragging : ''}`}
+          >
+            {(mode === 'result' || mode === 'evaluate') && <span className={styles.totalScore}>{getTotalScore(items)}</span>}
+            <Item
+              itemIndex={0}
+              mode={mode}
+              data={items[0]}
+              setData={(prop, newPropData) => setItemData(sectionIndex, 0, prop, newPropData)}
+              isSelected={mode === 'edit' && selectedItem.id === items[0].id}
+              {...props}
+            />
+            {items && items.map((item, itemIndex) => {
+              if (itemIndex === 0) return null;
+              return (
+                <Draggable key={item.id} draggableId={item.id} index={itemIndex} isDragDisabled={mode !== 'edit' || selectedItem.id !== item.id}>
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      className={`${styles.ItemWrapper} ${snapshot.isDragging ? styles.dragging : ''}`}
+                    >
+                      <Icon className={`${styles.dragIcon} ${selectedItem.id === item.id && mode === 'edit' && styles.couldDrag}`} type="drag" {...provided.dragHandleProps} />
+                      <Item
+                        itemIndex={itemIndex}
+                        mode={mode}
+                        data={item}
+                        setData={(prop, newPropData) => setItemData(sectionIndex, itemIndex, prop, newPropData)}
+                        isSelected={mode === 'edit' && selectedItem.id === item.id}
+                        {...props}
+                      />
+                    </div>
+                  )}
+                </Draggable>
+              );
+            })}
+            {provided.placeholder}
+          </ol>
+        )}
+      </Droppable>
+    </DragDropContext>
+  );
+};
+
+const shouldNotUpdate = (preProps, nextProps) => {
+  if (preProps.data !== nextProps.data) return false;
+  if (preProps.mode !== nextProps.mode) return false;
+  if (preProps.selectedItem.id !== nextProps.selectedItem.id) return false;
+  if (preProps.sectionIndex !== nextProps.sectionIndex) return false;
+  return true;
+}
+
+export default memo(Section, shouldNotUpdate);
