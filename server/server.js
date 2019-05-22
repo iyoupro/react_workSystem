@@ -9,10 +9,8 @@ const userSocket = {}; 
 // socket连接
 
 io.on("connection", function(socket){
-    //console.log("server connecting");
     socket.on('new user', (userKey) => {
         if(!(userKey in userSocket)){
-            console.log(2);
             socket.userKey = userKey;
             userSocket[userKey] = socket;
         }
@@ -69,6 +67,12 @@ io.on("connection", function(socket){
                     }
                 }
             })
+        }
+    })
+
+    socket.on('disconnect', function() {
+        if(socket.userKey in userSocket){
+            delete(userSocket[socket.userKey]);
         }
     })
 

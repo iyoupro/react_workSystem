@@ -35,12 +35,17 @@ const IMPage = props => {
 
 	// 连接上
 	socket.on('connect', function () {
-    socket.emit('new user', userData.key )
+    socket.emit('new user', userData.key );
   });
   
   socket.on('receive message', (target) => {
     sendMessage(target);
   })
+
+  socket.on('reconnect', function() {
+    socket.emit('new user', userData.key );
+  })
+
 
 
 
